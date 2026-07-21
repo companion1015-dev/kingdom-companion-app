@@ -1,0 +1,23 @@
+{
+  "name": "Kingdom Companion",
+  "short_name": "Kingdom Companion",
+  "description": "An AI-powered Christian platform helping believers grow spiritually. Scripture. Encouragement. Peace. Purpose.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1B3A5C",
+  "theme_color": "#1B3A5C",
+  "orientation": "portrait-primary",
+  "categories": ["lifestyle", "education", "books"],
+  "lang": "en",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512-clean.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Open Bible", "url": "/bible", "description": "Read the Bible" },
+    { "name": "Daily Encouragement", "url": "/daily", "description": "Today's Scripture and reflection" },
+    { "name": "Prayer Journal", "url": "/journal", "description": "Your personal prayer journal" },
+    { "name": "AI Companion", "url": "/companion", "description": "Scripture-centred AI guidance" }
+  ]
+}

@@ -1,0 +1,748 @@
+// ============================================================
+// THE BIBLE COMPANION — DATABASE SCHEMA
+// Implements DSD Chapters 1–3 exactly
+// PostgreSQL via Supabase | Prisma ORM
+// UUID primary keys | snake_case naming | soft delete via deleted_at
+// UTC timestamps | UTF-8 encoding
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── IDENTITY MODULE ─────────────────────────────────────────────────────────
+// DSD §1.10 — Identity: User, Role, Permission, Device
+
+model User {
+  id                    String    @id @default(uuid()) @db.Uuid
+  email                 String    @unique @db.VarChar(255)
+  email_verified_at     DateTime? @db.Timestamptz
+  display_name          String    @db.VarChar(100)
+  password_hash         String?   @db.VarChar(255)
+  auth_provider         String    @default("email") @db.VarChar(30)
+  preferred_translation String    @default("NIV") @db.VarChar(20)
+  theme                 String    @default("light") @db.VarChar(10)
+  font_size             Int       @default(16)
+  account_status        String    @default("active") @db.VarChar(20)
+  role                  String    @default("user") @db.VarChar(30)
+  created_at            DateTime  @default(now()) @db.Timestamptz
+  updated_at            DateTime  @updatedAt @db.Timestamptz
+  deleted_at            DateTime? @db.Timestamptz
+  last_login_at         DateTime? @db.Timestamptz
+
+  // Relations
+  devices           Device[]
+  sessions          Session[]
+  notes             Note[]
+  highlights        Highlight[]
+  bookmarks         Bookmark[]
+  prayers           Prayer[]
+  reading_progress  ReadingProgress[]
+  ai_conversations  AiConversation[]
+  notifications     Notification[]
+  feedbacks         Feedback[]
+  achievements      Achievement[]
+  user_settings     UserSetting[]
+  sync_metadata     SyncMetadata[]
+  audit_logs            AuditLog[]
+  referral_code         ReferralCode?
+  user_study_setting    UserStudySetting?
+  // Prayer Wall relations — added per audit fix
+  prayer_wall_requests  PrayerWallRequest[]
+  saved_prayers         SavedPrayer[]
+
+  @@index([email])
+  @@index([account_status])
+  @@index([role])
+  @@map("user")
+}
+
+// DSD §1.10 — Device tracking
+model Device {
+  id           String    @id @default(uuid()) @db.Uuid
+  user_id      String    @db.Uuid
+  device_name  String    @db.VarChar(100)
+  device_type  String    @db.VarChar(50)
+  push_token   String?   @db.VarChar(500)
+  is_active    Boolean   @default(true)
+  last_seen_at DateTime? @db.Timestamptz
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  sync_metadata SyncMetadata[]
+
+  @@index([user_id])
+  @@index([push_token])
+  @@map("device")
+}
+
+// Session management — Architecture Spec §3.3 security requirement
+model Session {
+  id            String    @id @default(uuid()) @db.Uuid
+  user_id       String    @db.Uuid
+  refresh_token String    @unique @db.VarChar(500)
+  device_info   String?   @db.VarChar(255)
+  ip_address    String?   @db.VarChar(45)
+  expires_at    DateTime  @db.Timestamptz
+  revoked_at    DateTime? @db.Timestamptz
+  created_at    DateTime  @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([refresh_token])
+  @@index([expires_at])
+  @@map("session")
+}
+
+// Email verification tokens
+model VerificationToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  user_id    String    @db.Uuid
+  token      String    @unique @db.VarChar(255)
+  type       String    @db.VarChar(30) // email_verification | password_reset
+  expires_at DateTime  @db.Timestamptz
+  used_at    DateTime? @db.Timestamptz
+  created_at DateTime  @default(now()) @db.Timestamptz
+
+  @@index([token])
+  @@index([user_id])
+  @@index([expires_at])
+  @@map("verification_token")
+}
+
+// ─── BIBLE MODULE ─────────────────────────────────────────────────────────────
+// DSD §1.10 — Bible: Translation, Book, Chapter, Verse
+// IMPORTANT: Verse text is never stored permanently — Bible.com API licence
+// Only metadata is cached. Verse IDs and references only.
+
+model Translation {
+  id           String   @id @default(uuid()) @db.Uuid
+  code         String   @unique @db.VarChar(20) // NIV, KJV, ESV etc.
+  name         String   @db.VarChar(100)
+  language     String   @default("en") @db.VarChar(10)
+  is_available Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  books Book[]
+
+  @@index([code])
+  @@index([language])
+  @@map("translation")
+}
+
+model Book {
+  id             String @id @default(uuid()) @db.Uuid
+  translation_id String @db.Uuid
+  book_id        String @db.VarChar(20) // Bible.com book ID e.g. "GEN"
+  name           String @db.VarChar(100)
+  abbreviation   String @db.VarChar(10)
+  testament      String @db.VarChar(2)  // OT | NT
+  book_order     Int
+  chapter_count  Int
+
+  translation Translation @relation(fields: [translation_id], references: [id])
+
+  @@unique([translation_id, book_id])
+  @@index([translation_id])
+  @@index([testament])
+  @@index([book_order])
+  @@map("book")
+}
+
+// ─── STUDY MODULE ─────────────────────────────────────────────────────────────
+// DSD §1.10 — Study: Note, Highlight, Bookmark
+// Architecture Spec §3.4: RLS required — user_id = auth.uid() enforced in Supabase
+
+model Note {
+  id              String    @id @default(uuid()) @db.Uuid
+  user_id         String    @db.Uuid
+  translation_id  String    @db.VarChar(20)
+  book_id         String    @db.VarChar(20)
+  chapter         Int
+  verse_id        String    @db.VarChar(50) // Bible.com verse ID
+  verse_reference String    @db.VarChar(100) // e.g. "John 3:16"
+  content         String    // User's personal note — never exposed to admins
+  tags            String[]  @default([])
+  created_at      DateTime  @default(now()) @db.Timestamptz
+  updated_at      DateTime  @updatedAt @db.Timestamptz
+  deleted_at      DateTime? @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([verse_reference])
+  @@index([deleted_at])
+  @@map("note")
+}
+
+model Highlight {
+  id              String    @id @default(uuid()) @db.Uuid
+  user_id         String    @db.Uuid
+  translation_id  String    @db.VarChar(20)
+  book_id         String    @db.VarChar(20)
+  chapter         Int
+  verse_id        String    @db.VarChar(50)
+  verse_reference String    @db.VarChar(100)
+  color           String    @default("yellow") @db.VarChar(20)
+  created_at      DateTime  @default(now()) @db.Timestamptz
+  updated_at      DateTime  @updatedAt @db.Timestamptz
+  deleted_at      DateTime? @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, verse_id, translation_id])
+  @@index([user_id])
+  @@index([verse_reference])
+  @@map("highlight")
+}
+
+model Bookmark {
+  id              String    @id @default(uuid()) @db.Uuid
+  user_id         String    @db.Uuid
+  translation_id  String    @db.VarChar(20)
+  book_id         String    @db.VarChar(20)
+  chapter         Int
+  verse_id        String    @db.VarChar(50)
+  verse_reference String    @db.VarChar(100)
+  collection_name String?   @db.VarChar(100)
+  tags            String[]  @default([])
+  created_at      DateTime  @default(now()) @db.Timestamptz
+  deleted_at      DateTime? @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([verse_reference])
+  @@index([collection_name])
+  @@map("bookmark")
+}
+
+// ─── PRAYER MODULE ────────────────────────────────────────────────────────────
+// DSD §2.12 — prayer table (exact implementation)
+// Constitution §11: Never share prayer journals without consent
+// Architecture Spec §3.4: Admin access DENIED at database level
+
+model Prayer {
+  id                  String    @id @default(uuid()) @db.Uuid
+  user_id             String    @db.Uuid
+  title               String    @db.VarChar(255)
+  content             String    // Encrypted at rest — admin access denied
+  category            String?   @db.VarChar(100)
+  tags                String?   @db.VarChar(255)
+  // Flat, comma-separated — consistent with note.tags (DSD §2.7). Added here to
+  // close spec/code drift: DSD §2.12 added this column, Prisma model didn't have it.
+  scripture_reference String?   @db.VarChar(100)
+  status              String    @default("active") @db.VarChar(30)
+  // status: active | answered | archived (DSD §2.12)
+  answered_at         DateTime? @db.Timestamptz
+  created_at          DateTime  @default(now()) @db.Timestamptz
+  updated_at          DateTime  @updatedAt @db.Timestamptz
+  deleted_at          DateTime? @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([category])
+  @@index([status])
+  @@index([tags])
+  @@map("prayer")
+}
+
+// ─── READING MODULE ───────────────────────────────────────────────────────────
+// DSD §2.13 — reading_plan | DSD §2.14 — reading_progress
+
+model ReadingPlan {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String   @db.VarChar(255)
+  description  String?
+  duration_days Int
+  difficulty   String   @default("beginner") @db.VarChar(30)
+  // difficulty: beginner | intermediate | advanced (DSD §2.13)
+  is_published Boolean  @default(false)
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  days     ReadingDay[]
+  progress ReadingProgress[]
+
+  @@map("reading_plan")
+}
+
+model ReadingDay {
+  id          String @id @default(uuid()) @db.Uuid
+  plan_id     String @db.Uuid
+  day_number  Int
+  title       String? @db.VarChar(255)
+  description String?
+
+  plan     ReadingPlan   @relation(fields: [plan_id], references: [id], onDelete: Cascade)
+  readings ReadingItem[]
+
+  @@unique([plan_id, day_number])
+  @@index([plan_id])
+  @@map("reading_day")
+}
+
+model ReadingItem {
+  id          String @id @default(uuid()) @db.Uuid
+  day_id      String @db.Uuid
+  book_id     String @db.VarChar(20)
+  chapter     Int
+  sort_order  Int    @default(0)
+
+  day ReadingDay @relation(fields: [day_id], references: [id], onDelete: Cascade)
+
+  @@index([day_id])
+  @@map("reading_item")
+}
+
+model ReadingProgress {
+  id                    String    @id @default(uuid()) @db.Uuid
+  user_id               String    @db.Uuid
+  reading_plan_id       String    @db.Uuid
+  current_day           Int       @default(1)
+  completed             Boolean   @default(false)
+  paused                Boolean   @default(false)
+  // Added per Reading Plans Progress product decision #4 (persisted, single
+  // boolean — not a status enum, per the explicit decision record).
+  completion_percentage Decimal   @default(0.00) @db.Decimal(5, 2)
+  started_at            DateTime  @default(now()) @db.Timestamptz
+  completed_at          DateTime? @db.Timestamptz
+  updated_at            DateTime  @updatedAt @db.Timestamptz
+
+  user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  reading_plan ReadingPlan @relation(fields: [reading_plan_id], references: [id])
+
+  @@unique([user_id, reading_plan_id])
+  @@index([user_id])
+  @@index([reading_plan_id])
+  @@index([completed])
+  @@map("reading_progress")
+}
+
+// ─── AI MODULE ────────────────────────────────────────────────────────────────
+// DSD §2.15 — ai_conversation | DSD §2.16 — ai_message
+// Constitution §7: AI never replaces Scripture
+// ASD Ch.6: conversation_type values confirmed
+
+model AiConversation {
+  id                String   @id @default(uuid()) @db.Uuid
+  user_id           String?  @db.Uuid // Nullable — guests can use AI without account
+  session_id        String?  @db.VarChar(255) // For guest sessions
+  title             String?  @db.VarChar(255)
+  conversation_type String   @db.VarChar(50)
+  // types: Bible Study | Prayer Assistant | Devotional | General Questions
+  //        Character Study | Topic Study (DSD §2.15 / ASD Ch.6)
+  created_at        DateTime @default(now()) @db.Timestamptz
+  updated_at        DateTime @updatedAt @db.Timestamptz
+
+  user     User?       @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  messages AiMessage[]
+
+  @@index([user_id])
+  @@index([conversation_type])
+  @@map("ai_conversation")
+}
+
+model AiMessage {
+  id              String   @id @default(uuid()) @db.Uuid
+  conversation_id String   @db.Uuid
+  sender          String   @db.VarChar(20)
+  // sender: user | assistant | system (DSD §2.16)
+  message         String   // AI-generated content — never presented as Scripture
+  scripture_refs  String[] @default([]) // Referenced verse IDs
+  created_at      DateTime @default(now()) @db.Timestamptz
+
+  conversation AiConversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([sender])
+  @@map("ai_message")
+}
+
+// ─── SYSTEM MODULE ────────────────────────────────────────────────────────────
+// DSD §2.17 — notification
+
+model Notification {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  title      String   @db.VarChar(255)
+  body       String
+  type       String   @db.VarChar(50)
+  // types: Daily Verse | Reading Reminder | Prayer Reminder | Achievement | System Announcement
+  is_read    Boolean  @default(false)
+  sent_at    DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([is_read])
+  @@index([type])
+  @@map("notification")
+}
+
+// DSD §2.18 — feedback
+model Feedback {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String?  @db.Uuid
+  feedback_type String   @db.VarChar(30)
+  // types: Bug Report | Feature Request | General Feedback
+  subject       String   @db.VarChar(255)
+  message       String
+  status        String   @default("open") @db.VarChar(30)
+  created_at    DateTime @default(now()) @db.Timestamptz
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([feedback_type])
+  @@index([status])
+  @@map("feedback")
+}
+
+// DSD §2.19 — achievement
+model Achievement {
+  id               String   @id @default(uuid()) @db.Uuid
+  user_id          String   @db.Uuid
+  achievement_code String   @db.VarChar(100)
+  title            String   @db.VarChar(255)
+  description      String?
+  awarded_at       DateTime @default(now()) @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([achievement_code])
+  @@map("achievement")
+}
+
+// DSD §2.20 — audit_log (IMMUTABLE — no UPDATE or DELETE via RLS)
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String?  @db.Uuid
+  action     String   @db.VarChar(255)
+  entity     String   @db.VarChar(100)
+  entity_id  String?  @db.Uuid
+  ip_address String?  @db.VarChar(45)
+  metadata   Json?
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([action])
+  @@index([entity])
+  @@index([created_at])
+  @@map("audit_log")
+}
+
+// DSD §2.21 — user_setting
+model UserSetting {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String   @db.Uuid
+  setting_key   String   @db.VarChar(100)
+  setting_value String
+  updated_at    DateTime @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, setting_key])
+  @@index([user_id])
+  @@index([setting_key])
+  @@map("user_setting")
+}
+
+// DSD §2.22 — sync_metadata
+model SyncMetadata {
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @db.Uuid
+  device_id       String   @db.Uuid
+  last_sync_at    DateTime @default(now()) @db.Timestamptz
+  sync_status     String   @default("successful") @db.VarChar(30)
+  // status: successful | pending | failed (DSD §2.22)
+  pending_changes Int      @default(0)
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  device Device @relation(fields: [device_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([device_id])
+  @@index([sync_status])
+  @@map("sync_metadata")
+}
+
+// ─── REFERRAL MODULE ──────────────────────────────────────────────────────────
+// Referral System Requirements — v1.0 foundation
+// No rewards, leaderboards, points, or multi-level referrals
+// One permanent code per user — never regenerated
+
+model ReferralCode {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @unique @db.Uuid          // one code per user, permanent
+  code       String   @unique @db.VarChar(12)   // format: BC-XXXXXXXX (unguessable)
+  clicks     Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user      User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  referrals Referral[]
+
+  @@index([code])
+  @@map("referral_code")
+}
+
+model Referral {
+  id               String    @id @default(uuid()) @db.Uuid
+  referral_code_id String    @db.Uuid
+  referred_user_id String?   @unique @db.Uuid    // set when referred account is created
+  // status: clicked | registered | verified
+  // verified = referral complete (referred user verified their email)
+  status           String    @default("clicked") @db.VarChar(20)
+  ip_fingerprint   String?   @db.VarChar(64)     // HMAC-hashed IP for abuse detection
+  // source: whatsapp | email | sms | facebook | x | telegram | copy | native
+  source           String?   @db.VarChar(30)
+  created_at       DateTime  @default(now()) @db.Timestamptz
+  verified_at      DateTime? @db.Timestamptz     // set when referred user verifies email
+
+  code ReferralCode @relation(fields: [referral_code_id], references: [id], onDelete: Cascade)
+
+  @@index([referral_code_id])
+  @@index([status])
+  @@index([ip_fingerprint])
+  @@index([referred_user_id])
+  @@map("referral")
+}
+
+// ─── COMMENTARY MODULE ────────────────────────────────────────────────────────
+// Document 23: Bible Study Notes & Commentary Display Requirements
+// Provider-based architecture — no hardcoded source
+// Supports internal, public-domain, and future licensed providers
+
+model CommentaryNote {
+  id               String   @id @default(uuid()) @db.Uuid
+  // provider_id: "internal" | "public_domain" | future licensed providers
+  provider_id      String   @db.VarChar(50)
+  translation_code String   @db.VarChar(20)      // NIV | KJV | ESV etc (null = all)
+  book_id          String   @db.VarChar(20)       // e.g. JHN, PSA, ROM
+  chapter          Int
+  verse_start      Int
+  verse_end        Int?                            // null = single verse; set = passage
+  // type: verse | passage | historical | cultural | word_study | application | cross_reference | topic
+  type             String   @db.VarChar(30)
+  content          String                          // the commentary text (markdown supported)
+  language         String   @default("en") @db.VarChar(10)
+  is_published     Boolean  @default(true)
+  sort_order       Int      @default(0)            // order within verse
+  created_at       DateTime @default(now()) @db.Timestamptz
+  updated_at       DateTime @updatedAt @db.Timestamptz
+
+  @@index([book_id, chapter, verse_start])
+  @@index([provider_id])
+  @@index([translation_code])
+  @@index([is_published])
+  @@map("commentary_note")
+}
+
+// Saves each user's preferred study notes display mode
+model UserStudySetting {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @unique @db.Uuid
+  // notes_mode: none | popup | inline (Document 23 — two display modes)
+  notes_mode String   @default("inline") @db.VarChar(20)
+  font_size  Int      @default(18)
+  updated_at DateTime @updatedAt @db.Timestamptz
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_study_setting")
+}
+
+// ─── DONATION MODULE ──────────────────────────────────────────────────────────
+// PRD §4.61 — Optional donations, never restricts Bible access
+// Constitution §4: donations always voluntary, never pressure users
+// IMPORTANT: Never store card details — only operational metadata
+// Sensitive payment data stays with Stripe/PayPal
+
+model DonationRecord {
+  id               String   @id @default(uuid()) @db.Uuid
+  // payment_provider: stripe | paypal
+  payment_provider String   @db.VarChar(20)
+  // provider_ref: Stripe PaymentIntent ID or PayPal order ID — never card data
+  provider_ref     String   @unique @db.VarChar(255)
+  amount_cents     Int                              // amount in smallest currency unit
+  currency         String   @default("USD") @db.VarChar(10)
+  // frequency: one_time | monthly | annual (monthly/annual for v1.5)
+  frequency        String   @default("one_time") @db.VarChar(20)
+  // status: pending | succeeded | failed | refunded
+  status           String   @default("pending") @db.VarChar(20)
+  // donor_email: optional, only if donor explicitly provides for receipt
+  donor_email      String?  @db.VarChar(255)
+  created_at       DateTime @default(now()) @db.Timestamptz
+  updated_at       DateTime @updatedAt @db.Timestamptz
+
+  @@index([status])
+  @@index([payment_provider])
+  @@index([created_at])
+  @@map("donation_record")
+}
+
+// ─── TOPICS DISCOVERY MODULE ──────────────────────────────────────────────────
+// PRD §4.29c / DSD §2.45-2.47, adapted to this codebase's established
+// convention of referencing Bible verses by translation/book/chapter/verse_id
+// strings rather than a local verse table (see Note model above) — the DSD
+// assumed a local `bible_verse` table that does not exist in this codebase.
+// ASSUMPTION — REQUIRES PRODUCT DECISION: TopicContentLink (linking a topic to
+// devotionals/blog articles/prayer wall requests) is deferred to a future
+// session — this session implements Topic + verse references only, which is
+// enough for a genuinely working /topics page without inventing cross-links
+// to features not yet verified end-to-end.
+
+model Topic {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique @db.VarChar(100)
+  name        String   @db.VarChar(100)
+  category    String   @db.VarChar(50)
+  description String
+  is_published Boolean @default(true)
+  created_at  DateTime @default(now()) @db.Timestamptz
+  updated_at  DateTime @updatedAt @db.Timestamptz
+
+  verses TopicVerse[]
+
+  @@index([category])
+  @@index([is_published])
+  @@map("topic")
+}
+
+model TopicVerse {
+  id              String @id @default(uuid()) @db.Uuid
+  topic_id        String @db.Uuid
+  translation_id  String @db.VarChar(20)
+  book_id         String @db.VarChar(20)
+  chapter         Int
+  verse_id        String @db.VarChar(50)  // Bible API verse ID
+  verse_reference String @db.VarChar(100) // e.g. "John 3:16"
+  display_order   Int    @default(0)
+
+  topic Topic @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+
+  @@index([topic_id])
+  @@map("topic_verse")
+}
+
+// ─── DEVOTIONAL LIBRARY (MULTI-DAY SERIES) ───────────────────────────────────
+// PRD §4.44 / DSD §2.49-2.50. Distinct from the existing /daily route (Daily
+// Encouragement, already implemented separately with its own data source,
+// src/modules/daily) — this models the named, multi-day series only, per the
+// distinction already established in this project's own specifications.
+
+model DevotionalSeries {
+  id            String   @id @default(uuid()) @db.Uuid
+  slug          String   @unique @db.VarChar(100)
+  title         String   @db.VarChar(150)
+  category      String   @db.VarChar(50)
+  description   String?
+  duration_days Int
+  is_published  Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz
+  updated_at    DateTime @updatedAt @db.Timestamptz
+
+  entries DevotionalEntry[]
+
+  @@index([category])
+  @@index([is_published])
+  @@map("devotional_series")
+}
+
+model DevotionalEntry {
+  id                       String   @id @default(uuid()) @db.Uuid
+  devotional_series_id     String   @db.Uuid
+  day_number               Int
+  title                    String   @db.VarChar(150)
+  theme                    String?  @db.VarChar(100)
+  translation_id           String   @db.VarChar(20)
+  book_id                  String   @db.VarChar(20)
+  chapter                  Int
+  central_verse_id         String   @db.VarChar(50)
+  central_verse_reference  String   @db.VarChar(100)
+  reflection               String
+  guided_prayer            String
+  practical_application    String?
+  is_ai_generated          Boolean  @default(false)
+  ai_disclosure_text       String?
+  created_at               DateTime @default(now()) @db.Timestamptz
+  updated_at               DateTime @updatedAt @db.Timestamptz
+
+  series DevotionalSeries @relation(fields: [devotional_series_id], references: [id], onDelete: Cascade)
+
+  @@unique([devotional_series_id, day_number])
+  @@index([devotional_series_id])
+  @@map("devotional_entry")
+}
+
+// ─── BLOG & RESOURCES ─────────────────────────────────────────────────────────
+// PRD §4.62-4.63 (merged, per the Full Project Audit's adopted merge decision)
+// / DSD §2.55-2.57. Scoped down for this session: `resource_type` and `tags`
+// implemented; downloads, SEO metadata table, and homepage-featured flag
+// deferred — ASSUMPTION — REQUIRES PRODUCT DECISION on when those are needed.
+
+model BlogCategory {
+  id         String   @id @default(uuid()) @db.Uuid
+  slug       String   @unique @db.VarChar(100)
+  name       String   @db.VarChar(100)
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  articles BlogArticle[]
+
+  @@map("blog_category")
+}
+
+model BlogAuthor {
+  id           String   @id @default(uuid()) @db.Uuid
+  user_id      String?  @db.Uuid // nullable — supports guest/contributor authors with no account
+  display_name String   @db.VarChar(150)
+  bio          String?
+  photo_url    String?
+  created_at   DateTime @default(now()) @db.Timestamptz
+
+  articles BlogArticle[]
+
+  @@map("blog_author")
+}
+
+model BlogArticle {
+  id                     String    @id @default(uuid()) @db.Uuid
+  slug                   String    @unique @db.VarChar(150)
+  title                  String    @db.VarChar(255)
+  subtitle               String?   @db.VarChar(255)
+  featured_image_url     String?
+  blog_author_id         String    @db.Uuid
+  blog_category_id       String    @db.Uuid
+  resource_type          String    @default("article") @db.VarChar(30)
+  content                String
+  tags                   String[]  @default([])
+  status                 String    @default("draft") @db.VarChar(20)
+  // status: draft | pending_review | published | archived
+  estimated_reading_minutes Int?
+  is_ai_assisted         Boolean   @default(false)
+  ai_review_status       String    @default("not_applicable") @db.VarChar(20)
+  published_at           DateTime? @db.Timestamptz
+  created_at             DateTime  @default(now()) @db.Timestamptz
+  updated_at             DateTime  @updatedAt @db.Timestamptz
+
+  author   BlogAuthor   @relation(fields: [blog_author_id], references: [id])
+  category BlogCategory @relation(fields: [blog_category_id], references: [id])
+
+  @@index([blog_category_id])
+  @@index([blog_author_id])
+  @@index([resource_type])
+  @@index([status])
+  @@index([published_at])
+  @@map("blog_article")
+}
