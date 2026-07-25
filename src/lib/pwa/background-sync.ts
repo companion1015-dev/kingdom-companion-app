@@ -25,6 +25,18 @@ export type SyncStatus = 'idle' | 'syncing' | 'offline' | 'error'
 let db: IDBDatabase | null = null
 
 export async function initSyncDB(): Promise<IDBDatabase> {
+
+  // Confirmed real risk found during a live-crash investigation: this
+  // previously called indexedDB.open() unconditionally. indexedDB is a
+  // browser global that is not guaranteed to exist in every context this
+  // shared, every-page component can run in -- if it is ever unavailable,
+  // this used to throw immediately with no fallback, and since
+  // SyncStatusIndicator lives in the shared PWA layout, that crash could
+  // take down navigation across the whole app rather than staying local
+  // to one feature. Fail soft instead.
+  if (typeof indexedDB === "undefined") {
+    return Promise.reject(new Error("indexedDB is not available in this context"))
+  }
   if (db) return db
 
   return new Promise((resolve, reject) => {
