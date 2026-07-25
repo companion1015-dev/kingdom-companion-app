@@ -56,7 +56,16 @@ export default function SplashScreen({ onComplete, isOffline = false }: Props) {
       clearInterval(progressInterval)
       clearInterval(msgInterval)
     }
-  }, [onComplete])
+  // Real bug found during a live-crash investigation: this previously
+  // depended on [onComplete], but PWAProvider passes onComplete as a new
+  // inline arrow function on every one of its own re-renders. That meant
+  // this effect could restart its entire timer chain repeatedly instead of
+  // running once -- at minimum causing the splash animation to behave
+  // unpredictably, and under the wrong conditions potentially never firing
+  // onComplete() at all if reset before reaching 2400ms. Runs once, on
+  // mount only, matching what this animation sequence is actually meant to do.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // If loading takes too long
   const [slowLoad, setSlowLoad] = useState(false)
