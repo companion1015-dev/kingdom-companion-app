@@ -98,7 +98,16 @@ export default function BibleReader() {
 
   useEffect(() => {
     const saved = loadPosition()
-    if (saved) { setBookId(saved.bookId); setChapter(saved.chapter); setTranslation(saved.translation); loadChapter(saved.translation, saved.bookId, saved.chapter) }
+    // Guard against a stale saved translation from before this fix (e.g.
+    // "NIV", which is access-denied and no longer offered) silently
+    // overriding the working default -- only trust it if it's one of the
+    // translations we actually support today.
+    const knownCodes = TRANSLATIONS.map(t => t.code)
+    if (saved && knownCodes.includes(saved.translation)) {
+      setBookId(saved.bookId); setChapter(saved.chapter); setTranslation(saved.translation); loadChapter(saved.translation, saved.bookId, saved.chapter)
+    } else if (saved) {
+      setBookId(saved.bookId); setChapter(saved.chapter); loadChapter(translation, saved.bookId, saved.chapter)
+    }
     else loadChapter(translation, bookId, chapter)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

@@ -6,14 +6,11 @@
 import type { Translation, Book, Chapter, SearchResult } from '../types'
 
 export const TRANSLATIONS: Translation[] = [
-  { id: '1',  code: 'NIV',  name: 'New International Version',          language: 'en', abbreviation: 'NIV',  isAvailable: true },
-  { id: '2',  code: 'KJV',  name: 'King James Version',                 language: 'en', abbreviation: 'KJV',  isAvailable: true },
-  { id: '3',  code: 'ESV',  name: 'English Standard Version',           language: 'en', abbreviation: 'ESV',  isAvailable: true },
-  { id: '4',  code: 'NKJV', name: 'New King James Version',             language: 'en', abbreviation: 'NKJV', isAvailable: true },
-  { id: '5',  code: 'NLT',  name: 'New Living Translation',             language: 'en', abbreviation: 'NLT',  isAvailable: true },
-  { id: '6',  code: 'AMP',  name: 'Amplified Bible',                    language: 'en', abbreviation: 'AMP',  isAvailable: true },
-  { id: '7',  code: 'MSG',  name: 'The Message',                        language: 'en', abbreviation: 'MSG',  isAvailable: true },
+  { id: '3034', code: 'BSB',   name: 'Berean Standard Bible',   language: 'en', abbreviation: 'BSB',   isAvailable: true },
+  { id: '12',   code: 'ASV',   name: 'American Standard Version', language: 'en', abbreviation: 'ASV', isAvailable: true },
+  { id: '206',  code: 'WEBUS', name: 'World English Bible',    language: 'en', abbreviation: 'WEBUS', isAvailable: true },
 ]
+
 
 export const BOOKS: Book[] = [
   // Pentateuch
