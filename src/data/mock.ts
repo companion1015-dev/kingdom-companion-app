@@ -56,13 +56,15 @@ export const readingPlans = [
 export const navLinks = [
   { label: 'Home',             href: '/' },
   { label: 'Bible',            href: '/bible' },
+  { label: 'Study',            href: '/study' },
+  { label: 'Companion',        href: '/companion' },
   { label: 'Topics',           href: '/topics' },
   { label: 'Daily',            href: '/daily' },
   { label: 'Devotionals',      href: '/devotionals' },
   { label: 'Reading Plans',    href: '/reading-plans' },
   { label: 'Prayer Journal',   href: '/journal' },
   { label: 'Blog',             href: '/blog' },
-  { label: 'Support',          href: '/support' },
+  { label: 'Give',             href: '/support' },
   { label: 'About',            href: '/about' },
 ]
 
