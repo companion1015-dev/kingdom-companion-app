@@ -36,6 +36,13 @@ const YOUVERSION_API_BASE = 'https://api.youversion.com/v1'
 const BIBLE_API_KEY       = process.env.BIBLE_API_KEY
 
 // Real YouVersion integer Bible version IDs (confirmed from official docs).
+// NOTE, confirmed by a live request during this fix: version 111 (NIV)
+// returns "Access denied" with this app's current key/tier -- NIV is a
+// commercially licensed translation (Biblica), and YouVersion appears to
+// gate its full text behind a separate licence this app doesn't hold yet.
+// BSB, ASV, and WEBUS are open-licence translations and work without issue,
+// so BSB is now the default fallback rather than NIV. NIV stays in the map
+// in case licensing is granted later, but nothing should default to it.
 const TRANSLATION_IDS: Record<string, number> = {
   ASV:   12,
   NIV:   111,
@@ -48,7 +55,7 @@ function apiHeaders() {
 }
 
 function getVersionId(code: string): number {
-  return TRANSLATION_IDS[code] ?? TRANSLATION_IDS['NIV']
+  return TRANSLATION_IDS[code] ?? TRANSLATION_IDS['BSB']
 }
 
 // --- TRANSLATIONS -------------------------------------------------------------
@@ -135,31 +142,65 @@ export async function getChapter(
   try {
     const versionId = getVersionId(translation)
 
-    const res = await fetch(
+    // Verified against live responses: /verses gives us the ordered list of
+    // verse numbers and their passage_id (e.g. "JHN.3.16") for the chapter,
+    // but no actual Scripture text -- "title" here is just the verse number
+    // as a string. /passages, separately, returns real text but as one
+    // flowing blob per request with no verse boundaries marked inside it.
+    // Neither endpoint alone gives us what the reader UI needs (individual
+    // verses with their own text, for per-verse highlight/bookmark/note).
+    // So: list the verses first, then fetch each one's own passage text.
+    const listRes = await fetch(
       `${YOUVERSION_API_BASE}/bibles/${versionId}/books/${bookId}/chapters/${chapter}/verses`,
       { headers: apiHeaders(), next: { revalidate: 3600 } }
     )
 
-    if (!res.ok) {
-      console.error(`[BibleAPI] Chapter ${bookId}.${chapter} failed: ${res.status}`)
+    if (!listRes.ok) {
+      console.error(`[BibleAPI] Chapter ${bookId}.${chapter} failed: ${listRes.status}`)
       return getMockChapter(bookId, chapter, translation)
     }
 
-    const body = await res.json()
+    const listBody = await listRes.json()
     const localBook = BOOKS.find(b => b.bookId === bookId)
     const bookName  = localBook?.name ?? bookId
 
-    const verses = (body.data ?? []).map((v: Record<string, unknown>, i: number) => {
-      const verseNum = Number(v.verse ?? v.number ?? v.verse_number ?? i + 1)
-      return {
-        id:          String(v.usfm ?? v.id ?? `${bookId}.${chapter}.${verseNum}`),
-        verseNumber: verseNum,
-        reference:   `${bookName} ${chapter}:${verseNum}`,
-        text:        cleanVerseText(String(v.content ?? v.text ?? '')),
-      }
-    })
+    const verseList: { verseNum: number; passageId: string }[] = (listBody.data ?? []).map(
+      (v: Record<string, unknown>, i: number) => ({
+        verseNum:  Number(v.title ?? v.verse ?? i + 1),
+        passageId: String(v.passage_id ?? v.id ?? `${bookId}.${chapter}.${i + 1}`),
+      })
+    )
 
-    if (verses.length === 0) return getMockChapter(bookId, chapter, translation)
+    if (verseList.length === 0) return getMockChapter(bookId, chapter, translation)
+
+    // Fetch every verse's real text in parallel to keep this to one round
+    // of latency rather than one-at-a-time. A known cost of this API shape:
+    // a full chapter costs N+1 requests (1 list + N passages), not 1 -- see
+    // file header note on the tradeoffs found in YouVersion's public API.
+    const texts = await Promise.all(
+      verseList.map(async ({ passageId }) => {
+        try {
+          const pRes = await fetch(
+            `${YOUVERSION_API_BASE}/bibles/${versionId}/passages/${passageId}`,
+            { headers: apiHeaders(), next: { revalidate: 3600 } }
+          )
+          if (!pRes.ok) return ''
+          const pBody = await pRes.json()
+          return cleanVerseText(String(pBody.content ?? pBody.text ?? ''))
+        } catch { return '' }
+      })
+    )
+
+    const verses = verseList.map(({ verseNum }, i) => ({
+      id:          `${bookId}.${chapter}.${verseNum}`,
+      verseNumber: verseNum,
+      reference:   `${bookName} ${chapter}:${verseNum}`,
+      text:        texts[i] || `[Verse text unavailable]`,
+    }))
+
+    if (verses.every(v => !v.text || v.text === '[Verse text unavailable]')) {
+      return getMockChapter(bookId, chapter, translation)
+    }
 
     return {
       id:            `${bookId}.${chapter}`,

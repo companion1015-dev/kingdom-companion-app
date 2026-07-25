@@ -31,7 +31,7 @@ function loadPosition() {
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function BibleReader() {
-  const [translation, setTranslation] = useState('NIV')
+  const [translation, setTranslation] = useState('BSB') // NIV is access-denied with this API key/tier -- see bible-api.ts header
   const [bookId,      setBookId]      = useState('JHN')
   const [chapter,     setChapter]     = useState(3)
   const [translations] = useState<Translation[]>(TRANSLATIONS)
