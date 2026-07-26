@@ -40,7 +40,7 @@ export const GET = withOptionalAuth(async (req: NextRequest, user) => {
           id: true, title: true, content: true, category: true, privacy: true,
           display_name: true, country_code: true, status: true, prayer_count: true,
           is_featured: true, created_at: true, answered_at: true,
-          attachment_url: true, attachment_type: true,
+          attachment_url: true, attachment_type: true, user_id: true,
           _count: { select: { reactions: true } },
         },
       }),
@@ -60,11 +60,13 @@ export const GET = withOptionalAuth(async (req: NextRequest, user) => {
       savedSet  = new Set(saved.map((s: { request_id: string }) => s.request_id))
     }
 
-    const shaped = requests.map((r: Record<string, unknown> & { id: string; _count: { reactions: number } }) => ({
+    const shaped = requests.map((r: Record<string, unknown> & { id: string; user_id: string | null; _count: { reactions: number } }) => ({
       ...r,
       encouragement_count: r._count.reactions,
       has_prayed: prayedSet.has(r.id),
       has_saved:  savedSet.has(r.id),
+      is_owner:   user ? r.user_id === user.id : false,
+      user_id: undefined, // never expose the raw owner ID to the client
       _count: undefined,
     }))
 

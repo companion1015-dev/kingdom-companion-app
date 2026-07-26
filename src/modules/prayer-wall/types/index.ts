@@ -42,6 +42,7 @@ export type PrayerRequest = {
   answered_at:        string | null
   has_prayed?:        boolean
   has_saved?:         boolean
+  is_owner?:          boolean
   encouragement_count?:number
   attachment_url?:    string | null
   attachment_type?:   'image' | 'pdf' | null
