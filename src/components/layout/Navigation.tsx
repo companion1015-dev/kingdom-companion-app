@@ -47,8 +47,8 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.slice(0, 7).map(link => (
+          <div className="hidden lg:flex items-center gap-1 flex-wrap justify-end">
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
