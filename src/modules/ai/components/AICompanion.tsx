@@ -1,7 +1,7 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import { Send, Sparkles, RefreshCw, BookOpen, Copy, ChevronDown, WifiOff } from 'lucide-react'
+import { Send, Sparkles, RefreshCw, BookOpen, Copy, ChevronDown, WifiOff, History, Plus, Trash2, X } from 'lucide-react'
 import { emotions } from '@/data/mock'
 
 type Message = {
@@ -9,6 +9,15 @@ type Message = {
   role:    'user' | 'assistant'
   content: string
   type?:   'crisis' | 'fallback' | 'streaming' | 'normal'
+}
+
+type Conversation = {
+  id: string
+  title: string | null
+  conversation_type: string
+  created_at: string
+  updated_at: string
+  message_count?: number
 }
 
 type ConversationType = 'General Questions' | 'Bible Study' | 'Prayer Assistant' | 'Devotional' | 'Character Study' | 'Topic Study'
@@ -98,6 +107,25 @@ function ResponseSection({ icon, title, content, accent = false }: {
   )
 }
 
+function groupConversationsByDate(conversations: Conversation[]): { label: string; items: Conversation[] }[] {
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const startOfYesterday = new Date(startOfToday.getTime() - 86400000)
+  const sevenDaysAgo = new Date(startOfToday.getTime() - 7 * 86400000)
+
+  const groups: Record<string, Conversation[]> = { Today: [], Yesterday: [], 'Previous 7 Days': [], Older: [] }
+  for (const c of conversations) {
+    const updated = new Date(c.updated_at)
+    if (updated >= startOfToday) groups.Today.push(c)
+    else if (updated >= startOfYesterday) groups.Yesterday.push(c)
+    else if (updated >= sevenDaysAgo) groups['Previous 7 Days'].push(c)
+    else groups.Older.push(c)
+  }
+  return Object.entries(groups)
+    .filter(([, items]) => items.length > 0)
+    .map(([label, items]) => ({ label, items }))
+}
+
 export default function AICompanion() {
   const [messages,   setMessages]  = useState<Message[]>([])
   const [input,      setInput]     = useState('')
@@ -105,6 +133,13 @@ export default function AICompanion() {
   const [convType,   setConvType]  = useState<ConversationType>('General Questions')
   const [isOffline,  setIsOffline] = useState(false)
   const [toast,      setToast]     = useState<string | null>(null)
+  // Conversation history sidebar -- real persistence, only available when
+  // signed in (guests keep the existing single-session, un-persisted chat).
+  const [authed,          setAuthed]          = useState(false)
+  const [conversations,   setConversations]   = useState<Conversation[]>([])
+  const [activeConvoId,   setActiveConvoId]   = useState<string | null>(null)
+  const [showSidebar,     setShowSidebar]     = useState(false)
+  const [loadingConvo,    setLoadingConvo]    = useState(false)
   const textareaRef  = useRef<HTMLTextAreaElement>(null)
   const bottomRef    = useRef<HTMLDivElement>(null)
   const abortRef     = useRef<AbortController | null>(null)
@@ -122,7 +157,52 @@ export default function AICompanion() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  const loadConversations = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/ai/conversations', { credentials: 'include' })
+      if (res.status === 401) { setAuthed(false); return }
+      const data = await res.json()
+      if (data.success) { setAuthed(true); setConversations(data.data) }
+    } catch { /* stay in guest mode on any network failure */ }
+  }, [])
+
+  useEffect(() => { loadConversations() }, [loadConversations])
+
+  const selectConversation = async (id: string) => {
+    setLoadingConvo(true)
+    try {
+      const res  = await fetch(`/api/v1/ai/conversations/${id}`, { credentials: 'include' })
+      const data = await res.json()
+      if (data.success) {
+        setActiveConvoId(id)
+        setMessages(data.data.messages.map((m: { id: string; sender: string; message: string }) => ({
+          id: m.id, role: m.sender === 'user' ? 'user' : 'assistant', content: m.message, type: 'normal',
+        })))
+        setShowSidebar(false)
+      }
+    } catch { showToast('Unable to load that conversation') }
+    finally { setLoadingConvo(false) }
+  }
+
+  const startNewConversation = () => {
+    setActiveConvoId(null)
+    setMessages([])
+    setInput('')
+    setShowSidebar(false)
+  }
+
+  const deleteConversation = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!confirm('Delete this conversation? This cannot be undone.')) return
+    try {
+      await fetch(`/api/v1/ai/conversations/${id}`, { method: 'DELETE', credentials: 'include' })
+      setConversations(prev => prev.filter(c => c.id !== id))
+      if (activeConvoId === id) startNewConversation()
+    } catch { showToast('Unable to delete conversation') }
+  }
+
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500) }
+
 
   const handleEmotionClick = (emotion: typeof emotions[0]) => {
     setInput(`I am feeling ${emotion.label.toLowerCase()} today.`)
@@ -151,9 +231,21 @@ export default function AICompanion() {
       const res = await fetch('/api/v1/ai/companion', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ message, conversation_type: convType, translation: 'NIV' }),
+        body:    JSON.stringify({
+          message, conversation_type: convType, translation: 'BSB',
+          conversation_id: activeConvoId ?? undefined,
+          history: authed ? undefined : messages
+            .filter(m => m.type !== 'streaming')
+            .map(m => ({ role: m.role, content: m.content })),
+        }),
         signal:  abortRef.current.signal,
       })
+
+      const returnedConvoId = res.headers.get('X-Conversation-Id')
+      if (returnedConvoId && returnedConvoId !== activeConvoId) {
+        setActiveConvoId(returnedConvoId)
+        if (authed) loadConversations()
+      }
 
       if (!res.ok) throw new Error('Request failed')
 
@@ -231,6 +323,7 @@ export default function AICompanion() {
     setMessages([])
     setInput('')
     setLoading(false)
+    setActiveConvoId(null)
   }
 
   const isEmptyState = messages.length === 0
@@ -251,6 +344,16 @@ export default function AICompanion() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {authed && (
+              <button
+                onClick={() => setShowSidebar(true)}
+                className="p-2 text-charcoal/40 hover:text-navy rounded-lg hover:bg-navy/5 transition-colors"
+                aria-label="Conversation history"
+                title="Conversation history"
+              >
+                <History className="w-4 h-4" />
+              </button>
+            )}
             {/* Conversation type selector */}
             <div className="relative hidden sm:block">
               <select
@@ -275,6 +378,55 @@ export default function AICompanion() {
           </div>
         </div>
       </div>
+
+      {showSidebar && (
+        <>
+          <div className="fixed inset-0 z-40 bg-navy/20 backdrop-blur-sm" onClick={() => setShowSidebar(false)} />
+          <div className="fixed left-0 top-0 bottom-0 z-50 w-80 max-w-[85vw] bg-white shadow-2xl shadow-navy/20 flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-navy/8">
+              <h2 className="font-display text-base font-semibold text-navy">Conversations</h2>
+              <button onClick={() => setShowSidebar(false)} className="p-2 text-charcoal/40 hover:text-navy rounded-lg hover:bg-navy/5" aria-label="Close">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-3">
+              <button
+                onClick={startNewConversation}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all"
+              >
+                <Plus className="w-4 h-4" /> New Conversation
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 pb-4">
+              {conversations.length === 0 && (
+                <p className="text-xs text-charcoal/35 font-body text-center py-8">No conversations yet</p>
+              )}
+              {groupConversationsByDate(conversations).map(group => (
+                <div key={group.label} className="mb-4">
+                  <p className="text-xs font-body font-semibold text-charcoal/35 tracking-wider uppercase px-2 mb-1.5">{group.label}</p>
+                  {group.items.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => selectConversation(c.id)}
+                      className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-left transition-colors group ${activeConvoId === c.id ? 'bg-navy/8' : 'hover:bg-navy/4'}`}
+                    >
+                      <span className="text-sm font-body text-navy/75 truncate">{c.title ?? 'New Conversation'}</span>
+                      <span
+                        onClick={e => deleteConversation(c.id, e)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-charcoal/30 hover:text-red-500 transition-all shrink-0"
+                        role="button"
+                        aria-label="Delete conversation"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Offline banner */}
       {isOffline && (
