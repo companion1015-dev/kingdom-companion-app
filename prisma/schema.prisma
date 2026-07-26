@@ -51,6 +51,11 @@ model User {
   audit_logs            AuditLog[]
   referral_code         ReferralCode?
   user_study_setting    UserStudySetting?
+  // Prayer Wall relations
+  prayer_requests    PrayerRequest[]
+  prayer_reactions   PrayerReaction[]
+  prayer_reports     PrayerReport[]
+  saved_prayers      SavedPrayer[]
 
   @@index([email])
   @@index([account_status])
@@ -740,4 +745,113 @@ model BlogArticle {
   @@index([status])
   @@index([published_at])
   @@map("blog_article")
+}
+
+// ─── GLOBAL PRAYER WALL ───────────────────────────────────────────────────────
+// Distinct from `Prayer` above, which is the private Prayer Journal.
+// This is the public, community-facing Prayer Wall. Privacy tiers control
+// visibility per request; "private" entries never leave the owner's device
+// view even though they're stored server-side for cross-device sync.
+
+model PrayerRequest {
+  id              String    @id @default(uuid()) @db.Uuid
+  user_id         String?   @db.Uuid // nullable: anonymous submissions allowed
+  title           String    @db.VarChar(255)
+  content         String
+  category        String    @db.VarChar(30)
+  privacy         String    @default("private") @db.VarChar(20)
+  // privacy: private | anonymous | community | public
+  display_name    String?   @db.VarChar(100)
+  country_code    String?   @db.VarChar(2)
+  status          String    @default("active") @db.VarChar(20)
+  // status: active | answered | archived | removed
+  prayer_count    Int       @default(0)
+  is_featured     Boolean   @default(false)
+  attachment_url  String?
+  attachment_type String?   @db.VarChar(10) // image | pdf
+  moderation_status String  @default("approved") @db.VarChar(20)
+  // moderation_status: approved | pending | hidden
+  created_at      DateTime  @default(now()) @db.Timestamptz
+  updated_at      DateTime  @updatedAt @db.Timestamptz
+  answered_at     DateTime? @db.Timestamptz
+  deleted_at      DateTime? @db.Timestamptz
+
+  user          User?              @relation(fields: [user_id], references: [id])
+  reactions     PrayerReaction[]
+  reports       PrayerReport[]
+  saved_by      SavedPrayer[]
+  answered_info PrayerAnswered?
+
+  @@index([category])
+  @@index([privacy])
+  @@index([status])
+  @@index([moderation_status])
+  @@index([created_at])
+  @@index([user_id])
+  @@map("prayer_request")
+}
+
+model PrayerReaction {
+  id         String   @id @default(uuid()) @db.Uuid
+  request_id String   @db.Uuid
+  user_id    String?  @db.Uuid // nullable: anonymous "I Prayed" allowed
+  type       String   @db.VarChar(20) // prayed | encouragement | verse
+  content    String?  // text for encouragement/verse types; null for prayed
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  request PrayerRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  user    User?         @relation(fields: [user_id], references: [id])
+
+  @@index([request_id])
+  @@index([type])
+  @@map("prayer_reaction")
+}
+
+model PrayerReport {
+  id         String   @id @default(uuid()) @db.Uuid
+  request_id String   @db.Uuid
+  user_id    String?  @db.Uuid
+  reason     String   @db.VarChar(30)
+  details    String?
+  status     String   @default("pending") @db.VarChar(20)
+  // status: pending | reviewed | actioned | dismissed
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  request PrayerRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  user    User?         @relation(fields: [user_id], references: [id])
+
+  @@index([request_id])
+  @@index([status])
+  @@map("prayer_report")
+}
+
+model PrayerAnswered {
+  id               String   @id @default(uuid()) @db.Uuid
+  request_id       String   @unique @db.Uuid
+  testimony        String
+  bible_verse      String?  @db.VarChar(100)
+  thanksgiving     String?
+  praise_category  String   @db.VarChar(30)
+  is_public        Boolean  @default(true)
+  created_at       DateTime @default(now()) @db.Timestamptz
+
+  request PrayerRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([praise_category])
+  @@index([is_public])
+  @@map("prayer_answered")
+}
+
+model SavedPrayer {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  request_id String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz
+
+  user    User          @relation(fields: [user_id], references: [id])
+  request PrayerRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, request_id])
+  @@index([user_id])
+  @@map("saved_prayer")
 }
