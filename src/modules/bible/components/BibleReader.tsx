@@ -14,7 +14,7 @@ import BibleSearch      from './BibleSearch'
 import VerseContextMenu from './VerseContextMenu'
 import NoteEditor       from '@/modules/study/components/NoteEditor'
 import { InlineCommentary, NoteIndicator, CommentaryPopup } from '@/modules/commentary/components/CommentaryPanel'
-import { InternalCommentaryProvider } from '@/modules/commentary/providers/internal'
+import { HelloAOCommentaryProvider } from '@/modules/commentary/providers/helloao'
 import { loadStudySettings } from '@/modules/commentary/types'
 import type { CommentaryNote } from '@/modules/commentary/types'
 
@@ -105,14 +105,14 @@ export default function BibleReader() {
         // can render immediately rather than per-verse on open.
         setCommentaryNotes({})
         setCommentaryOpenVerse(null)
-        InternalCommentaryProvider.getChapterIndex(b, c, t).then(async idx => {
+        HelloAOCommentaryProvider.getChapterIndex(b, c, t).then(async idx => {
           setCommentaryIndex(idx.has_notes)
           const mode = loadStudySettings().notes_mode
           setCommentaryMode(mode)
           if (mode === 'inline') {
             const verseNums = Object.keys(idx.has_notes).map(Number)
             const entries = await Promise.all(
-              verseNums.map(async v => [v, await InternalCommentaryProvider.getVerseNotes(b, c, v, t)] as const)
+              verseNums.map(async v => [v, await HelloAOCommentaryProvider.getVerseNotes(b, c, v, t)] as const)
             )
             setCommentaryNotes(Object.fromEntries(entries))
           }
@@ -199,7 +199,7 @@ export default function BibleReader() {
   const handleOpenCommentary = async (verseNum: number) => {
     setCommentaryOpenVerse(verseNum)
     if (!commentaryNotes[verseNum]) {
-      const notes = await InternalCommentaryProvider.getVerseNotes(bookId, chapter, verseNum, translation)
+      const notes = await HelloAOCommentaryProvider.getVerseNotes(bookId, chapter, verseNum, translation)
       setCommentaryNotes(prev => ({ ...prev, [verseNum]: notes }))
     }
   }
