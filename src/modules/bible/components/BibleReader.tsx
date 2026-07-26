@@ -13,6 +13,10 @@ import ChapterSelector  from './ChapterSelector'
 import BibleSearch      from './BibleSearch'
 import VerseContextMenu from './VerseContextMenu'
 import NoteEditor       from '@/modules/study/components/NoteEditor'
+import { InlineCommentary, NoteIndicator, CommentaryPopup } from '@/modules/commentary/components/CommentaryPanel'
+import { InternalCommentaryProvider } from '@/modules/commentary/providers/internal'
+import { loadStudySettings } from '@/modules/commentary/types'
+import type { CommentaryNote } from '@/modules/commentary/types'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type Panel = 'book' | 'chapter' | 'search' | null
@@ -31,7 +35,7 @@ function loadPosition() {
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function BibleReader() {
-  const [translation, setTranslation] = useState('BSB') // NIV is access-denied with this API key/tier -- see bible-api.ts header
+  const [translation, setTranslation] = useState('BSB') // NIV is access-denied with this API key/tier — see bible-api.ts header
   const [bookId,      setBookId]      = useState('JHN')
   const [chapter,     setChapter]     = useState(3)
   const [translations] = useState<Translation[]>(TRANSLATIONS)
@@ -50,6 +54,15 @@ export default function BibleReader() {
   const [toast,           setToast]           = useState<string | null>(null)
   // Note display format: 'popup' = OLD (link in context menu), 'inline' = NEW (text under verse)
   const [noteFormat,      setNoteFormat]      = useState<NoteDisplayFormat>('inline')
+  // Study commentary -- distinct from the personal "note" state above.
+  // notes_mode comes from the user's saved study settings (defaults to
+  // 'inline'); commentaryIndex marks which verses in the current chapter
+  // have any commentary at all, so we don't fetch per-verse notes for
+  // every verse up front -- only ones known to have something to show.
+  const [commentaryMode,  setCommentaryMode]  = useState<'none' | 'popup' | 'inline'>('inline')
+  const [commentaryIndex, setCommentaryIndex] = useState<Record<number, boolean>>({})
+  const [commentaryNotes, setCommentaryNotes] = useState<Record<number, CommentaryNote[]>>({})
+  const [commentaryOpenVerse, setCommentaryOpenVerse] = useState<number | null>(null)
 
   const contentRef = useRef<HTMLDivElement>(null)
   const currentBook = books.find(b => b.bookId === bookId) ?? null
@@ -86,6 +99,24 @@ export default function BibleReader() {
         setChapterData(data.data)
         savePosition(b, c, t)
         contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+
+        // Study commentary — load which verses have notes for this chapter,
+        // then (inline mode only) eagerly fetch the actual note text so it
+        // can render immediately rather than per-verse on open.
+        setCommentaryNotes({})
+        setCommentaryOpenVerse(null)
+        InternalCommentaryProvider.getChapterIndex(b, c, t).then(async idx => {
+          setCommentaryIndex(idx.has_notes)
+          const mode = loadStudySettings().notes_mode
+          setCommentaryMode(mode)
+          if (mode === 'inline') {
+            const verseNums = Object.keys(idx.has_notes).map(Number)
+            const entries = await Promise.all(
+              verseNums.map(async v => [v, await InternalCommentaryProvider.getVerseNotes(b, c, v, t)] as const)
+            )
+            setCommentaryNotes(Object.fromEntries(entries))
+          }
+        }).catch(() => { /* commentary is supplementary — never blocks reading */ })
       } else {
         setError('Unable to load this chapter. Please try again.')
       }
@@ -163,6 +194,14 @@ export default function BibleReader() {
 
   const handleSearchResult = (result: SearchResult) => {
     setBookId(result.bookId); setChapter(result.chapterNumber); setPanel(null)
+  }
+
+  const handleOpenCommentary = async (verseNum: number) => {
+    setCommentaryOpenVerse(verseNum)
+    if (!commentaryNotes[verseNum]) {
+      const notes = await InternalCommentaryProvider.getVerseNotes(bookId, chapter, verseNum, translation)
+      setCommentaryNotes(prev => ({ ...prev, [verseNum]: notes }))
+    }
   }
 
   return (
@@ -301,6 +340,9 @@ export default function BibleReader() {
                               <FileText className="w-2.5 h-2.5" /> Note
                             </button>
                           )}
+                          {commentaryMode === 'popup' && commentaryIndex[verse.verseNumber] && (
+                            <NoteIndicator onClick={() => handleOpenCommentary(verse.verseNumber)} />
+                          )}
                         </p>
 
                         {/* Bookmark indicator */}
@@ -332,6 +374,15 @@ export default function BibleReader() {
                             </div>
                           )}
                         </div>
+                      )}
+
+                      {/* Study commentary — inline mode, distinct from the personal note above */}
+                      {commentaryMode === 'inline' && commentaryIndex[verse.verseNumber] && commentaryNotes[verse.verseNumber] && (
+                        <InlineCommentary
+                          reference={verse.reference}
+                          notes={commentaryNotes[verse.verseNumber]}
+                          loading={false}
+                        />
                       )}
                     </div>
                   )
@@ -399,6 +450,21 @@ export default function BibleReader() {
           onClose={() => setNoteEditor(null)}
         />
       )}
+
+      {/* Study commentary popup — distinct from the personal note editor above */}
+      {commentaryOpenVerse !== null && chapterData && (() => {
+        const v = chapterData.verses.find(x => x.verseNumber === commentaryOpenVerse)
+        if (!v) return null
+        return (
+          <CommentaryPopup
+            reference={v.reference}
+            verseText={v.text}
+            notes={commentaryNotes[commentaryOpenVerse] ?? []}
+            loading={!commentaryNotes[commentaryOpenVerse]}
+            onClose={() => setCommentaryOpenVerse(null)}
+          />
+        )
+      })()}
 
       {/* Toast */}
       {toast && (
