@@ -115,7 +115,7 @@ export type StudySettings = {
 }
 
 export const DEFAULT_STUDY_SETTINGS: StudySettings = {
-  notes_mode:     'inline',
+  notes_mode:     'popup',
   font_size:       18,
   show_ai_button:  true,
 }

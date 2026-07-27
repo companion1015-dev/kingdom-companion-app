@@ -59,7 +59,7 @@ export default function BibleReader() {
   // 'inline'); commentaryIndex marks which verses in the current chapter
   // have any commentary at all, so we don't fetch per-verse notes for
   // every verse up front -- only ones known to have something to show.
-  const [commentaryMode,  setCommentaryMode]  = useState<'none' | 'popup' | 'inline'>('inline')
+  const [commentaryMode,  setCommentaryMode]  = useState<'none' | 'popup' | 'inline'>('popup')
   const [commentaryIndex, setCommentaryIndex] = useState<Record<number, boolean>>({})
   const [commentaryNotes, setCommentaryNotes] = useState<Record<number, CommentaryNote[]>>({})
   const [commentaryOpenVerse, setCommentaryOpenVerse] = useState<number | null>(null)

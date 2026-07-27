@@ -48,6 +48,7 @@ const TRANSLATION_IDS: Record<string, number> = {
   NIV:   111,
   WEBUS: 206,
   BSB:   3034,
+  KJV:   1, // Confirmed via bible.com/versions/1-kjv-king-james-version. Public domain.
 }
 
 function apiHeaders() {

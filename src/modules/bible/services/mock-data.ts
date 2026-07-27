@@ -7,6 +7,7 @@ import type { Translation, Book, Chapter, SearchResult } from '../types'
 
 export const TRANSLATIONS: Translation[] = [
   { id: '3034', code: 'BSB',   name: 'Berean Standard Bible',   language: 'en', abbreviation: 'BSB',   isAvailable: true },
+  { id: '1', code: 'KJV', name: 'King James Version', language: 'en', abbreviation: 'KJV', isAvailable: true },
   { id: '12',   code: 'ASV',   name: 'American Standard Version', language: 'en', abbreviation: 'ASV', isAvailable: true },
   { id: '206',  code: 'WEBUS', name: 'World English Bible',    language: 'en', abbreviation: 'WEBUS', isAvailable: true },
 ]
