@@ -13,7 +13,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
   const [title,       setTitle]       = useState('')
   const [content,     setContent]     = useState('')
   const [category,    setCategory]    = useState('other')
-  const [privacy,     setPrivacy]     = useState('private')  // DEFAULT: private
+  const [privacy,     setPrivacy]     = useState('community')  // DEFAULT: community -- was 'private', which meant submitted prayers silently never appeared in the feed
   const [displayName, setDisplayName] = useState('')
   const [attachment,  setAttachment]  = useState<File | null>(null)
   const [preview,     setPreview]     = useState<string | null>(null)
@@ -194,7 +194,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                       <span className="text-xl">{opt.icon}</span>
                       <div className="flex-1">
                         <p className={`text-sm font-body font-semibold ${privacy === opt.id ? 'text-navy' : 'text-charcoal/60'}`}>
-                          {opt.label} {opt.id === 'private' && <span className="text-xs text-gold font-normal">(Default)</span>}
+                          {opt.label} {opt.id === 'community' && <span className="text-xs text-gold font-normal">(Default)</span>}
                         </p>
                         <p className="text-xs text-charcoal/40 font-body">{opt.description}</p>
                       </div>
