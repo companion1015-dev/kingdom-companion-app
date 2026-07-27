@@ -128,6 +128,20 @@ export default function BibleReader() {
   }, [])
 
   useEffect(() => {
+    // Deep-link support: /bible?book=ISA&chapter=40 takes priority over any
+    // saved reading position -- this is what makes "Read Isaiah 40" style
+    // links from elsewhere in the app (homepage daily verse, etc.) actually
+    // navigate to that specific passage instead of just opening wherever
+    // the reader last left off.
+    const params = new URLSearchParams(window.location.search)
+    const linkedBook    = params.get('book')
+    const linkedChapter = params.get('chapter')
+    if (linkedBook && BOOKS.some(b => b.bookId === linkedBook)) {
+      const c = Math.max(1, parseInt(linkedChapter ?? '1') || 1)
+      setBookId(linkedBook); setChapter(c); loadChapter(translation, linkedBook, c)
+      return
+    }
+
     const saved = loadPosition()
     // Guard against a stale saved translation from before this fix (e.g.
     // "NIV", which is access-denied and no longer offered) silently

@@ -855,3 +855,25 @@ model SavedPrayer {
   @@index([user_id])
   @@map("saved_prayer")
 }
+
+// ─── AI-GENERATED DAILY ENCOURAGEMENT ────────────────────────────────────────
+// Replaces the old 5-entry hardcoded rotation (DAILY_ENTRIES), which wasn't
+// genuinely daily -- it repeated every 5 days. One row per calendar date,
+// generated fresh by Claude on the first request of that day and cached
+// here for every subsequent visitor that same day -- real content, not
+// mocked, without regenerating (and re-paying for) it on every page view.
+model DailyGenerated {
+  id                 String   @id @default(uuid()) @db.Uuid
+  date               String   @unique @db.VarChar(10) // YYYY-MM-DD
+  verse_reference    String   @db.VarChar(100)
+  verse_text         String
+  translation        String   @default("BSB") @db.VarChar(20)
+  title              String   @db.VarChar(255)
+  reflection         String
+  prayer             String
+  challenge          String
+  reflection_question String
+  created_at         DateTime @default(now()) @db.Timestamptz
+
+  @@map("daily_generated")
+}

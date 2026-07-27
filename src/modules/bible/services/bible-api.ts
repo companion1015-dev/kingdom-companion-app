@@ -29,7 +29,7 @@
 // NOTE: Scripture text is NEVER stored permanently (Constitution paragraph 4, DSD 1.10)
 // It is fetched fresh each request and cached per Workbox strategy only.
 
-import type { Translation, Book, Chapter, SearchResponse } from '../types'
+import type { Translation, Book, Chapter, SearchResponse, SearchResult } from '../types'
 import { TRANSLATIONS, BOOKS, getMockChapter, SAMPLE_SEARCH_RESULTS } from './mock-data'
 
 const YOUVERSION_API_BASE = 'https://api.youversion.com/v1'
@@ -233,15 +233,80 @@ function cleanVerseText(text: string): string {
 }
 
 // --- SEARCH ---------------------------------------------------------------------
+// Previously only ever matched against 5 hardcoded sample verses, regardless
+// of what was actually typed -- YouVersion's API has no search endpoint, so
+// this had never been replaced with something real. Fixed by fetching the
+// complete Bible text (BSB, public domain) from bible.helloao.org once per
+// warm server instance and searching it directly -- genuine full-text
+// search against actual Scripture, not a canned list.
+
+type FlatVerse = { verseId: string; reference: string; text: string; bookId: string; bookName: string; chapterNumber: number; verseNumber: number }
+let completeBibleCache: Promise<FlatVerse[]> | null = null
+
+async function loadCompleteBible(): Promise<FlatVerse[]> {
+  if (completeBibleCache) return completeBibleCache
+
+  completeBibleCache = fetch('https://bible.helloao.org/api/BSB/complete.json')
+    .then(res => { if (!res.ok) throw new Error(`${res.status}`); return res.json() })
+    .then(data => {
+      const flat: FlatVerse[] = []
+      for (const book of data.books ?? []) {
+        const bookId   = String(book.id ?? '')
+        const bookName = String(book.commonName ?? book.name ?? bookId)
+        for (const chapter of book.chapters ?? []) {
+          const chapterNumber = Number(chapter.chapter?.number ?? chapter.number ?? 0)
+          const content = chapter.chapter?.content ?? chapter.content ?? []
+          for (const v of content) {
+            if (v.type !== 'verse' || !v.number) continue
+            const text = (v.content ?? [])
+              .map((p: unknown) => typeof p === 'string' ? p : (p as { text?: string })?.text ?? '')
+              .join(' ').replace(/\s+/g, ' ').trim()
+            if (!text) continue
+            flat.push({
+              verseId: `${bookId}.${chapterNumber}.${v.number}`,
+              reference: `${bookName} ${chapterNumber}:${v.number}`,
+              text, bookId, bookName, chapterNumber, verseNumber: Number(v.number),
+            })
+          }
+        }
+      }
+      return flat
+    })
+    .catch(err => {
+      console.error('[BibleAPI] Failed to load complete Bible for search:', err)
+      completeBibleCache = null
+      return []
+    })
+
+  return completeBibleCache
+}
 
 export async function searchBible(
   query:       string,
-  translation: string = 'NIV',
-  _limit:      number = 20,
+  translation: string = 'BSB',
+  limit:       number = 20,
 ): Promise<SearchResponse> {
-  const results = SAMPLE_SEARCH_RESULTS.filter(r =>
-    r.text.toLowerCase().includes(query.toLowerCase()) ||
-    r.reference.toLowerCase().includes(query.toLowerCase())
-  )
-  return { results, total: results.length, query, translation }
+  const q = query.trim().toLowerCase()
+  if (!q) return { results: [], total: 0, query, translation }
+
+  const verses = await loadCompleteBible()
+
+  if (verses.length === 0) {
+    const results = SAMPLE_SEARCH_RESULTS.filter(r =>
+      r.text.toLowerCase().includes(q) || r.reference.toLowerCase().includes(q)
+    )
+    return { results, total: results.length, query, translation }
+  }
+
+  const refMatches  = verses.filter(v => v.reference.toLowerCase().includes(q))
+  const wordMatches = verses.filter(v => !refMatches.includes(v) && v.text.toLowerCase().includes(q))
+  const matched = [...refMatches, ...wordMatches].slice(0, limit)
+
+  const results: SearchResult[] = matched.map(v => ({
+    verseId: v.verseId, reference: v.reference, text: v.text,
+    bookId: v.bookId, bookName: v.bookName, chapterNumber: v.chapterNumber, verseNumber: v.verseNumber,
+    translation, matchedWords: [query],
+  }))
+
+  return { results, total: refMatches.length + wordMatches.length, query, translation }
 }

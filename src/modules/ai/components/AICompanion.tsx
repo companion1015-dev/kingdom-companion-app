@@ -153,6 +153,21 @@ export default function AICompanion() {
     return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
   }, [])
 
+  // Pre-fill from a homepage handoff (e.g. the emotion selector on "/" now
+  // genuinely routes here with the chosen feeling, instead of the old
+  // alert() placeholder). Left for the user to review and send themselves
+  // rather than auto-submitting on their behalf.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const prefill = params.get('message')
+    if (prefill) {
+      setInput(prefill)
+      textareaRef.current?.focus()
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])

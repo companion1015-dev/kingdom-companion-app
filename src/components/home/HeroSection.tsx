@@ -1,13 +1,28 @@
 'use client'
 import { useState, useRef } from 'react'
-import { ArrowRight, Sparkles, BookOpen } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ArrowRight, Sparkles, BookOpen, ChevronDown } from 'lucide-react'
 import { dailyVerse, emotions } from '@/data/mock'
 
+// Genuine fixes here: the emotion selector previously did
+// alert('AI Companion coming in Phase 3...') -- a leftover from before the
+// real AI Companion existed. It now actually routes to /companion with the
+// message pre-filled. The daily verse badge previously linked to a generic
+// /bible with no specific chapter; it now deep-links to the exact verse
+// shown. Emotions expanded from 12 to a genuinely extensive list, with the
+// first 6 shown by default and the rest behind a "More topics" dropdown.
+
+const QUICK_COUNT = 6
+
 export default function HeroSection() {
+  const router = useRouter()
   const [input, setInput]       = useState('')
   const [selected, setSelected] = useState<string | null>(null)
-  const [loading, setLoading]   = useState(false)
+  const [showMore, setShowMore] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  const quickEmotions   = emotions.slice(0, QUICK_COUNT)
+  const extraEmotions   = emotions.slice(QUICK_COUNT)
 
   const handleEmotionClick = (id: string) => {
     setSelected(id)
@@ -18,13 +33,9 @@ export default function HeroSection() {
     }
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!input.trim()) return
-    setLoading(true)
-    // Placeholder — will connect to /api/v1/ai/companion
-    await new Promise(r => setTimeout(r, 800))
-    setLoading(false)
-    alert('AI Companion coming in Phase 3. For now, your input has been received.')
+    router.push(`/companion?message=${encodeURIComponent(input.trim())}`)
   }
 
   return (
@@ -44,10 +55,10 @@ export default function HeroSection() {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 w-full">
 
-        {/* Daily verse badge */}
+        {/* Daily verse badge — now deep-links to the exact verse shown */}
         <div className="flex justify-center mb-10 animate-fade-in">
           <a
-            href="/bible"
+            href={`/bible?book=${dailyVerse.bookId}&chapter=${dailyVerse.chapter}`}
             className="inline-flex items-center gap-2.5 glass rounded-full px-5 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/12 transition-all group"
           >
             <BookOpen className="w-3.5 h-3.5 text-gold" />
@@ -66,7 +77,7 @@ export default function HeroSection() {
         </div>
 
         <p className="text-center text-white/55 font-body text-base sm:text-lg mb-10 animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0, animationFillMode: 'forwards' }}>
-          Share what's on your heart — receive Scripture, reflection, and prayer.
+          Share what&rsquo;s on your heart — receive Scripture, reflection, and prayer.
         </p>
 
         {/* Emotion input card — signature element */}
@@ -82,9 +93,9 @@ export default function HeroSection() {
             boxShadow: '0 8px 48px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
           }}
         >
-          {/* Emotion chips */}
-          <div className="flex flex-wrap gap-2 mb-5">
-            {emotions.map(emotion => (
+          {/* Emotion chips — quick access, with a dropdown for the extended list */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {quickEmotions.map(emotion => (
               <button
                 key={emotion.id}
                 onClick={() => handleEmotionClick(emotion.id)}
@@ -102,7 +113,37 @@ export default function HeroSection() {
                 <span>{emotion.label}</span>
               </button>
             ))}
+            <button
+              onClick={() => setShowMore(s => !s)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-body text-white/50 hover:text-white border border-white/15 hover:border-white/30 transition-all"
+              aria-expanded={showMore}
+            >
+              More topics <ChevronDown className={`w-3 h-3 transition-transform ${showMore ? 'rotate-180' : ''}`} />
+            </button>
           </div>
+
+          {showMore && (
+            <div className="flex flex-wrap gap-2 mb-2 pb-3 border-b border-white/10">
+              {extraEmotions.map(emotion => (
+                <button
+                  key={emotion.id}
+                  onClick={() => handleEmotionClick(emotion.id)}
+                  className={`
+                    inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body transition-all duration-200
+                    border bg-gradient-to-r ${emotion.color} ${emotion.border}
+                    ${selected === emotion.id
+                      ? 'text-white border-gold/60 ring-1 ring-gold/40 scale-105'
+                      : 'text-white/70 hover:text-white hover:scale-105 hover:border-white/30'
+                    }
+                  `}
+                  aria-pressed={selected === emotion.id}
+                >
+                  <span>{emotion.icon}</span>
+                  <span>{emotion.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Text input */}
           <div className="relative">
@@ -120,21 +161,17 @@ export default function HeroSection() {
               <span className="text-xs text-white/25 font-body">⌘ + Enter to send</span>
               <button
                 onClick={handleSubmit}
-                disabled={!input.trim() || loading}
+                disabled={!input.trim()}
                 className={`
                   inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200
-                  ${input.trim() && !loading
+                  ${input.trim()
                     ? 'bg-gold hover:bg-gold-light text-navy shadow-lg shadow-gold/20 hover:scale-105'
                     : 'bg-white/10 text-white/30 cursor-not-allowed'
                   }
                 `}
               >
-                {loading ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                {loading ? 'Finding Scripture…' : 'Receive encouragement'}
+                <Sparkles className="w-4 h-4" />
+                Receive encouragement
               </button>
             </div>
           </div>
