@@ -1,30 +1,28 @@
 // ─── PRISMA CLIENT ────────────────────────────────────────────────────────────
-// Note: In this build environment, Prisma engine binaries cannot be downloaded.
-// The schema is fully defined in prisma/schema.prisma and will generate correctly
-// in your local environment or CI/CD pipeline with network access.
-// Run: npx prisma generate && npx prisma db push
-
-// For type safety in this environment, we export a typed stub.
-// Replace with the standard singleton below when Prisma generates successfully:
+// CRITICAL FIX #1: this file previously exported a stubbed fake Proxy object
+// that always returned Promise.resolve(null) for every single method call,
+// on every model, with no exceptions -- a temporary sandbox placeholder that
+// was never swapped out and had been silently deployed to production.
 //
-// import { PrismaClient } from '@prisma/client'
-// declare global { var __prisma: PrismaClient | undefined }
-// const prisma = globalThis.__prisma ?? new PrismaClient({ log: ['error'] })
-// if (process.env.NODE_ENV !== 'production') globalThis.__prisma = prisma
-// export { prisma }; export default prisma
+// CRITICAL FIX #2, found while fixing #1: Prisma 7 changed how PrismaClient
+// itself is constructed. `new PrismaClient()` with no arguments is no longer
+// valid at all -- it now requires an explicit database driver adapter to be
+// passed in. Confirmed directly against Prisma's own v7 upgrade guide and
+// multiple real bug reports of the exact error this caused:
+// "Using engine type client requires either adapter or accelerateUrl".
+// Since this project uses PostgreSQL (via Supabase), the fix is @prisma/adapter-pg.
 
-// ─── TYPED STUB (build environment only) ─────────────────────────────────────
-export const prisma = new Proxy({} as Record<string, unknown>, {
-  get: (_target, prop) => {
-    if (prop === 'then') return undefined
-    return new Proxy(() => Promise.resolve(null), {
-      get: (_t, p) => {
-        if (p === 'then') return undefined
-        return () => Promise.resolve(null)
-      },
-      apply: () => Promise.resolve(null)
-    })
-  }
-}) as unknown as import('./prisma-types').PrismaLike
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __prisma: PrismaClient | undefined
+}
+
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+
+export const prisma = globalThis.__prisma ?? new PrismaClient({ adapter, log: ['error'] })
+if (process.env.NODE_ENV !== 'production') globalThis.__prisma = prisma
 
 export default prisma
