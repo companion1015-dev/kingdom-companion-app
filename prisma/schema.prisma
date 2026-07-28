@@ -56,6 +56,8 @@ model User {
   prayer_reactions   PrayerReaction[]
   prayer_reports     PrayerReport[]
   saved_prayers      SavedPrayer[]
+  donation_records       DonationRecord[]
+  donation_subscriptions DonationSubscription[]
 
   @@index([email])
   @@index([account_status])
@@ -571,25 +573,62 @@ model UserStudySetting {
 
 model DonationRecord {
   id               String   @id @default(uuid()) @db.Uuid
-  // payment_provider: stripe | paypal
+  user_id          String?  @db.Uuid
   payment_provider String   @db.VarChar(20)
-  // provider_ref: Stripe PaymentIntent ID or PayPal order ID — never card data
   provider_ref     String   @unique @db.VarChar(255)
-  amount_cents     Int                              // amount in smallest currency unit
+  amount_cents     Int
   currency         String   @default("USD") @db.VarChar(10)
-  // frequency: one_time | monthly | annual (monthly/annual for v1.5)
   frequency        String   @default("one_time") @db.VarChar(20)
-  // status: pending | succeeded | failed | refunded
   status           String   @default("pending") @db.VarChar(20)
-  // donor_email: optional, only if donor explicitly provides for receipt
   donor_email      String?  @db.VarChar(255)
+  dedication_type  String?  @db.VarChar(30)
+  dedication_name  String?  @db.VarChar(255)
+  donor_display_name String? @db.VarChar(100)
+  is_anonymous     Boolean  @default(false)
+  hide_amount      Boolean  @default(false)
+  wants_receipt    Boolean  @default(true)
+  wants_updates    Boolean  @default(false)
+  country_code     String?  @db.VarChar(2)
+  subscription_id  String?  @db.Uuid
   created_at       DateTime @default(now()) @db.Timestamptz
   updated_at       DateTime @updatedAt @db.Timestamptz
+
+  user         User?                @relation(fields: [user_id], references: [id])
+  subscription DonationSubscription? @relation(fields: [subscription_id], references: [id])
 
   @@index([status])
   @@index([payment_provider])
   @@index([created_at])
+  @@index([country_code])
+  @@index([user_id])
   @@map("donation_record")
+}
+
+model DonationSubscription {
+  id                    String    @id @default(uuid()) @db.Uuid
+  user_id               String?   @db.Uuid
+  payment_provider      String    @db.VarChar(20)
+  provider_subscription_id String @unique @db.VarChar(255)
+  amount_cents          Int
+  currency              String    @db.VarChar(10)
+  frequency             String    @db.VarChar(20)
+  status                String    @default("active") @db.VarChar(20)
+  dedication_type       String?   @db.VarChar(30)
+  dedication_name       String?   @db.VarChar(255)
+  donor_email           String?   @db.VarChar(255)
+  donor_display_name    String?   @db.VarChar(100)
+  is_anonymous          Boolean   @default(false)
+  next_billing_at       DateTime? @db.Timestamptz
+  cancelled_at          DateTime? @db.Timestamptz
+  created_at            DateTime  @default(now()) @db.Timestamptz
+  updated_at            DateTime  @updatedAt @db.Timestamptz
+
+  user    User?            @relation(fields: [user_id], references: [id])
+  charges DonationRecord[]
+
+  @@index([status])
+  @@index([user_id])
+  @@map("donation_subscription")
 }
 
 // ─── TOPICS DISCOVERY MODULE ──────────────────────────────────────────────────
