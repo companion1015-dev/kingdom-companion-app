@@ -84,6 +84,7 @@ export const navLinks = [
   { label: 'Reading Plans',    href: '/reading-plans' },
   { label: 'Prayer Journal',   href: '/journal' },
   { label: 'Prayer Wall',      href: '/prayer-wall' },
+  { label: 'Invite Friends',   href: '/invite' },
   { label: 'Blog',             href: '/blog' },
   { label: 'Give',             href: '/support' },
   { label: 'About',            href: '/about' },
