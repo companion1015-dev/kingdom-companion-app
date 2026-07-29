@@ -55,7 +55,15 @@ export function validationErrorResponse(error: z.ZodError): NextResponse<ApiErro
     if (!details[key]) details[key] = []
     details[key].push(e.message)
   })
-  return errorResponse('VALIDATION_ERROR', 'The request could not be processed.', 422, details)
+  // Real fix: this previously always returned the generic, unhelpful
+  // "The request could not be processed." regardless of what actually went
+  // wrong -- even though the specific message (e.g. "Password is
+  // required", "Invalid email") was already being collected into `details`
+  // just above, it was never surfaced. Now shows the first real validation
+  // message people actually need to see, across every form in the app that
+  // uses this helper -- not just login.
+  const firstMessage = issues[0]?.message ?? 'Please check your input and try again.'
+  return errorResponse('VALIDATION_ERROR', firstMessage, 422, details)
 }
 
 export function unauthorizedResponse(message = 'Authentication required.'): NextResponse<ApiError> {
