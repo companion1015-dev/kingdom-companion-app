@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Users, Copy, Check, TrendingUp, UserPlus, ShieldCheck } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
@@ -71,7 +72,12 @@ export default function InviteDashboardPage() {
 
         {!loading && error && (
           <div className="bg-white rounded-2xl border border-navy/8 p-8 text-center">
-            <p className="text-charcoal/55 font-body text-sm">{error}</p>
+            <p className="text-charcoal/55 font-body text-sm mb-4">{error}</p>
+            {error.includes('sign in') && (
+              <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all">
+                Sign In
+              </Link>
+            )}
           </div>
         )}
 
