@@ -907,6 +907,8 @@ model DailyGenerated {
   verse_reference    String   @db.VarChar(100)
   verse_text         String
   translation        String   @default("BSB") @db.VarChar(20)
+  book_id            String   @default("PSA") @db.VarChar(10)
+  chapter            Int      @default(46)
   title              String   @db.VarChar(255)
   reflection         String
   prayer             String

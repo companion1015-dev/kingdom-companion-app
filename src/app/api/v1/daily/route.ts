@@ -82,6 +82,8 @@ async function generateTodayEntry() {
     verse_reference: verseData?.reference ?? `${bookName} ${chapter}:${verse}`,
     verse_text: verseData?.text ?? 'Scripture text unavailable today -- please read this passage directly in the Bible reader.',
     translation: 'BSB',
+    book_id: bookId,
+    chapter,
     title, reflection, prayer, challenge,
     reflection_question: reflectionQuestion,
   }

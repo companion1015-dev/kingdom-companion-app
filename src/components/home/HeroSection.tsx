@@ -1,25 +1,47 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Sparkles, BookOpen, ChevronDown } from 'lucide-react'
-import { dailyVerse, emotions } from '@/data/mock'
+import { emotions } from '@/data/mock'
 
 // Genuine fixes here: the emotion selector previously did
 // alert('AI Companion coming in Phase 3...') -- a leftover from before the
 // real AI Companion existed. It now actually routes to /companion with the
-// message pre-filled. The daily verse badge previously linked to a generic
-// /bible with no specific chapter; it now deep-links to the exact verse
-// shown. Emotions expanded from 12 to a genuinely extensive list, with the
-// first 6 shown by default and the rest behind a "More topics" dropdown.
+// message pre-filled. The daily verse badge previously showed one
+// hardcoded verse (Isaiah 40:31) forever -- it now fetches the same real,
+// AI-selected, daily-rotating verse already used by the Daily Encouragement
+// section elsewhere on the homepage, via /api/v1/daily, rather than a second,
+// inconsistent static copy. Emotions expanded from 12 to a genuinely
+// extensive list, with the first 6 shown by default and the rest behind a
+// "More topics" dropdown.
 
 const QUICK_COUNT = 6
+
+type DailyVerse = { reference: string; text: string; book_id: string; chapter: number }
 
 export default function HeroSection() {
   const router = useRouter()
   const [input, setInput]       = useState('')
   const [selected, setSelected] = useState<string | null>(null)
   const [showMore, setShowMore] = useState(false)
+  const [dailyVerse, setDailyVerse] = useState<DailyVerse | null>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    fetch('/api/v1/daily')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          setDailyVerse({
+            reference: res.data.verse_reference,
+            text: res.data.verse_text,
+            book_id: res.data.book_id,
+            chapter: res.data.chapter,
+          })
+        }
+      })
+      .catch(() => { /* badge just won't render below -- not critical to page load */ })
+  }, [])
 
   const quickEmotions   = emotions.slice(0, QUICK_COUNT)
   const extraEmotions   = emotions.slice(QUICK_COUNT)
@@ -55,18 +77,20 @@ export default function HeroSection() {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 w-full">
 
-        {/* Daily verse badge — now deep-links to the exact verse shown */}
-        <div className="flex justify-center mb-10 animate-fade-in">
-          <a
-            href={`/bible?book=${dailyVerse.bookId}&chapter=${dailyVerse.chapter}`}
-            className="inline-flex items-center gap-2.5 glass rounded-full px-5 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/12 transition-all group"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-gold" />
-            <span className="font-display italic text-white/70">&ldquo;{dailyVerse.text.slice(0, 55)}…&rdquo;</span>
-            <span className="text-gold/80 text-xs font-body">{dailyVerse.reference}</span>
-            <ArrowRight className="w-3.5 h-3.5 text-white/40 group-hover:translate-x-0.5 transition-transform" />
-          </a>
-        </div>
+        {/* Daily verse badge — real, rotating verse from /api/v1/daily, not a static copy */}
+        {dailyVerse && (
+          <div className="flex justify-center mb-10 animate-fade-in">
+              <a
+              href={`/bible?book=${dailyVerse.book_id}&chapter=${dailyVerse.chapter}`}
+              className="inline-flex items-center gap-2.5 glass rounded-full px-5 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/12 transition-all group"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-gold" />
+              <span className="font-display italic text-white/70">&ldquo;{dailyVerse.text.slice(0, 55)}…&rdquo;</span>
+              <span className="text-gold/80 text-xs font-body">{dailyVerse.reference}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-white/40 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          </div>
+        )}
 
         {/* Primary heading */}
         <div className="text-center mb-4 animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0, animationFillMode: 'forwards' }}>
