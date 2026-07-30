@@ -82,13 +82,19 @@ export const navLinks = [
   { label: 'Daily',            href: '/daily' },
   { label: 'Devotionals',      href: '/devotionals' },
   { label: 'Reading Plans',    href: '/reading-plans' },
-  { label: 'Prayer Journal',   href: '/journal' },
   { label: 'Prayer Wall',      href: '/prayer-wall' },
-  { label: 'Invite Friends',   href: '/invite' },
-  { label: 'My Profile',       href: '/profile' },
   { label: 'Blog',             href: '/blog' },
   { label: 'Give',             href: '/support' },
   { label: 'About',            href: '/about' },
+]
+
+// Shown only to signed-in users -- previously mixed into navLinks above and
+// shown to everyone regardless of auth state, even though every one of
+// these leads straight to a "please sign in" wall for anonymous visitors.
+export const authNavLinks = [
+  { label: 'Prayer Journal',   href: '/journal' },
+  { label: 'Invite Friends',   href: '/invite' },
+  { label: 'My Profile',       href: '/profile' },
 ]
 
 export const bibleBooks = [
