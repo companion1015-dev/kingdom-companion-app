@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
+import ThemeProvider from '@/components/providers/ThemeProvider'
 import '@/styles/globals.css'
 
 const PWAProvider = dynamic(() => import('@/modules/pwa/components/PWAProvider'), { ssr: false })
@@ -51,10 +52,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="min-h-screen bg-cream font-body antialiased">
-        <PWAProvider>
-          {children}
-        </PWAProvider>
+      <body className="min-h-screen bg-cream dark:bg-navy-dark text-charcoal dark:text-cream font-body antialiased transition-colors duration-200">
+        <ThemeProvider>
+          <PWAProvider>
+            {children}
+          </PWAProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

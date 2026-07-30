@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { User, Save, Check } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
+import { useTheme } from '@/components/providers/ThemeProvider'
 
 // Genuinely new page -- no Profile/Settings page existed anywhere before
 // this. Users could fully use the app but had no way to update their name,
@@ -35,7 +36,7 @@ export default function ProfilePage() {
 
   const [displayName, setDisplayName] = useState('')
   const [translation, setTranslation] = useState('BSB')
-  const [theme,       setTheme]       = useState('light')
+  const { theme, setTheme } = useTheme()
   const [fontSize,    setFontSize]    = useState(16)
 
   useEffect(() => {
@@ -47,7 +48,6 @@ export default function ProfilePage() {
           setProfile(data.data)
           setDisplayName(data.data.display_name)
           setTranslation(data.data.preferred_translation)
-          setTheme(data.data.theme)
           setFontSize(data.data.font_size)
         } else {
           setError(data.error?.message ?? 'Unable to load your profile.')
@@ -134,7 +134,7 @@ PROFCHUNK1EOF          <User className="w-7 h-7 text-navy" />
             <div>
               <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Theme</label>
               <div className="flex gap-2">
-                {['light', 'dark'].map(t => (
+                {(['light', 'dark'] as const).map(t => (
                   <button key={t} onClick={() => setTheme(t)}
                     className={`flex-1 px-4 py-2.5 rounded-xl border text-sm font-body font-medium capitalize transition-all ${theme === t ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/60 hover:border-navy/30'}`}>
                     {t}
