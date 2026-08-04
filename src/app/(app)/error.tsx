@@ -1,23 +1,33 @@
 'use client'
 
 export default function AppError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
   return (
-    <div style={{ padding: 40, fontFamily: 'monospace', background: '#fff', color: '#c00' }}>
-      <h1>Debug: Client Error Caught</h1>
-      <p><strong>Message:</strong> {error.message}</p>
-      <p><strong>Digest:</strong> {error.digest || 'none'}</p>
-      <pre style={{ whiteSpace: 'pre-wrap', fontSize: 12, background: '#f5f5f5', padding: 12 }}>
-        {error.stack}
-      </pre>
-      <button onClick={() => reset()} style={{ marginTop: 20, padding: '8px 16px' }}>
-        Try again
-      </button>
+    <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+      <div className="text-center max-w-md">
+        <h1 className="font-display text-2xl text-navy mb-3">Something went wrong</h1>
+        <p className="font-body text-sm text-charcoal/60 mb-6">
+          We hit a snag loading this page. Please try again, or head back home.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={() => reset()}
+            className="px-5 py-2.5 bg-navy text-white rounded-lg text-sm font-medium hover:bg-navy/90 transition-colors"
+          >
+            Try again
+          </button>
+          
+            href="/"
+            className="px-5 py-2.5 border border-navy/20 text-navy rounded-lg text-sm font-medium hover:bg-navy/5 transition-colors"
+          >
+            Go home
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
