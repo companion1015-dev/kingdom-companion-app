@@ -1,4 +1,5 @@
 'use client'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -11,6 +12,19 @@ import { navLinks, authNavLinks } from '@/data/mock'
 // out visitor saw links that just led straight to a "please sign in" wall.
 
 export default function Navigation() {
+  const router = useRouter()
+  const goToSearch = () => {
+    const focusSearch = () => {
+      document.getElementById('search-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      document.getElementById('bible-search-input')?.focus()
+    }
+    if (window.location.pathname === '/') {
+      focusSearch()
+    } else {
+      router.push('/')
+      setTimeout(focusSearch, 400)
+    }
+  }
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [scrolled,    setScrolled]    = useState(false)
   const [authed,      setAuthed]      = useState(false)
@@ -95,7 +109,7 @@ export default function Navigation() {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <button aria-label="Search" className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8">
+            <button aria-label="Search" onClick={goToSearch} className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8">
               <Search className="w-4 h-4" />
             </button>
 

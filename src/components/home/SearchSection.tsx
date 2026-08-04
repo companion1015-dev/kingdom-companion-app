@@ -76,6 +76,7 @@ export default function SearchSection() {
               onFocus={() => setFocused(true)}
               onBlur={() => setTimeout(() => setFocused(false), 150)}
               onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
+              id="bible-search-input"
               placeholder="Try: 'Psalm 23', 'anxiety', 'Moses', 'hope'…"
               className="w-full pl-14 pr-14 py-4 bg-transparent text-navy font-body text-base placeholder-charcoal/30 outline-none rounded-2xl"
               aria-label="Search the Bible"
