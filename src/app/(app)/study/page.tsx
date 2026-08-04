@@ -74,9 +74,9 @@ export default function StudyPage() {
     { id: 'notes',      label: 'Notes',      icon: FileText,    count: counts.notes      },
   ]
 
-  const empty = (label: string, icon: typeof Bookmark, hint: string) => (
+  const empty = (label: string, Icon: typeof Bookmark, hint: string) => (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      {icon({ className: 'w-12 h-12 text-navy/15 mb-4' })}
+      <Icon className="w-12 h-12 text-navy/15 mb-4" />
       <p className="font-body text-sm text-charcoal/50 mb-1">No {label} yet</p>
       <p className="font-body text-xs text-charcoal/35 mb-6">{hint}</p>
       <Link
