@@ -20,7 +20,7 @@ export default function AppError({
           >
             Try again
           </button>
-          
+          <a
             href="/"
             className="px-5 py-2.5 border border-navy/20 text-navy rounded-lg text-sm font-medium hover:bg-navy/5 transition-colors"
           >
