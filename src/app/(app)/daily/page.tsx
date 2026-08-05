@@ -200,7 +200,7 @@ export default function DailyPage() {
             {tab === 'journal' && (
               <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 sm:p-8">
                 <h2 className="font-display text-xl font-semibold text-navy dark:text-cream mb-2">Journal Prompt</h2>
-                <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm mb-6 leading-relaxed">{entry.journalPrompt}</p>
+                <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm mb-6 leading-relaxed">What is God saying to you through today's verse? Write freely below.</p>
                 <textarea
                   placeholder="Write your thoughts, prayers, or reflections here…"
                   rows={8}
