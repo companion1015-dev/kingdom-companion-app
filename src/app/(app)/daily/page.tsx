@@ -6,6 +6,7 @@ import { BookOpen, Bookmark, Share2, ChevronLeft, ChevronRight, Clock, MessageSq
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 import type { DailyEntry } from '@/modules/daily/data/entries'
+import { BOOKS } from '@/modules/bible/services/mock-data'
 
 export default function DailyPage() {
   const [entry,     setEntry]     = useState<DailyEntry | null>(null)
@@ -72,7 +73,6 @@ export default function DailyPage() {
             ) : entry && (
               <>
                 <h1 className="font-display text-3xl sm:text-4xl font-light text-white mb-2">{entry.title}</h1>
-                <p className="text-white/45 font-body text-sm mb-8">{entry.theme}</p>
 
                 {/* Daily verse — hero card */}
                 <div className="bg-white/8 dark:bg-navy-dark border border-white/12 rounded-2xl p-6 sm:p-8 text-left mx-auto max-w-2xl backdrop-blur-sm">
@@ -87,7 +87,7 @@ export default function DailyPage() {
                     </div>
                     <div className="flex items-center gap-1.5 text-white/30 font-body text-xs">
                       <Clock className="w-3 h-3" />
-                      {entry.readingTime} min read
+                      {Math.max(1, Math.round((entry?.reflection?.split(/\s+/).length || 200) / 200))} min read
                     </div>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function DailyPage() {
                     <p className="text-white font-body text-sm leading-relaxed mb-4">{entry.challenge}</p>
                     <div className="h-px bg-white/10 dark:bg-navy-dark mb-4" />
                     <span className="text-xs font-body font-semibold text-white/40 tracking-widest uppercase block mb-2">Reflection Question</span>
-                    <p className="text-white/70 font-display italic text-base leading-relaxed">{entry.reflectionQ}</p>
+                    <p className="text-white/70 font-display italic text-base leading-relaxed">{entry.reflection_question}</p>
                   </div>
                 </div>
 
@@ -161,7 +161,7 @@ export default function DailyPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-0.5">Suggested Reading</p>
-                    <p className="font-body font-medium text-navy dark:text-cream text-sm">{entry.suggestedReading}</p>
+                    <p className="font-body font-medium text-navy dark:text-cream text-sm">{BOOKS.find(b => b.bookId === entry?.book_id)?.name} {entry?.chapter}</p>
                   </div>
                   <Link href="/bible" className="flex items-center gap-1.5 text-gold hover:text-gold-dark text-xs font-body font-semibold transition-colors">
                     Open <ArrowRight className="w-3.5 h-3.5" />
