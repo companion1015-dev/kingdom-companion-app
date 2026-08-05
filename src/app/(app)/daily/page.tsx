@@ -33,7 +33,7 @@ export default function DailyPage() {
 
   const handleShare = async () => {
     if (!entry) return
-    const text = `"${entry?.verse?.text}" — ${entry?.verse?.reference}\n\nRead today's devotional at Kingdom Companion`
+    const text = `"${entry?.verse_text}" — ${entry?.verse_reference}\n\nRead today's devotional at Kingdom Companion`
     try {
       if (navigator.share) {
         await navigator.share({ title: entry.title, text, url: window.location.href })
@@ -78,12 +78,12 @@ export default function DailyPage() {
                 <div className="bg-white/8 dark:bg-navy-dark border border-white/12 rounded-2xl p-6 sm:p-8 text-left mx-auto max-w-2xl backdrop-blur-sm">
                   <span className="text-gold/60 font-display text-6xl leading-none select-none">&ldquo;</span>
                   <p className="font-display text-lg sm:text-xl italic text-white leading-relaxed -mt-4 mb-4">
-                    {entry?.verse?.text}
+                    {entry?.verse_text}
                   </p>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-gold font-body font-semibold text-sm">{entry?.verse?.reference}</p>
-                      <p className="text-white/35 font-body text-xs">{entry?.verse?.translation}</p>
+                      <p className="text-gold font-body font-semibold text-sm">{entry?.verse_reference}</p>
+                      <p className="text-white/35 font-body text-xs">{entry?.translation}</p>
                     </div>
                     <div className="flex items-center gap-1.5 text-white/30 font-body text-xs">
                       <Clock className="w-3 h-3" />
