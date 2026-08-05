@@ -75,14 +75,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-2xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-PROFCHUNK1EOF          <User className="w-7 h-7 text-navy" />
-          <h1 className="text-3xl font-serif text-navy">Your Profile</h1>
+PROFCHUNK1EOF          <User className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-3xl font-serif text-navy dark:text-cream">Your Profile</h1>
         </div>
-        <p className="text-navy/60 mb-8">Manage your name, preferred translation, and reading preferences.</p>
+        <p className="text-navy/60 dark:text-cream/60 mb-8">Manage your name, preferred translation, and reading preferences.</p>
 
         {loading && (
           <div className="flex justify-center py-16">
@@ -91,8 +91,8 @@ PROFCHUNK1EOF          <User className="w-7 h-7 text-navy" />
         )}
 
         {!loading && error && !profile && (
-          <div className="bg-white rounded-2xl border border-navy/8 p-8 text-center">
-            <p className="text-charcoal/55 font-body text-sm mb-4">{error}</p>
+          <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-8 text-center">
+            <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-4">{error}</p>
             {error.includes('sign in') && (
               <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all">
                 Sign In
@@ -102,29 +102,29 @@ PROFCHUNK1EOF          <User className="w-7 h-7 text-navy" />
         )}
 
         {!loading && profile && (
-          <div className="bg-white rounded-2xl border border-navy/8 p-6 sm:p-8 space-y-5">
+          <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 sm:p-8 space-y-5">
             {error && <p className="text-xs font-body text-red-600 bg-red-50 border border-red-100 rounded-xl p-3">{error}</p>}
 
             <div>
-              <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Email</label>
-              <p className="px-4 py-2.5 rounded-xl bg-cream border border-navy/10 text-charcoal/50 font-body text-sm">{profile.email}</p>
-              <p className="text-xs text-charcoal/35 font-body mt-1">
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Email</label>
+              <p className="px-4 py-2.5 rounded-xl bg-cream dark:bg-navy-dark border border-navy/10 text-charcoal/50 dark:text-cream/50 font-body text-sm">{profile.email}</p>
+              <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body mt-1">
                 {profile.email_verified_at ? 'Verified' : 'Not yet verified'} · Member since {new Date(profile.created_at).toLocaleDateString()}
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Display Name</label>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Display Name</label>
               <input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={100}
-                className="w-full px-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy font-body text-sm outline-none transition-all" />
+                className="w-full px-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
             </div>
 
             <div>
-              <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Preferred Bible Translation</label>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Preferred Bible Translation</label>
               <div className="grid grid-cols-2 gap-2">
                 {TRANSLATIONS.map(t => (
                   <button key={t.code} onClick={() => setTranslation(t.code)}
-                    className={`px-3 py-2.5 rounded-xl border text-sm font-body text-left transition-all ${translation === t.code ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/60 hover:border-navy/30'}`}>
+                    className={`px-3 py-2.5 rounded-xl border text-sm font-body text-left transition-all ${translation === t.code ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/60 dark:text-cream/60 hover:border-navy/30'}`}>
                     <span className="font-semibold">{t.code}</span> <span className="text-xs opacity-70">— {t.name}</span>
                   </button>
                 ))}
@@ -132,23 +132,23 @@ PROFCHUNK1EOF          <User className="w-7 h-7 text-navy" />
             </div>
 
             <div>
-              <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Theme</label>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Theme</label>
               <div className="flex gap-2">
                 {(['light', 'dark'] as const).map(t => (
                   <button key={t} onClick={() => setTheme(t)}
-                    className={`flex-1 px-4 py-2.5 rounded-xl border text-sm font-body font-medium capitalize transition-all ${theme === t ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/60 hover:border-navy/30'}`}>
+                    className={`flex-1 px-4 py-2.5 rounded-xl border text-sm font-body font-medium capitalize transition-all ${theme === t ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/60 dark:text-cream/60 hover:border-navy/30'}`}>
                     {t}
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-charcoal/35 font-body mt-1.5">Dark mode preference is saved now; full dark-mode styling across the app is a separate future update.</p>
+              <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body mt-1.5">Dark mode preference is saved now; full dark-mode styling across the app is a separate future update.</p>
             </div>
 
             <div>
-              <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Reading Font Size — {fontSize}px</label>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Reading Font Size — {fontSize}px</label>
               <input type="range" min={12} max={28} value={fontSize} onChange={e => setFontSize(Number(e.target.value))}
                 className="w-full accent-navy" />
-              <p className="text-sm mt-2 text-charcoal/60 font-body" style={{ fontSize: `${fontSize}px` }}>
+              <p className="text-sm mt-2 text-charcoal/60 dark:text-cream/60 font-body" style={{ fontSize: `${fontSize}px` }}>
                 The quick brown fox jumps over the lazy dog.
               </p>
             </div>

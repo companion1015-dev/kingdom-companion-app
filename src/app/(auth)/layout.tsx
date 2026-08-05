@@ -10,7 +10,7 @@ const todayVerse = verses[new Date().getDate() % verses.length]
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex bg-cream">
+    <div className="min-h-screen flex bg-cream dark:bg-navy-dark">
 
       {/* Left — Scripture panel */}
       <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-12 bg-hero-gradient relative overflow-hidden">
@@ -62,8 +62,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <Image src="/images/logo.png" alt="Kingdom Companion" fill className="object-cover" sizes="36px" />
           </div>
           <div>
-            <span className="block font-display text-base font-semibold text-navy">Kingdom Companion</span>
-            <span className="text-[9px] text-charcoal/40 tracking-widest uppercase font-body">Rooted in Truth · Built for Life</span>
+            <span className="block font-display text-base font-semibold text-navy dark:text-cream">Kingdom Companion</span>
+            <span className="text-[9px] text-charcoal/40 dark:text-cream/40 tracking-widest uppercase font-body">Rooted in Truth · Built for Life</span>
           </div>
         </Link>
 

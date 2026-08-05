@@ -42,22 +42,22 @@ export default function BlogPage() {
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-3xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-          <Newspaper className="w-7 h-7 text-navy" />
-          <h1 className="text-2xl font-serif text-navy">Blog &amp; Resources</h1>
+          <Newspaper className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-2xl font-serif text-navy dark:text-cream">Blog &amp; Resources</h1>
         </div>
-        <p className="text-navy/60 mb-8">Biblically grounded articles, study resources, and updates.</p>
+        <p className="text-navy/60 dark:text-cream/60 mb-8">Biblically grounded articles, study resources, and updates.</p>
 
         <div className="relative mb-8 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy/40" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy/40 dark:text-cream/40" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search articles..."
-            className="w-full pl-9 pr-3 py-2 rounded-lg border border-navy/15 bg-white text-navy placeholder:text-navy/40 focus:outline-none focus:ring-2 focus:ring-gold/50"
+            className="w-full pl-9 pr-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark text-navy dark:text-cream placeholder:text-navy/40 dark:text-cream/40 focus:outline-none focus:ring-2 focus:ring-gold/50"
           />
         </div>
 
@@ -67,10 +67,10 @@ export default function BlogPage() {
           </div>
         )}
 
-        {!loading && error && <div className="text-center py-16 text-navy/60">{error}</div>}
+        {!loading && error && <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>}
 
         {!loading && !error && articles.length === 0 && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <Newspaper className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No articles are published yet — check back soon.</p>
           </div>
@@ -82,12 +82,12 @@ export default function BlogPage() {
               <li key={a.slug}>
                 <Link
                   href={`/blog/${a.slug}`}
-                  className="block p-5 rounded-xl bg-white hover:bg-cream border border-navy/8 hover:border-gold/20 transition-all duration-200"
+                  className="block p-5 rounded-xl bg-white dark:bg-navy-dark hover:bg-cream dark:bg-navy-dark border border-navy/8 hover:border-gold/20 transition-all duration-200"
                 >
                   <span className="text-xs uppercase tracking-wide text-gold-dark">{a.category.name}</span>
-                  <h3 className="font-serif text-lg text-navy mt-1">{a.title}</h3>
-                  {a.subtitle && <p className="text-sm text-navy/60 mt-0.5">{a.subtitle}</p>}
-                  <div className="flex items-center gap-3 mt-3 text-xs text-navy/40">
+                  <h3 className="font-serif text-lg text-navy dark:text-cream mt-1">{a.title}</h3>
+                  {a.subtitle && <p className="text-sm text-navy/60 dark:text-cream/60 mt-0.5">{a.subtitle}</p>}
+                  <div className="flex items-center gap-3 mt-3 text-xs text-navy/40 dark:text-cream/40">
                     <span>{a.author.display_name}</span>
                     {a.estimated_reading_minutes && (
                       <span className="flex items-center gap-1">

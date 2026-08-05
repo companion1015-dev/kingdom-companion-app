@@ -50,25 +50,25 @@ export default function SearchSection() {
   }
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-cream-dark" aria-labelledby="search-heading">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-navy-dark-dark" aria-labelledby="search-heading">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 id="search-heading" className="font-display text-3xl font-light text-navy mb-2">
+        <h2 id="search-heading" className="font-display text-3xl font-light text-navy dark:text-cream mb-2">
           Search Scripture
         </h2>
-        <p className="text-charcoal/50 font-body text-sm mb-8">
+        <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm mb-8">
           Search by reference, keyword, topic, person, place, or event.
         </p>
 
         {/* Search input */}
         <div className="relative">
           <div
-            className={`relative flex items-center rounded-2xl transition-all duration-200 bg-white
+            className={`relative flex items-center rounded-2xl transition-all duration-200 bg-white dark:bg-navy-dark
               ${focused
                 ? 'shadow-xl shadow-navy/10 ring-2 ring-gold/30'
                 : 'shadow-md shadow-navy/8 ring-1 ring-navy/8'
               }`}
           >
-            <Search className="absolute left-5 w-5 h-5 text-navy/30 pointer-events-none" />
+            <Search className="absolute left-5 w-5 h-5 text-navy/30 dark:text-cream/30 pointer-events-none" />
             <input
               type="search"
               value={query}
@@ -78,7 +78,7 @@ export default function SearchSection() {
               onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
               id="bible-search-input"
               placeholder="Try: 'Psalm 23', 'anxiety', 'Moses', 'hope'…"
-              className="w-full pl-14 pr-14 py-4 bg-transparent text-navy font-body text-base placeholder-charcoal/30 outline-none rounded-2xl"
+              className="w-full pl-14 pr-14 py-4 bg-transparent text-navy dark:text-cream font-body text-base placeholder-charcoal/30 outline-none rounded-2xl"
               aria-label="Search the Bible"
             />
             <button
@@ -92,7 +92,7 @@ export default function SearchSection() {
 
           {/* Live results */}
           {focused && results.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl shadow-navy/10 ring-1 ring-navy/8 overflow-hidden text-left z-20">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-navy-dark rounded-2xl shadow-xl shadow-navy/10 ring-1 ring-navy/8 overflow-hidden text-left z-20">
               {results.map(r => (
                 <button
                   key={r.verseId}
@@ -100,7 +100,7 @@ export default function SearchSection() {
                   className="w-full flex flex-col items-start gap-0.5 px-5 py-3 hover:bg-navy/4 transition-colors border-b border-navy/6 last:border-0"
                 >
                   <span className="text-xs font-body font-semibold text-gold">{r.reference}</span>
-                  <span className="text-sm font-body text-charcoal/60 line-clamp-1">{r.text}</span>
+                  <span className="text-sm font-body text-charcoal/60 dark:text-cream/60 line-clamp-1">{r.text}</span>
                 </button>
               ))}
             </div>
@@ -108,14 +108,14 @@ export default function SearchSection() {
 
           {/* Static suggestions before enough characters typed */}
           {focused && filteredSuggestions.length > 0 && results.length === 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl shadow-navy/10 ring-1 ring-navy/8 overflow-hidden text-left z-20">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-navy-dark rounded-2xl shadow-xl shadow-navy/10 ring-1 ring-navy/8 overflow-hidden text-left z-20">
               {filteredSuggestions.map(s => (
                 <button
                   key={s}
                   onClick={() => setQuery(s)}
-                  className="w-full flex items-center gap-2 px-5 py-3 hover:bg-navy/4 transition-colors text-sm font-body text-charcoal/60"
+                  className="w-full flex items-center gap-2 px-5 py-3 hover:bg-navy/4 transition-colors text-sm font-body text-charcoal/60 dark:text-cream/60"
                 >
-                  <Search className="w-3.5 h-3.5 text-navy/30" />
+                  <Search className="w-3.5 h-3.5 text-navy/30 dark:text-cream/30" />
                   {s}
                 </button>
               ))}
@@ -130,7 +130,7 @@ export default function SearchSection() {
               <button
                 key={s}
                 onClick={() => setQuery(s)}
-                className="px-3.5 py-1.5 rounded-full bg-white border border-navy/10 text-xs font-body text-charcoal/55 hover:border-gold/30 hover:text-navy transition-all"
+                className="px-3.5 py-1.5 rounded-full bg-white dark:bg-navy-dark border border-navy/10 text-xs font-body text-charcoal/55 dark:text-cream/55 hover:border-gold/30 hover:text-navy dark:text-cream transition-all"
               >
                 {s}
               </button>

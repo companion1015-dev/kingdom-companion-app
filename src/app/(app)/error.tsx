@@ -7,10 +7,10 @@ export default function AppError({
   reset: () => void
 }) {
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center px-6">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark flex items-center justify-center px-6">
       <div className="text-center max-w-md">
-        <h1 className="font-display text-2xl text-navy mb-3">Something went wrong</h1>
-        <p className="font-body text-sm text-charcoal/60 mb-6">
+        <h1 className="font-display text-2xl text-navy dark:text-cream mb-3">Something went wrong</h1>
+        <p className="font-body text-sm text-charcoal/60 dark:text-cream/60 mb-6">
           We hit a snag loading this page. Please try again, or head back home.
         </p>
         <div className="flex gap-3 justify-center">
@@ -22,7 +22,7 @@ export default function AppError({
           </button>
           <a
             href="/"
-            className="px-5 py-2.5 border border-navy/20 text-navy rounded-lg text-sm font-medium hover:bg-navy/5 transition-colors"
+            className="px-5 py-2.5 border border-navy/20 text-navy dark:text-cream rounded-lg text-sm font-medium hover:bg-navy/5 transition-colors"
           >
             Go home
           </a>

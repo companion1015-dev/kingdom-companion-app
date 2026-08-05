@@ -77,14 +77,14 @@ export default function AdminDashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-3xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-          <Shield className="w-7 h-7 text-navy" />
-          <h1 className="text-3xl font-serif text-navy">Admin Dashboard</h1>
+          <Shield className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-3xl font-serif text-navy dark:text-cream">Admin Dashboard</h1>
         </div>
-        <p className="text-navy/60 mb-8">Moderation, feedback, and ministry activity in one place.</p>
+        <p className="text-navy/60 dark:text-cream/60 mb-8">Moderation, feedback, and ministry activity in one place.</p>
 
         {loading && (
           <div className="flex justify-center py-16">
@@ -93,8 +93,8 @@ export default function AdminDashboardPage() {
         )}
 
         {!loading && error && (
-          <div className="bg-white rounded-2xl border border-navy/8 p-8 text-center">
-            <p className="text-charcoal/55 font-body text-sm mb-4">{error}</p>
+          <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-8 text-center">
+            <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-4">{error}</p>
             {error.includes('sign in') && (
               <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all">
                 Sign In
@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
             <div className="flex gap-1 mb-6 p-1 bg-navy/5 rounded-2xl overflow-x-auto">
               {TABS.map(t => (
                 <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-body font-semibold whitespace-nowrap transition-all ${tab === t.id ? 'bg-white text-navy shadow-sm' : 'text-charcoal/45 hover:text-navy'}`}>
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-body font-semibold whitespace-nowrap transition-all ${tab === t.id ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/45 dark:text-cream/45 hover:text-navy dark:text-cream'}`}>
 
                   <t.icon className="w-3.5 h-3.5" /> {t.label}
                   {t.id === 'moderation' && stats.pending_reports > 0 && (
@@ -136,17 +136,17 @@ export default function AdminDashboardPage() {
               <div className="space-y-3">
                 {reports.length === 0 && <EmptyState text="No pending reports — the Prayer Wall is clean." />}
                 {reports.map(r => (
-                  <div key={r.id} className="bg-white rounded-2xl border border-navy/8 p-5">
+                  <div key={r.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
                     <div className="flex items-center justify-between mb-2">
                       <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-xs font-body font-semibold capitalize">{r.reason}</span>
-                      <span className="text-xs text-charcoal/30 font-body">{new Date(r.created_at).toLocaleDateString()}</span>
+                      <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body">{new Date(r.created_at).toLocaleDateString()}</span>
                     </div>
-                    <h3 className="font-display text-sm font-semibold text-navy mb-1">{r.request?.title ?? '(request removed)'}</h3>
-                    <p className="text-xs text-charcoal/55 font-body mb-2 line-clamp-2">{r.request?.content}</p>
-                    {r.details && <p className="text-xs text-charcoal/40 font-body italic mb-3">Reporter note: {r.details}</p>}
+                    <h3 className="font-display text-sm font-semibold text-navy dark:text-cream mb-1">{r.request?.title ?? '(request removed)'}</h3>
+                    <p className="text-xs text-charcoal/55 dark:text-cream/55 font-body mb-2 line-clamp-2">{r.request?.content}</p>
+                    {r.details && <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body italic mb-3">Reporter note: {r.details}</p>}
                     <div className="flex gap-2">
                       <button onClick={() => runAction('dismiss_report', r.id, 'Report dismissed')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-navy/12 text-navy/60 hover:text-navy text-xs font-body font-medium transition-all">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-xs font-body font-medium transition-all">
                         <Check className="w-3.5 h-3.5" /> Dismiss
                       </button>
                       {r.request?.id && (
@@ -165,15 +165,15 @@ export default function AdminDashboardPage() {
               <div className="space-y-3">
                 {feedback.length === 0 && <EmptyState text="No open feedback messages." />}
                 {feedback.map(f => (
-                  <div key={f.id} className="bg-white rounded-2xl border border-navy/8 p-5">
+                  <div key={f.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="px-2 py-0.5 rounded-full bg-navy/8 text-navy text-xs font-body font-semibold">{f.feedback_type}</span>
-                      <span className="text-xs text-charcoal/30 font-body">{new Date(f.created_at).toLocaleDateString()}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-navy/8 text-navy dark:text-cream text-xs font-body font-semibold">{f.feedback_type}</span>
+                      <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body">{new Date(f.created_at).toLocaleDateString()}</span>
                     </div>
-                    <h3 className="font-display text-sm font-semibold text-navy mb-1">{f.subject}</h3>
-                    <p className="text-xs text-charcoal/55 font-body mb-3">{f.message}</p>
+                    <h3 className="font-display text-sm font-semibold text-navy dark:text-cream mb-1">{f.subject}</h3>
+                    <p className="text-xs text-charcoal/55 dark:text-cream/55 font-body mb-3">{f.message}</p>
                     <button onClick={() => runAction('resolve_feedback', f.id, 'Marked resolved')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-navy/12 text-navy/60 hover:text-navy text-xs font-body font-medium transition-all">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-xs font-body font-medium transition-all">
                       <Check className="w-3.5 h-3.5" /> Mark Resolved
                     </button>
                   </div>
@@ -185,14 +185,14 @@ export default function AdminDashboardPage() {
               <div className="space-y-2">
                 {donations.length === 0 && <EmptyState text="No donations recorded yet." />}
                 {donations.map(d => (
-                  <div key={d.id} className="bg-white rounded-2xl border border-navy/8 p-4 flex items-center justify-between">
+                  <div key={d.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-4 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-body font-semibold text-navy">
-                        {formatMoney(d.amount_cents, d.currency)} <span className="text-xs text-charcoal/40 font-normal capitalize">· {d.frequency.replace('_', ' ')} · {d.payment_provider}</span>
+                      <p className="text-sm font-body font-semibold text-navy dark:text-cream">
+                        {formatMoney(d.amount_cents, d.currency)} <span className="text-xs text-charcoal/40 dark:text-cream/40 font-normal capitalize">· {d.frequency.replace('_', ' ')} · {d.payment_provider}</span>
                       </p>
-                      <p className="text-xs text-charcoal/45 font-body">{d.is_anonymous ? 'Anonymous' : d.donor_display_name ?? 'No name provided'}</p>
+                      <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body">{d.is_anonymous ? 'Anonymous' : d.donor_display_name ?? 'No name provided'}</p>
                     </div>
-                    <span className="text-xs text-charcoal/30 font-body shrink-0">{new Date(d.created_at).toLocaleDateString()}</span>
+                    <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body shrink-0">{new Date(d.created_at).toLocaleDateString()}</span>
                   </div>
                 ))}
               </div>
@@ -214,19 +214,19 @@ export default function AdminDashboardPage() {
 
 function StatCard({ icon: Icon, label, value, accent, isText }: { icon: typeof Shield; label: string; value: number | string; accent?: boolean; isText?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? 'bg-red-50 border-red-100' : 'bg-white border-navy/8'}`}>
-      <Icon className={`w-4 h-4 mb-2 ${accent ? 'text-red-500' : 'text-navy/40'}`} />
-      <p className={`font-display font-light text-navy ${isText ? 'text-lg' : 'text-2xl'}`}>{value}</p>
-      <p className="text-xs text-charcoal/45 font-body">{label}</p>
+    <div className={`rounded-2xl border p-4 ${accent ? 'bg-red-50 border-red-100' : 'bg-white dark:bg-navy-dark border-navy/8'}`}>
+      <Icon className={`w-4 h-4 mb-2 ${accent ? 'text-red-500' : 'text-navy/40 dark:text-cream/40'}`} />
+      <p className={`font-display font-light text-navy dark:text-cream ${isText ? 'text-lg' : 'text-2xl'}`}>{value}</p>
+      <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body">{label}</p>
     </div>
   )
 }
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-navy/8 p-10 text-center">
-      <X className="w-8 h-8 text-navy/15 mx-auto mb-2" />
-      <p className="text-charcoal/45 font-body text-sm">{text}</p>
+    <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-10 text-center">
+      <X className="w-8 h-8 text-navy/15 dark:text-cream/15 mx-auto mb-2" />
+      <p className="text-charcoal/45 dark:text-cream/45 font-body text-sm">{text}</p>
     </div>
   )
 }

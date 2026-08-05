@@ -62,7 +62,7 @@ export default function BibleSearch({ translation, onSelectVerse, onClose }: Pro
     const parts = text.split(regex)
     return parts.map((part, i) =>
       regex.test(part)
-        ? <mark key={i} className="bg-gold/30 text-navy rounded px-0.5 not-italic">{part}</mark>
+        ? <mark key={i} className="bg-gold/30 text-navy dark:text-cream rounded px-0.5 not-italic">{part}</mark>
         : part
     )
   }
@@ -72,19 +72,19 @@ export default function BibleSearch({ translation, onSelectVerse, onClose }: Pro
       {/* Search input */}
       <div className="p-4 border-b border-navy/8">
         <div className="relative flex items-center">
-          <Search className="absolute left-3.5 w-4 h-4 text-navy/30 pointer-events-none" />
+          <Search className="absolute left-3.5 w-4 h-4 text-navy/30 dark:text-cream/30 pointer-events-none" />
           <input
             ref={inputRef}
             type="search"
             value={query}
             onChange={e => handleChange(e.target.value)}
             placeholder="Search by reference, keyword, or topic…"
-            className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-navy/15 focus:border-gold/50 focus:ring-2 focus:ring-gold/15 text-navy font-body text-sm outline-none bg-white transition-all"
+            className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-navy/15 focus:border-gold/50 focus:ring-2 focus:ring-gold/15 text-navy dark:text-cream font-body text-sm outline-none bg-white dark:bg-navy-dark transition-all"
           />
           {query && (
             <button
               onClick={() => { setQuery(''); setResults([]); inputRef.current?.focus() }}
-              className="absolute right-3 text-charcoal/30 hover:text-navy transition-colors"
+              className="absolute right-3 text-charcoal/30 dark:text-cream/30 hover:text-navy dark:text-cream transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -111,7 +111,7 @@ export default function BibleSearch({ translation, onSelectVerse, onClose }: Pro
         {!loading && results.length > 0 && (
           <div className="py-2">
             <div className="px-4 py-2">
-              <span className="text-xs text-charcoal/35 font-body font-medium tracking-wider uppercase">
+              <span className="text-xs text-charcoal/35 dark:text-cream/35 font-body font-medium tracking-wider uppercase">
                 {results.length} result{results.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -121,17 +121,17 @@ export default function BibleSearch({ translation, onSelectVerse, onClose }: Pro
                 onClick={() => handleSelect(result)}
                 className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-navy/4 transition-colors group"
               >
-                <BookOpen className="w-4 h-4 text-navy/25 shrink-0 mt-0.5 group-hover:text-gold transition-colors" />
+                <BookOpen className="w-4 h-4 text-navy/25 dark:text-cream/25 shrink-0 mt-0.5 group-hover:text-gold transition-colors" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="text-xs font-body font-semibold text-gold">{result.reference}</span>
-                    <span className="text-xs text-charcoal/30 font-body">{result.translation}</span>
+                    <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body">{result.translation}</span>
                   </div>
-                  <p className="text-sm text-charcoal/65 font-body leading-relaxed line-clamp-2">
+                  <p className="text-sm text-charcoal/65 dark:text-cream/65 font-body leading-relaxed line-clamp-2">
                     {highlight(result.text, query)}
                   </p>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-navy/20 group-hover:text-navy/50 transition-colors shrink-0 mt-1" />
+                <ArrowRight className="w-3.5 h-3.5 text-navy/20 dark:text-cream/20 group-hover:text-navy/50 dark:text-cream/50 transition-colors shrink-0 mt-1" />
               </button>
             ))}
           </div>
@@ -140,22 +140,22 @@ export default function BibleSearch({ translation, onSelectVerse, onClose }: Pro
         {/* No results */}
         {!loading && query.length >= 2 && results.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-            <Search className="w-10 h-10 text-navy/15 mb-3" />
-            <p className="font-body text-sm text-charcoal/50 mb-1">No results for &ldquo;{query}&rdquo;</p>
-            <p className="font-body text-xs text-charcoal/35">Try a different word or Bible reference</p>
+            <Search className="w-10 h-10 text-navy/15 dark:text-cream/15 mb-3" />
+            <p className="font-body text-sm text-charcoal/50 dark:text-cream/50 mb-1">No results for &ldquo;{query}&rdquo;</p>
+            <p className="font-body text-xs text-charcoal/35 dark:text-cream/35">Try a different word or Bible reference</p>
           </div>
         )}
 
         {/* Recent searches */}
         {!loading && !query && recent.length > 0 && (
           <div className="p-4">
-            <p className="text-xs text-charcoal/35 font-body font-medium tracking-wider uppercase mb-3">Recent</p>
+            <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body font-medium tracking-wider uppercase mb-3">Recent</p>
             <div className="flex flex-wrap gap-2">
               {recent.map(r => (
                 <button
                   key={r}
                   onClick={() => { setQuery(r); handleChange(r) }}
-                  className="px-3 py-1.5 rounded-full bg-navy/5 hover:bg-navy/10 text-navy/60 hover:text-navy text-xs font-body transition-all"
+                  className="px-3 py-1.5 rounded-full bg-navy/5 hover:bg-navy/10 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-xs font-body transition-all"
                 >
                   {r}
                 </button>
@@ -167,9 +167,9 @@ export default function BibleSearch({ translation, onSelectVerse, onClose }: Pro
         {/* Empty state */}
         {!loading && !query && recent.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-            <Search className="w-10 h-10 text-navy/15 mb-3" />
-            <p className="font-body text-sm text-charcoal/50 mb-1">Search Scripture</p>
-            <p className="font-body text-xs text-charcoal/35">Try &ldquo;John 3:16&rdquo;, &ldquo;hope&rdquo;, or &ldquo;Psalm 23&rdquo;</p>
+            <Search className="w-10 h-10 text-navy/15 dark:text-cream/15 mb-3" />
+            <p className="font-body text-sm text-charcoal/50 dark:text-cream/50 mb-1">Search Scripture</p>
+            <p className="font-body text-xs text-charcoal/35 dark:text-cream/35">Try &ldquo;John 3:16&rdquo;, &ldquo;hope&rdquo;, or &ldquo;Psalm 23&rdquo;</p>
           </div>
         )}
       </div>

@@ -15,12 +15,12 @@ export default function ChapterSelector({ book, currentChapter, onSelect, onClos
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-navy/10">
         <div>
-          <h2 className="font-display text-lg font-semibold text-navy">{book.name}</h2>
-          <p className="text-xs text-charcoal/40 font-body">{book.chapterCount} chapters</p>
+          <h2 className="font-display text-lg font-semibold text-navy dark:text-cream dark:text-cream">{book.name}</h2>
+          <p className="text-xs text-charcoal/40 dark:text-cream/40 dark:text-cream/40 font-body">{book.chapterCount} chapters</p>
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-lg text-charcoal/40 hover:text-navy hover:bg-navy/5 transition-colors"
+          className="p-2 rounded-lg text-charcoal/40 dark:text-cream/40 dark:text-cream/40 hover:text-navy dark:text-cream dark:text-cream hover:bg-navy/5 transition-colors"
           aria-label="Close chapter selector"
         >
           <X className="w-5 h-5" />
@@ -39,7 +39,7 @@ export default function ChapterSelector({ book, currentChapter, onSelect, onClos
                 transition-all duration-150 hover:scale-105
                 ${ch === currentChapter
                   ? 'bg-navy text-white shadow-md shadow-navy/20'
-                  : 'bg-navy/6 text-navy/60 hover:bg-navy/15 hover:text-navy'
+                  : 'bg-navy/6 text-navy/60 dark:text-cream/60 dark:text-cream/60 hover:bg-navy/15 hover:text-navy dark:text-cream dark:text-cream'
                 }
               `}
               aria-label={`Chapter ${ch}`}

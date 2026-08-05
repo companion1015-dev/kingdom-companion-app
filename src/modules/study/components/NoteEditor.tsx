@@ -102,7 +102,7 @@ export default function NoteEditor({
 
       {/* Modal */}
       <div
-        className="fixed inset-x-4 bottom-0 sm:inset-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg z-50 bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-navy/30 flex flex-col max-h-[90vh]"
+        className="fixed inset-x-4 bottom-0 sm:inset-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg z-50 bg-white dark:bg-navy-dark rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-navy/30 flex flex-col max-h-[90vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="note-editor-title"
@@ -110,14 +110,14 @@ export default function NoteEditor({
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-navy/8 shrink-0">
           <div className="flex-1 min-w-0">
-            <h2 id="note-editor-title" className="font-body text-sm font-semibold text-navy truncate">
+            <h2 id="note-editor-title" className="font-body text-sm font-semibold text-navy dark:text-cream truncate">
               {isEditing ? 'Edit note' : 'Add note'}
             </h2>
             <p className="text-xs text-gold font-body font-medium mt-0.5">{verseReference}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-charcoal/40 hover:text-navy hover:bg-navy/5 transition-colors shrink-0"
+            className="p-2 rounded-lg text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream hover:bg-navy/5 transition-colors shrink-0"
             aria-label="Close note editor"
           >
             <X className="w-4 h-4" />
@@ -125,8 +125,8 @@ export default function NoteEditor({
         </div>
 
         {/* Verse reference */}
-        <div className="px-5 py-3 bg-cream/70 border-b border-navy/6 shrink-0">
-          <p className="font-display italic text-sm text-navy/60 leading-relaxed line-clamp-2">
+        <div className="px-5 py-3 bg-cream/70 dark:bg-navy-dark border-b border-navy/6 shrink-0">
+          <p className="font-display italic text-sm text-navy/60 dark:text-cream/60 leading-relaxed line-clamp-2">
             &ldquo;{verseText}&rdquo;
           </p>
         </div>
@@ -138,21 +138,21 @@ export default function NoteEditor({
             value={content}
             onChange={e => handleContentChange(e.target.value)}
             placeholder="Write your reflection, insight, or prayer here…"
-            className="w-full min-h-[120px] bg-transparent text-navy font-body text-sm leading-relaxed resize-none outline-none placeholder-charcoal/30"
+            className="w-full min-h-[120px] bg-transparent text-navy dark:text-cream font-body text-sm leading-relaxed resize-none outline-none placeholder-charcoal/30"
             style={{ caretColor: '#C9A84C' }}
             maxLength={10000}
           />
 
           {/* Character count */}
           <div className="flex justify-end mt-1">
-            <span className="text-xs text-charcoal/25 font-body">{content.length}/10,000</span>
+            <span className="text-xs text-charcoal/25 dark:text-cream/25 font-body">{content.length}/10,000</span>
           </div>
 
           {/* Tags section */}
           <div className="mt-4 pt-4 border-t border-navy/6">
             <div className="flex items-center gap-2 mb-3">
-              <Tag className="w-3.5 h-3.5 text-charcoal/35" />
-              <span className="text-xs text-charcoal/40 font-body">Tags</span>
+              <Tag className="w-3.5 h-3.5 text-charcoal/35 dark:text-cream/35" />
+              <span className="text-xs text-charcoal/40 dark:text-cream/40 font-body">Tags</span>
             </div>
 
             {/* Existing tags */}
@@ -161,12 +161,12 @@ export default function NoteEditor({
                 {tags.map(tag => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-navy/8 text-navy/60 text-xs font-body"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-navy/8 text-navy/60 dark:text-cream/60 text-xs font-body"
                   >
                     #{tag}
                     <button
                       onClick={() => removeTag(tag)}
-                      className="text-charcoal/30 hover:text-red-400 transition-colors"
+                      className="text-charcoal/30 dark:text-cream/30 hover:text-red-400 transition-colors"
                       aria-label={`Remove tag ${tag}`}
                     >
                       <X className="w-2.5 h-2.5" />
@@ -185,13 +185,13 @@ export default function NoteEditor({
                   onChange={e => setTagInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
                   placeholder="Add a tag…"
-                  className="flex-1 px-3 py-1.5 rounded-lg border border-navy/12 text-xs font-body text-navy placeholder-charcoal/30 outline-none focus:border-gold/40 transition-colors bg-transparent"
+                  className="flex-1 px-3 py-1.5 rounded-lg border border-navy/12 text-xs font-body text-navy dark:text-cream placeholder-charcoal/30 outline-none focus:border-gold/40 transition-colors bg-transparent"
                   maxLength={50}
                 />
                 <button
                   onClick={addTag}
                   disabled={!tagInput.trim()}
-                  className="p-1.5 rounded-lg bg-navy/6 text-navy/50 hover:bg-navy/15 hover:text-navy disabled:opacity-30 transition-colors"
+                  className="p-1.5 rounded-lg bg-navy/6 text-navy/50 dark:text-cream/50 hover:bg-navy/15 hover:text-navy dark:text-cream disabled:opacity-30 transition-colors"
                   aria-label="Add tag"
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -206,7 +206,7 @@ export default function NoteEditor({
           {isEditing && (
             <button
               onClick={handleDelete}
-              className="p-2.5 rounded-xl text-charcoal/35 hover:text-red-500 hover:bg-red-50 transition-all"
+              className="p-2.5 rounded-xl text-charcoal/35 dark:text-cream/35 hover:text-red-500 hover:bg-red-50 transition-all"
               aria-label="Delete note"
             >
               <Trash2 className="w-4 h-4" />
@@ -215,7 +215,7 @@ export default function NoteEditor({
           <div className="flex-1" />
           <button
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-navy/12 text-charcoal/50 hover:text-navy text-sm font-body font-medium transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-navy/12 text-charcoal/50 dark:text-cream/50 hover:text-navy dark:text-cream text-sm font-body font-medium transition-colors"
           >
             Cancel
           </button>

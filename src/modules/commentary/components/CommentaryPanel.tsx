@@ -37,7 +37,7 @@ function NoteCard({ note, onAIStudy, reference }: {
   const renderContent = (text: string) =>
     text.split(/\*\*(.*?)\*\*/g).map((part, i) =>
       i % 2 === 1
-        ? <strong key={i} className="font-semibold text-navy">{part}</strong>
+        ? <strong key={i} className="font-semibold text-navy dark:text-cream">{part}</strong>
         : <span key={i}>{part}</span>
     )
 
@@ -50,18 +50,18 @@ function NoteCard({ note, onAIStudy, reference }: {
       >
         <div className="flex items-center gap-2">
           <span className="text-sm">{cfg.icon}</span>
-          <span className="text-xs font-body font-semibold text-navy/60 tracking-wider uppercase">{cfg.label}</span>
+          <span className="text-xs font-body font-semibold text-navy/60 dark:text-cream/60 tracking-wider uppercase">{cfg.label}</span>
         </div>
         {expanded
-          ? <ChevronUp className="w-3.5 h-3.5 text-charcoal/30" />
-          : <ChevronDown className="w-3.5 h-3.5 text-charcoal/30" />
+          ? <ChevronUp className="w-3.5 h-3.5 text-charcoal/30 dark:text-cream/30" />
+          : <ChevronDown className="w-3.5 h-3.5 text-charcoal/30 dark:text-cream/30" />
         }
       </button>
 
       {/* Content */}
       {expanded && (
         <div className="px-4 pb-4">
-          <p className="text-sm font-body text-charcoal/70 leading-relaxed">
+          <p className="text-sm font-body text-charcoal/70 dark:text-cream/70 leading-relaxed">
             {renderContent(note.content)}
           </p>
 
@@ -94,7 +94,7 @@ export function CommentaryPopup({ reference, verseText, notes, loading, onClose,
 
       {/* Panel — bottom sheet on mobile, side panel on desktop */}
       <div
-        className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-16 sm:right-0 sm:left-auto sm:w-96 sm:h-[calc(100vh-4rem)] z-50 bg-white rounded-t-3xl sm:rounded-none sm:rounded-bl-2xl shadow-2xl shadow-navy/25 flex flex-col max-h-[80vh] sm:max-h-none"
+        className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-16 sm:right-0 sm:left-auto sm:w-96 sm:h-[calc(100vh-4rem)] z-50 bg-white dark:bg-navy-dark rounded-t-3xl sm:rounded-none sm:rounded-bl-2xl shadow-2xl shadow-navy/25 flex flex-col max-h-[80vh] sm:max-h-none"
         role="dialog"
         aria-modal="true"
         aria-label={`Study notes for ${reference}`}
@@ -102,12 +102,12 @@ export function CommentaryPopup({ reference, verseText, notes, loading, onClose,
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-navy/8 shrink-0">
           <div>
-            <h2 className="font-body text-sm font-semibold text-navy">Study Notes</h2>
+            <h2 className="font-body text-sm font-semibold text-navy dark:text-cream">Study Notes</h2>
             <p className="text-xs text-gold font-body font-semibold mt-0.5">{reference}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-charcoal/35 hover:text-navy hover:bg-navy/5 transition-colors"
+            className="p-2 rounded-xl text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream hover:bg-navy/5 transition-colors"
             aria-label="Close study notes"
           >
             <X className="w-5 h-5" />
@@ -115,8 +115,8 @@ export function CommentaryPopup({ reference, verseText, notes, loading, onClose,
         </div>
 
         {/* Verse text */}
-        <div className="px-5 py-4 bg-cream/60 border-b border-navy/6 shrink-0">
-          <p className="font-display italic text-navy text-sm leading-relaxed">
+        <div className="px-5 py-4 bg-cream/60 dark:bg-navy-dark border-b border-navy/6 shrink-0">
+          <p className="font-display italic text-navy dark:text-cream text-sm leading-relaxed">
             &ldquo;{verseText}&rdquo;
           </p>
         </div>
@@ -140,9 +140,9 @@ export function CommentaryPopup({ reference, verseText, notes, loading, onClose,
 
           {!loading && notes.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <BookOpen className="w-10 h-10 text-navy/15 mb-3" />
-              <p className="text-sm font-body text-charcoal/40 mb-1">No study notes yet</p>
-              <p className="text-xs font-body text-charcoal/30">
+              <BookOpen className="w-10 h-10 text-navy/15 dark:text-cream/15 mb-3" />
+              <p className="text-sm font-body text-charcoal/40 dark:text-cream/40 mb-1">No study notes yet</p>
+              <p className="text-xs font-body text-charcoal/30 dark:text-cream/30">
                 More commentary coming soon
               </p>
             </div>
@@ -158,7 +158,7 @@ export function CommentaryPopup({ reference, verseText, notes, loading, onClose,
           ))}
 
           {!loading && notes.length > 0 && (
-            <p className="text-xs text-charcoal/25 font-body text-center mt-2 italic">
+            <p className="text-xs text-charcoal/25 dark:text-cream/25 font-body text-center mt-2 italic">
               Kingdom Companion Study Notes · Public domain & original content
             </p>
           )}

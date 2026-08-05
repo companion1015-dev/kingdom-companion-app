@@ -42,10 +42,10 @@ export default function BlogArticlePage({ params }: { params: { slug: string } }
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-2xl mx-auto px-4 py-10">
-        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-navy/60 hover:text-navy mb-6">
+        <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream mb-6">
           <ArrowLeft className="w-4 h-4" /> Blog &amp; Resources
         </Link>
 
@@ -56,23 +56,23 @@ export default function BlogArticlePage({ params }: { params: { slug: string } }
         )}
 
         {!loading && error === 'not_found' && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <Newspaper className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>This article doesn&rsquo;t exist or isn&rsquo;t published yet.</p>
           </div>
         )}
 
         {!loading && error && error !== 'not_found' && (
-          <div className="text-center py-16 text-navy/60">{error}</div>
+          <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>
         )}
 
         {!loading && !error && article && (
           <article>
             <span className="text-xs uppercase tracking-wide text-gold-dark">{article.category.name}</span>
-            <h1 className="text-3xl font-serif text-navy mt-1 mb-2">{article.title}</h1>
-            {article.subtitle && <p className="text-navy/60 text-lg mb-4">{article.subtitle}</p>}
+            <h1 className="text-3xl font-serif text-navy dark:text-cream mt-1 mb-2">{article.title}</h1>
+            {article.subtitle && <p className="text-navy/60 dark:text-cream/60 text-lg mb-4">{article.subtitle}</p>}
 
-            <div className="flex items-center gap-3 mb-8 text-sm text-navy/50">
+            <div className="flex items-center gap-3 mb-8 text-sm text-navy/50 dark:text-cream/50">
               <span>{article.author.display_name}</span>
               {article.estimated_reading_minutes && (
                 <span className="flex items-center gap-1">
@@ -82,19 +82,19 @@ export default function BlogArticlePage({ params }: { params: { slug: string } }
             </div>
 
             {article.is_ai_assisted && (
-              <div className="mb-6 px-4 py-3 rounded-lg bg-navy/5 text-navy/60 text-sm">
+              <div className="mb-6 px-4 py-3 rounded-lg bg-navy/5 text-navy/60 dark:text-cream/60 text-sm">
                 This article was created with AI assistance and reviewed by our editorial team before publishing.
               </div>
             )}
 
-            <div className="prose prose-navy max-w-none text-navy/80 leading-relaxed whitespace-pre-wrap">
+            <div className="prose prose-navy max-w-none text-navy/80 dark:text-cream/80 leading-relaxed whitespace-pre-wrap">
               {article.content}
             </div>
 
             {article.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-8 pt-6 border-t border-navy/8">
                 {article.tags.map(t => (
-                  <span key={t} className="px-2.5 py-1 rounded-full bg-navy/5 text-navy/60 text-xs">{t}</span>
+                  <span key={t} className="px-2.5 py-1 rounded-full bg-navy/5 text-navy/60 dark:text-cream/60 text-xs">{t}</span>
                 ))}
               </div>
             )}

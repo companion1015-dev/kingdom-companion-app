@@ -28,8 +28,8 @@ export default function OfflinePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-cream flex items-center justify-center p-6">
-      <div className="bg-white rounded-3xl border border-navy/8 shadow-xl shadow-navy/8 max-w-md w-full overflow-hidden">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark flex items-center justify-center p-6">
+      <div className="bg-white dark:bg-navy-dark rounded-3xl border border-navy/8 shadow-xl shadow-navy/8 max-w-md w-full overflow-hidden">
 
         {/* Header */}
         <div className="bg-hero-gradient p-8 text-center relative overflow-hidden">
@@ -54,24 +54,24 @@ export default function OfflinePage() {
         <div className="p-6">
 
           {/* Scripture verse */}
-          <div className="p-4 rounded-2xl bg-cream border-l-4 border-gold mb-6">
-            <p className="font-display italic text-navy text-base leading-relaxed mb-2">
+          <div className="p-4 rounded-2xl bg-cream dark:bg-navy-dark border-l-4 border-gold mb-6">
+            <p className="font-display italic text-navy dark:text-cream text-base leading-relaxed mb-2">
               &ldquo;Your word is a lamp to my feet and a light to my path.&rdquo;
             </p>
             <p className="text-gold text-xs font-body font-semibold">— Psalm 119:105 (NIV)</p>
           </div>
 
           {/* Available features */}
-          <p className="text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">
+          <p className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">
             Available Offline
           </p>
           <div className="grid grid-cols-2 gap-2 mb-5">
             {available.map(({ icon: Icon, label, desc }) => (
               <div key={label} className="flex items-start gap-2.5 p-3 rounded-xl bg-navy/4">
-                <Icon className="w-4 h-4 text-navy/40 shrink-0 mt-0.5" />
+                <Icon className="w-4 h-4 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-body font-semibold text-navy/70">{label}</p>
-                  <p className="text-xs font-body text-charcoal/40 leading-tight">{desc}</p>
+                  <p className="text-xs font-body font-semibold text-navy/70 dark:text-cream/70">{label}</p>
+                  <p className="text-xs font-body text-charcoal/40 dark:text-cream/40 leading-tight">{desc}</p>
                 </div>
               </div>
             ))}
@@ -97,14 +97,14 @@ export default function OfflinePage() {
             </button>
             <Link
               href="/bible"
-              className="w-full flex items-center justify-center gap-2 py-3.5 border border-navy/15 hover:border-navy/30 text-navy/70 hover:text-navy text-sm font-body font-medium rounded-2xl transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3.5 border border-navy/15 hover:border-navy/30 text-navy/70 dark:text-cream/70 hover:text-navy dark:text-cream text-sm font-body font-medium rounded-2xl transition-all"
             >
               <BookOpen className="w-4 h-4" />
               Go to Downloaded Content
             </Link>
           </div>
 
-          <p className="text-center text-xs font-body text-charcoal/25 mt-5">
+          <p className="text-center text-xs font-body text-charcoal/25 dark:text-cream/25 mt-5">
             Kingdom Companion &nbsp;·&nbsp; Rooted in Truth. Built for Life.
           </p>
         </div>

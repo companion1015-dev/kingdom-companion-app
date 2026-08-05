@@ -60,7 +60,7 @@ export default function InviteLandingPage() {
           </div>
 
           <button onClick={handleJoin}
-            className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gold hover:bg-gold-light text-navy text-sm font-body font-semibold shadow-lg shadow-gold/20 hover:scale-[1.01] transition-all mb-4">
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gold hover:bg-gold-light text-navy dark:text-cream text-sm font-body font-semibold shadow-lg shadow-gold/20 hover:scale-[1.01] transition-all mb-4">
             Join Kingdom Companion <ArrowRight className="w-4 h-4" />
           </button>
 

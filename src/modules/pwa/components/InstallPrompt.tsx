@@ -117,22 +117,22 @@ export default function InstallPrompt() {
     return (
       <>
         <div className="fixed inset-0 z-40 bg-navy/40 backdrop-blur-sm" onClick={() => setShowIOSGuide(false)} />
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl shadow-navy/30 p-6 pb-10 max-h-[85vh] overflow-y-auto">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-navy-dark rounded-t-3xl shadow-2xl shadow-navy/30 p-6 pb-10 max-h-[85vh] overflow-y-auto">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-display text-xl font-semibold text-navy">Install on iPhone</h2>
-            <button onClick={() => setShowIOSGuide(false)} className="p-2 text-charcoal/40 hover:text-navy rounded-lg"><X className="w-5 h-5" /></button>
+            <h2 className="font-display text-xl font-semibold text-navy dark:text-cream">Install on iPhone</h2>
+            <button onClick={() => setShowIOSGuide(false)} className="p-2 text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream rounded-lg"><X className="w-5 h-5" /></button>
           </div>
-          <p className="text-sm text-charcoal/55 font-body mb-6">Follow these steps to add Kingdom Companion to your Home Screen:</p>
+          <p className="text-sm text-charcoal/55 dark:text-cream/55 font-body mb-6">Follow these steps to add Kingdom Companion to your Home Screen:</p>
           {[
             { step: 1, icon: <Share className="w-5 h-5 text-blue-500" />, title: 'Tap the Share button', desc: 'Find the Share icon (□↑) at the bottom of Safari' },
-            { step: 2, icon: <Plus className="w-5 h-5 text-navy" />,      title: 'Tap "Add to Home Screen"', desc: 'Scroll down in the share menu to find this option' },
+            { step: 2, icon: <Plus className="w-5 h-5 text-navy dark:text-cream" />,      title: 'Tap "Add to Home Screen"', desc: 'Scroll down in the share menu to find this option' },
             { step: 3, icon: <Download className="w-5 h-5 text-gold" />,  title: 'Tap "Add"', desc: 'Confirm and the app will appear on your Home Screen' },
           ].map(s => (
             <div key={s.step} className="flex gap-4 mb-5">
               <div className="w-9 h-9 rounded-full bg-navy/8 flex items-center justify-center shrink-0">{s.icon}</div>
               <div>
-                <p className="text-sm font-body font-semibold text-navy mb-0.5">{s.title}</p>
-                <p className="text-xs font-body text-charcoal/50">{s.desc}</p>
+                <p className="text-sm font-body font-semibold text-navy dark:text-cream mb-0.5">{s.title}</p>
+                <p className="text-xs font-body text-charcoal/50 dark:text-cream/50">{s.desc}</p>
               </div>
             </div>
           ))}
@@ -150,7 +150,7 @@ export default function InstallPrompt() {
       <div className="fixed inset-0 z-40 bg-navy/20 backdrop-blur-sm" onClick={handleDismiss} />
 
       {/* Install prompt card — bottom sheet on mobile, centred modal on desktop */}
-      <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md sm:w-full z-50 bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl shadow-navy/25 overflow-hidden">
+      <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md sm:w-full z-50 bg-white dark:bg-navy-dark rounded-t-3xl sm:rounded-3xl shadow-2xl shadow-navy/25 overflow-hidden">
 
         {/* Header */}
         <div className="relative bg-hero-gradient p-6 text-center">
@@ -166,7 +166,7 @@ export default function InstallPrompt() {
 
         {/* Body */}
         <div className="p-6">
-          <p className="text-sm font-body text-charcoal/60 text-center mb-5 leading-relaxed">
+          <p className="text-sm font-body text-charcoal/60 dark:text-cream/60 text-center mb-5 leading-relaxed">
             Install Kingdom Companion for faster access, offline Bible reading, and a more app-like experience.
           </p>
 
@@ -175,7 +175,7 @@ export default function InstallPrompt() {
             {benefits.map(b => (
               <div key={b.text} className="flex items-center gap-2 p-2.5 bg-navy/4 rounded-xl">
                 <span className="text-base">{b.icon}</span>
-                <span className="text-xs font-body text-navy/70 font-medium">{b.text}</span>
+                <span className="text-xs font-body text-navy/70 dark:text-cream/70 font-medium">{b.text}</span>
               </div>
             ))}
           </div>
@@ -191,13 +191,13 @@ export default function InstallPrompt() {
             </button>
             <button
               onClick={handleDismiss}
-              className="w-full py-3 text-charcoal/45 text-sm font-body hover:text-charcoal/70 transition-colors"
+              className="w-full py-3 text-charcoal/45 dark:text-cream/45 text-sm font-body hover:text-charcoal/70 dark:text-cream/70 transition-colors"
             >
               Maybe Later
             </button>
           </div>
 
-          <p className="text-center text-xs text-charcoal/30 font-body mt-3">
+          <p className="text-center text-xs text-charcoal/30 dark:text-cream/30 font-body mt-3">
             Always free &nbsp;·&nbsp; No account required &nbsp;·&nbsp; No advertisements
           </p>
         </div>

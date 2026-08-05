@@ -15,8 +15,8 @@ function PasswordStrength({ password }: { password: string }) {
   return (
     <div className="mt-2 space-y-1">
       {checks.map(c => (
-        <div key={c.label} className={`flex items-center gap-2 text-xs ${c.pass ? 'text-green-600' : 'text-charcoal/40'}`}>
-          <Check className={`w-3 h-3 ${c.pass ? 'text-green-500' : 'text-charcoal/25'}`} />
+        <div key={c.label} className={`flex items-center gap-2 text-xs ${c.pass ? 'text-green-600' : 'text-charcoal/40 dark:text-cream/40'}`}>
+          <Check className={`w-3 h-3 ${c.pass ? 'text-green-500' : 'text-charcoal/25 dark:text-cream/25'}`} />
           {c.label}
         </div>
       ))}
@@ -73,12 +73,12 @@ export default function RegisterPage() {
         <div className="w-16 h-16 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-6">
           <Check className="w-7 h-7 text-green-500" />
         </div>
-        <h1 className="font-display text-2xl font-semibold text-navy mb-3">Check your email</h1>
-        <p className="text-charcoal/60 font-body text-sm leading-relaxed mb-8">
-          We've sent a verification link to <strong className="text-navy">{form.email}</strong>.
+        <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Check your email</h1>
+        <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm leading-relaxed mb-8">
+          We've sent a verification link to <strong className="text-navy dark:text-cream">{form.email}</strong>.
           Please click the link to activate your account.
         </p>
-        <p className="text-xs text-charcoal/40 font-body">
+        <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">
           Didn't receive it?{' '}
           <button className="text-gold underline" onClick={() => setSuccess(false)}>Try again</button>
         </p>
@@ -86,7 +86,7 @@ export default function RegisterPage() {
     )
   }
 
-  const inputBase = 'w-full px-4 py-3 rounded-xl border font-body text-sm text-navy placeholder-charcoal/35 outline-none transition-all duration-200 bg-white'
+  const inputBase = 'w-full px-4 py-3 rounded-xl border font-body text-sm text-navy dark:text-cream placeholder-charcoal/35 outline-none transition-all duration-200 bg-white dark:bg-navy-dark'
   const inputNormal = `${inputBase} border-navy/15 focus:border-gold/60 focus:ring-2 focus:ring-gold/15`
   const inputError  = `${inputBase} border-red-300 focus:border-red-400 focus:ring-2 focus:ring-red-100`
 
@@ -94,8 +94,8 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="font-display text-3xl font-semibold text-navy mb-1">Create account</h1>
-      <p className="text-charcoal/55 font-body text-sm mb-8">
+      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-1">Create account</h1>
+      <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-8">
         Free forever. No credit card required.
       </p>
 
@@ -109,7 +109,7 @@ export default function RegisterPage() {
 
         {/* Display name */}
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Your name
           </label>
           <input
@@ -122,7 +122,7 @@ export default function RegisterPage() {
 
         {/* Email */}
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Email address
           </label>
           <input
@@ -135,7 +135,7 @@ export default function RegisterPage() {
 
         {/* Password */}
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Password
           </label>
           <div className="relative">
@@ -145,7 +145,7 @@ export default function RegisterPage() {
               className={`${err('password') ? inputError : inputNormal} pr-12`}
             />
             <button type="button" onClick={() => setShowPw(v => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 hover:text-navy transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream transition-colors"
               aria-label={showPw ? 'Hide password' : 'Show password'}
             >
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -157,7 +157,7 @@ export default function RegisterPage() {
 
         {/* Confirm password */}
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Confirm password
           </label>
           <div className="relative">
@@ -167,7 +167,7 @@ export default function RegisterPage() {
               className={`${err('confirm_password') ? inputError : inputNormal} pr-12`}
             />
             <button type="button" onClick={() => setShowCpw(v => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 hover:text-navy transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream transition-colors"
               aria-label={showCpw ? 'Hide password' : 'Show password'}
             >
               {showCpw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -177,7 +177,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Terms */}
-        <p className="text-xs text-charcoal/45 font-body leading-relaxed">
+        <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body leading-relaxed">
           By creating an account you agree to our{' '}
           <Link href="/terms" className="text-gold underline">Terms of Use</Link> and{' '}
           <Link href="/privacy" className="text-gold underline">Privacy Policy</Link>.
@@ -196,7 +196,7 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm font-body text-charcoal/50">
+      <p className="mt-6 text-center text-sm font-body text-charcoal/50 dark:text-cream/50">
         Already have an account?{' '}
         <Link href="/login" className="text-gold font-medium hover:text-gold-dark transition-colors">
           Sign in

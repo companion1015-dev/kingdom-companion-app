@@ -100,7 +100,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-3 py-1.5 text-sm text-white/75 hover:text-white hover:bg-white/8 rounded-md transition-all duration-200 font-body"
+                className="px-3 py-1.5 text-sm text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-md transition-all duration-200 font-body"
               >
                 {link.label}
               </Link>
@@ -109,7 +109,7 @@ export default function Navigation() {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <button aria-label="Search" onClick={goToSearch} className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8">
+            <button aria-label="Search" onClick={goToSearch} className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8 dark:bg-navy-dark">
               <Search className="w-4 h-4" />
             </button>
 
@@ -117,16 +117,16 @@ export default function Navigation() {
               <div className="relative" ref={accountRef}>
                 <button
                   onClick={() => setAccountOpen(o => !o)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/85 hover:text-white bg-white/8 hover:bg-white/12 rounded-full transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/85 hover:text-white bg-white/8 dark:bg-navy-dark hover:bg-white/12 dark:bg-navy-dark rounded-full transition-all"
                 >
                   <User className="w-3.5 h-3.5" />
                   <span className="max-w-[100px] truncate font-body">{displayName}</span>
                   <ChevronDown className={`w-3 h-3 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {accountOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl shadow-xl shadow-navy/15 border border-navy/8 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-navy-dark rounded-xl shadow-xl shadow-navy/15 border border-navy/8 overflow-hidden">
                     <Link href="/profile" onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 hover:bg-navy/4 hover:text-navy transition-colors font-body">
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
                       <User className="w-3.5 h-3.5" /> My Profile
                     </Link>
                     <button onClick={handleLogout}
@@ -139,7 +139,7 @@ export default function Navigation() {
             ) : (
               <Link
                 href="/login"
-                className="px-4 py-1.5 text-sm font-medium text-navy bg-gold hover:bg-gold-light rounded-full transition-all duration-200"
+                className="px-4 py-1.5 text-sm font-medium text-navy dark:text-cream bg-gold hover:bg-gold-light rounded-full transition-all duration-200"
               >
                 Sign in
               </Link>
@@ -176,7 +176,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 rounded-lg transition-all font-body text-sm"
+                className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
@@ -193,7 +193,7 @@ export default function Navigation() {
               ) : (
                 <Link
                   href="/register"
-                  className="block w-full text-center px-4 py-3 text-sm font-medium text-navy bg-gold hover:bg-gold-light rounded-full transition-colors"
+                  className="block w-full text-center px-4 py-3 text-sm font-medium text-navy dark:text-cream bg-gold hover:bg-gold-light rounded-full transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
                   Create free account

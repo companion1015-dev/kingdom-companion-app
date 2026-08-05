@@ -48,10 +48,10 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="min-h-screen bg-cream pt-16">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark pt-16">
       <Navigation />
       <main className="max-w-2xl mx-auto px-4 py-10">
-        <Link href="/reading-plans" className="inline-flex items-center gap-1.5 text-sm text-navy/60 hover:text-navy mb-6">
+        <Link href="/reading-plans" className="inline-flex items-center gap-1.5 text-sm text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream mb-6">
           <ArrowLeft className="w-4 h-4" /> Reading Plans
         </Link>
 
@@ -62,38 +62,38 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
         )}
 
         {!loading && error === 'not_found' && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>This reading plan doesn&rsquo;t exist or isn&rsquo;t published yet.</p>
           </div>
         )}
 
         {!loading && error && error !== 'not_found' && (
-          <div className="text-center py-16 text-navy/60">{error}</div>
+          <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>
         )}
 
         {!loading && !error && plan && (
           <>
-            <h1 className="text-3xl font-serif text-navy mb-2">{plan.title}</h1>
-            {plan.description && <p className="text-navy/60 mb-4 leading-relaxed">{plan.description}</p>}
-            <div className="flex items-center gap-3 mb-8 text-sm text-navy/50">
+            <h1 className="text-3xl font-serif text-navy dark:text-cream mb-2">{plan.title}</h1>
+            {plan.description && <p className="text-navy/60 dark:text-cream/60 mb-4 leading-relaxed">{plan.description}</p>}
+            <div className="flex items-center gap-3 mb-8 text-sm text-navy/50 dark:text-cream/50">
               <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {plan.duration_days} days</span>
               <span className="capitalize">{plan.difficulty}</span>
             </div>
 
             {plan.days.length === 0 ? (
-              <p className="text-navy/50 text-sm">This plan&rsquo;s daily readings haven&rsquo;t been published yet.</p>
+              <p className="text-navy/50 dark:text-cream/50 text-sm">This plan&rsquo;s daily readings haven&rsquo;t been published yet.</p>
             ) : (
               <ul className="space-y-2">
                 {plan.days.map(day => (
-                  <li key={day.id} className="p-4 rounded-xl bg-white border border-navy/8">
+                  <li key={day.id} className="p-4 rounded-xl bg-white dark:bg-navy-dark border border-navy/8">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs uppercase tracking-wide text-navy/40">Day {day.day_number}</span>
+                      <span className="text-xs uppercase tracking-wide text-navy/40 dark:text-cream/40">Day {day.day_number}</span>
                     </div>
-                    {day.title && <h3 className="font-serif text-navy mb-1">{day.title}</h3>}
+                    {day.title && <h3 className="font-serif text-navy dark:text-cream mb-1">{day.title}</h3>}
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       {day.readings.map(item => (
-                        <span key={item.id} className="px-2 py-0.5 rounded-full bg-navy/5 text-navy/70 text-xs">
+                        <span key={item.id} className="px-2 py-0.5 rounded-full bg-navy/5 text-navy/70 dark:text-cream/70 text-xs">
                           {bookName(item.book_id)} {item.chapter}
                         </span>
                       ))}

@@ -40,11 +40,11 @@ export default function ForgotPasswordPage() {
         <div className="w-16 h-16 rounded-full bg-blue-50 border-2 border-blue-200 flex items-center justify-center mx-auto mb-6">
           <Mail className="w-7 h-7 text-blue-400" />
         </div>
-        <h1 className="font-display text-2xl font-semibold text-navy mb-3">Check your inbox</h1>
-        <p className="text-charcoal/60 font-body text-sm leading-relaxed mb-2">
-          If an account exists for <strong className="text-navy">{email}</strong>, a password reset link has been sent.
+        <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Check your inbox</h1>
+        <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm leading-relaxed mb-2">
+          If an account exists for <strong className="text-navy dark:text-cream">{email}</strong>, a password reset link has been sent.
         </p>
-        <p className="text-charcoal/40 font-body text-xs mb-8">
+        <p className="text-charcoal/40 dark:text-cream/40 font-body text-xs mb-8">
           The link expires in one hour. Please check your spam folder if you don&apos;t see it.
         </p>
         <Link href="/login" className="inline-flex items-center gap-2 text-sm font-body text-gold hover:text-gold-dark transition-colors">
@@ -56,12 +56,12 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
-      <Link href="/login" className="inline-flex items-center gap-1.5 text-xs font-body text-charcoal/45 hover:text-navy transition-colors mb-8">
+      <Link href="/login" className="inline-flex items-center gap-1.5 text-xs font-body text-charcoal/45 dark:text-cream/45 hover:text-navy dark:text-cream transition-colors mb-8">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to sign in
       </Link>
 
-      <h1 className="font-display text-3xl font-semibold text-navy mb-2">Reset password</h1>
-      <p className="text-charcoal/55 font-body text-sm mb-8 leading-relaxed">
+      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-2">Reset password</h1>
+      <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-8 leading-relaxed">
         Enter your email address and we&apos;ll send you a link to reset your password.
       </p>
 
@@ -73,13 +73,13 @@ export default function ForgotPasswordPage() {
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Email address
           </label>
           <input
             type="email" value={email} onChange={e => { setEmail(e.target.value); setApiError('') }}
             placeholder="your@email.com" autoComplete="email" autoFocus
-            className="w-full px-4 py-3 rounded-xl border border-navy/15 focus:border-gold/60 focus:ring-2 focus:ring-gold/15 font-body text-sm text-navy placeholder-charcoal/35 outline-none transition-all bg-white"
+            className="w-full px-4 py-3 rounded-xl border border-navy/15 focus:border-gold/60 focus:ring-2 focus:ring-gold/15 font-body text-sm text-navy dark:text-cream placeholder-charcoal/35 outline-none transition-all bg-white dark:bg-navy-dark"
           />
         </div>
 

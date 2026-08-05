@@ -34,14 +34,14 @@ export default function DevotionalsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-3xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-          <BookMarked className="w-7 h-7 text-navy" />
-          <h1 className="text-2xl font-serif text-navy">Devotional Library</h1>
+          <BookMarked className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-2xl font-serif text-navy dark:text-cream">Devotional Library</h1>
         </div>
-        <p className="text-navy/60 mb-8">
+        <p className="text-navy/60 dark:text-cream/60 mb-8">
           Multi-day devotional series to help you grow at your own pace.
           Looking for today&rsquo;s reading? Visit <Link href="/daily" className="text-gold hover:text-gold-dark underline">Daily Encouragement</Link>.
         </p>
@@ -52,10 +52,10 @@ export default function DevotionalsPage() {
           </div>
         )}
 
-        {!loading && error && <div className="text-center py-16 text-navy/60">{error}</div>}
+        {!loading && error && <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>}
 
         {!loading && !error && series.length === 0 && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <BookMarked className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No devotional series are published yet — check back soon.</p>
           </div>
@@ -67,12 +67,12 @@ export default function DevotionalsPage() {
               <li key={s.slug}>
                 <Link
                   href={`/devotionals/${s.slug}`}
-                  className="flex items-center gap-4 p-5 rounded-xl bg-white hover:bg-cream border border-navy/8 hover:border-gold/20 transition-all duration-200"
+                  className="flex items-center gap-4 p-5 rounded-xl bg-white dark:bg-navy-dark hover:bg-cream dark:bg-navy-dark border border-navy/8 hover:border-gold/20 transition-all duration-200"
                 >
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-navy mb-1">{s.title}</h3>
-                    {s.description && <p className="text-sm text-navy/60 line-clamp-2">{s.description}</p>}
-                    <div className="flex items-center gap-1.5 mt-2 text-xs text-navy/40">
+                    <h3 className="font-serif text-navy dark:text-cream mb-1">{s.title}</h3>
+                    {s.description && <p className="text-sm text-navy/60 dark:text-cream/60 line-clamp-2">{s.description}</p>}
+                    <div className="flex items-center gap-1.5 mt-2 text-xs text-navy/40 dark:text-cream/40">
                       <Clock className="w-3 h-3" /> {s.duration_days} days · {s.category}
                     </div>
                   </div>

@@ -74,16 +74,16 @@ export default function PrayerWallPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
 
       <main className="max-w-2xl mx-auto px-4 py-10">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
-          <Heart className="w-7 h-7 text-navy" />
-          <h1 className="text-2xl font-serif text-navy">Global Prayer Wall</h1>
+          <Heart className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-2xl font-serif text-navy dark:text-cream">Global Prayer Wall</h1>
         </div>
-        <p className="text-navy/60 mb-8">
+        <p className="text-navy/60 dark:text-cream/60 mb-8">
           Praying with Christians around the world. Share a request, or lift someone else up today.
         </p>
 
@@ -99,13 +99,13 @@ export default function PrayerWallPage() {
         <div className="flex gap-2 mb-6 p-1 bg-navy/5 rounded-2xl">
           <button
             onClick={() => setView('feed')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-body font-semibold transition-all ${view === 'feed' ? 'bg-white text-navy shadow-sm' : 'text-charcoal/45 hover:text-navy'}`}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-body font-semibold transition-all ${view === 'feed' ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/45 dark:text-cream/45 hover:text-navy dark:text-cream'}`}
           >
             <Heart className="w-3.5 h-3.5" /> Prayer Feed
           </button>
           <button
             onClick={() => setView('praise')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-body font-semibold transition-all ${view === 'praise' ? 'bg-white text-navy shadow-sm' : 'text-charcoal/45 hover:text-navy'}`}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-body font-semibold transition-all ${view === 'praise' ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/45 dark:text-cream/45 hover:text-navy dark:text-cream'}`}
           >
             <Flame className="w-3.5 h-3.5" /> Praise Reports
           </button>
@@ -117,7 +117,7 @@ export default function PrayerWallPage() {
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
           <button
             onClick={() => setCategory('all')}
-            className={`px-3.5 py-2 rounded-full text-xs font-body font-medium whitespace-nowrap transition-all shrink-0 ${category === 'all' ? 'bg-navy text-white' : 'bg-white border border-navy/10 text-charcoal/55 hover:border-navy/25'}`}
+            className={`px-3.5 py-2 rounded-full text-xs font-body font-medium whitespace-nowrap transition-all shrink-0 ${category === 'all' ? 'bg-navy text-white' : 'bg-white dark:bg-navy-dark border border-navy/10 text-charcoal/55 dark:text-cream/55 hover:border-navy/25'}`}
           >
             All
           </button>
@@ -125,7 +125,7 @@ export default function PrayerWallPage() {
             <button
               key={cat.id}
               onClick={() => setCategory(cat.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium whitespace-nowrap transition-all shrink-0 ${category === cat.id ? 'bg-navy text-white' : 'bg-white border border-navy/10 text-charcoal/55 hover:border-navy/25'}`}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium whitespace-nowrap transition-all shrink-0 ${category === cat.id ? 'bg-navy text-white' : 'bg-white dark:bg-navy-dark border border-navy/10 text-charcoal/55 dark:text-cream/55 hover:border-navy/25'}`}
             >
               <span>{cat.icon}</span> {cat.label}
             </button>
@@ -142,7 +142,7 @@ export default function PrayerWallPage() {
             <button
               key={s.id}
               onClick={() => setSort(s.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-body transition-colors ${sort === s.id ? 'bg-gold/15 text-gold-dark font-semibold' : 'text-charcoal/45 hover:text-navy'}`}
+              className={`px-3 py-1.5 rounded-full text-xs font-body transition-colors ${sort === s.id ? 'bg-gold/15 text-gold-dark font-semibold' : 'text-charcoal/45 dark:text-cream/45 hover:text-navy dark:text-cream'}`}
             >
               {s.label}
             </button>
@@ -157,11 +157,11 @@ export default function PrayerWallPage() {
         )}
 
         {!loading && error && (
-          <div className="text-center py-16 text-navy/60">{error}</div>
+          <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>
         )}
 
         {!loading && !error && requests.length === 0 && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <Heart className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No prayer requests here yet. Be the first to share one.</p>
           </div>
@@ -184,7 +184,7 @@ export default function PrayerWallPage() {
         {!loading && hasMore && (
           <button
             onClick={() => load(page + 1, true)}
-            className="w-full mt-6 py-3 rounded-2xl border border-navy/12 text-navy/60 hover:border-navy/25 hover:text-navy text-sm font-body font-medium transition-all"
+            className="w-full mt-6 py-3 rounded-2xl border border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/25 hover:text-navy dark:text-cream text-sm font-body font-medium transition-all"
           >
             Load more requests
           </button>
@@ -201,7 +201,7 @@ export default function PrayerWallPage() {
         {/* Praise Reports view */}
         {view === 'praise' && (
           <div>
-            <p className="text-sm text-charcoal/50 font-body mb-6">
+            <p className="text-sm text-charcoal/50 dark:text-cream/50 font-body mb-6">
               Real testimonies from believers whose prayers were answered — shared to strengthen others facing the same thing.
             </p>
 
@@ -212,7 +212,7 @@ export default function PrayerWallPage() {
             )}
 
             {!praiseLoading && praiseReports.length === 0 && (
-              <div className="text-center py-16 text-navy/50">
+              <div className="text-center py-16 text-navy/50 dark:text-cream/50">
                 <Flame className="w-10 h-10 mx-auto mb-3 opacity-40" />
                 <p>No public testimonies yet. When a prayer is answered, be the first to share how God moved.</p>
               </div>
@@ -221,19 +221,19 @@ export default function PrayerWallPage() {
             {!praiseLoading && praiseReports.length > 0 && (
               <div className="space-y-4">
                 {praiseReports.map(p => (
-                  <div key={p.id} className="bg-white rounded-2xl border border-green-100 p-5">
+                  <div key={p.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-green-100 p-5">
                     <div className="flex items-center gap-2 mb-2">
                       <Flame className="w-4 h-4 text-green-600" />
                       <span className="text-xs font-body font-semibold text-green-700 uppercase tracking-wide">{p.praise_category}</span>
-                      <span className="text-xs text-charcoal/30 font-body ml-auto">{formatPrayerTime(p.created_at)}</span>
+                      <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body ml-auto">{formatPrayerTime(p.created_at)}</span>
                     </div>
-                    {p.request_title && <h3 className="font-display text-base font-semibold text-navy mb-1.5">{p.request_title}</h3>}
-                    <p className="text-sm text-charcoal/65 font-body leading-relaxed mb-3">{p.testimony}</p>
+                    {p.request_title && <h3 className="font-display text-base font-semibold text-navy dark:text-cream mb-1.5">{p.request_title}</h3>}
+                    <p className="text-sm text-charcoal/65 dark:text-cream/65 font-body leading-relaxed mb-3">{p.testimony}</p>
                     {p.bible_verse && (
                       <p className="text-xs text-gold font-body font-medium italic border-l-2 border-gold/40 pl-3 mb-2">{p.bible_verse}</p>
                     )}
                     {p.thanksgiving && (
-                      <p className="text-xs text-charcoal/45 font-body italic">&ldquo;{p.thanksgiving}&rdquo;</p>
+                      <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body italic">&ldquo;{p.thanksgiving}&rdquo;</p>
                     )}
                   </div>
                 ))}

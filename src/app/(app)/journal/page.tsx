@@ -96,26 +96,26 @@ export default function JournalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
 
       <main className="max-w-3xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-          <BookHeart className="w-7 h-7 text-navy" />
-          <h1 className="text-2xl font-serif text-navy">Prayer Journal</h1>
+          <BookHeart className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-2xl font-serif text-navy dark:text-cream">Prayer Journal</h1>
         </div>
-        <p className="text-navy/60 mb-8">
+        <p className="text-navy/60 dark:text-cream/60 mb-8">
           A private place to record what&rsquo;s on your heart. Only you can ever see this.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy/40 dark:text-cream/40" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search your prayers..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-navy/15 bg-white text-navy placeholder:text-navy/40 focus:outline-none focus:ring-2 focus:ring-gold/50"
+              className="w-full pl-9 pr-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark text-navy dark:text-cream placeholder:text-navy/40 dark:text-cream/40 focus:outline-none focus:ring-2 focus:ring-gold/50"
             />
           </div>
           <button
@@ -132,7 +132,7 @@ export default function JournalPage() {
               key={s}
               onClick={() => setStatus(s)}
               className={`px-3 py-1.5 rounded-full text-sm capitalize transition-colors ${
-                status === s ? 'bg-navy text-cream' : 'bg-white text-navy/60 border border-navy/10'
+                status === s ? 'bg-navy text-cream' : 'bg-white dark:bg-navy-dark text-navy/60 dark:text-cream/60 border border-navy/10'
               }`}
             >
               {s}
@@ -147,13 +147,13 @@ export default function JournalPage() {
         )}
 
         {!loading && error && (
-          <div className="text-center py-16 text-navy/60">
+          <div className="text-center py-16 text-navy/60 dark:text-cream/60">
             <p>{error}</p>
           </div>
         )}
 
         {!loading && !error && prayers.length === 0 && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <BookHeart className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No prayers here yet. Start with &ldquo;New Prayer&rdquo; above.</p>
           </div>
@@ -162,11 +162,11 @@ export default function JournalPage() {
         {!loading && !error && prayers.length > 0 && (
           <ul className="space-y-3">
             {prayers.map(p => (
-              <li key={p.id} className="bg-white rounded-xl border border-navy/10 p-5">
+              <li key={p.id} className="bg-white dark:bg-navy-dark rounded-xl border border-navy/10 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-serif text-lg text-navy">{p.title}</h3>
-                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-navy/50">
+                    <h3 className="font-serif text-lg text-navy dark:text-cream">{p.title}</h3>
+                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-navy/50 dark:text-cream/50">
                       {p.category && <span>{p.category}</span>}
                       {p.scripture_reference && <span>· {p.scripture_reference}</span>}
                       {p.status === 'answered' && (
@@ -181,7 +181,7 @@ export default function JournalPage() {
                       <button
                         onClick={() => handleMarkAnswered(p.id)}
                         title="Mark as answered"
-                        className="p-2 rounded-lg hover:bg-gold/10 text-navy/50 hover:text-gold-dark transition-colors"
+                        className="p-2 rounded-lg hover:bg-gold/10 text-navy/50 dark:text-cream/50 hover:text-gold-dark transition-colors"
                       >
                         <CheckCircle2 className="w-4 h-4" />
                       </button>
@@ -190,7 +190,7 @@ export default function JournalPage() {
                       <button
                         onClick={() => handleArchive(p.id)}
                         title="Archive"
-                        className="p-2 rounded-lg hover:bg-navy/5 text-navy/50 transition-colors"
+                        className="p-2 rounded-lg hover:bg-navy/5 text-navy/50 dark:text-cream/50 transition-colors"
                       >
                         <Archive className="w-4 h-4" />
                       </button>
@@ -198,17 +198,17 @@ export default function JournalPage() {
                     <button
                       onClick={() => handleDelete(p.id)}
                       title="Delete"
-                      className="p-2 rounded-lg hover:bg-red-50 text-navy/50 hover:text-red-600 transition-colors"
+                      className="p-2 rounded-lg hover:bg-red-50 text-navy/50 dark:text-cream/50 hover:text-red-600 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <p className="text-navy/80 mt-2 whitespace-pre-wrap">{p.content}</p>
+                <p className="text-navy/80 dark:text-cream/80 mt-2 whitespace-pre-wrap">{p.content}</p>
                 {p.tags && (
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {p.tags.split(',').map(t => t.trim()).filter(Boolean).map(t => (
-                      <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-navy/5 text-navy/60 text-xs">
+                      <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-navy/5 text-navy/60 dark:text-cream/60 text-xs">
                         <Tag className="w-3 h-3" /> {t}
                       </span>
                     ))}
@@ -281,10 +281,10 @@ function PrayerComposer({ onClose, onSaved }: { onClose: () => void; onSaved: ()
 
   return (
     <div className="fixed inset-0 bg-navy/40 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-cream w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-cream dark:bg-navy-dark w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-serif text-navy">New Prayer</h2>
-          <button onClick={onClose} className="p-1 text-navy/50 hover:text-navy">
+          <h2 className="text-lg font-serif text-navy dark:text-cream">New Prayer</h2>
+          <button onClick={onClose} className="p-1 text-navy/50 dark:text-cream/50 hover:text-navy dark:text-cream">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -298,19 +298,19 @@ function PrayerComposer({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="Title"
-            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50"
+            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/50"
           />
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
             placeholder="What's on your heart..."
             rows={5}
-            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 resize-none"
+            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/50 resize-none"
           />
           <select
             value={category}
             onChange={e => setCategory(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white text-navy"
+            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark text-navy dark:text-cream"
           >
             <option value="">Category (optional)</option>
             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -319,13 +319,13 @@ function PrayerComposer({ onClose, onSaved }: { onClose: () => void; onSaved: ()
             value={scriptureRef}
             onChange={e => setScriptureRef(e.target.value)}
             placeholder="Scripture reference (optional, e.g. Philippians 4:6-7)"
-            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50"
+            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/50"
           />
           <input
             value={tags}
             onChange={e => setTags(e.target.value)}
             placeholder="Tags, comma-separated (optional)"
-            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50"
+            className="w-full px-3 py-2 rounded-lg border border-navy/15 bg-white dark:bg-navy-dark focus:outline-none focus:ring-2 focus:ring-gold/50"
           />
         </div>
 

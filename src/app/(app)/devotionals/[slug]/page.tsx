@@ -44,10 +44,10 @@ export default function DevotionalSeriesPage({ params }: { params: { slug: strin
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-3xl mx-auto px-4 py-10">
-        <Link href="/devotionals" className="inline-flex items-center gap-1.5 text-sm text-navy/60 hover:text-navy mb-6">
+        <Link href="/devotionals" className="inline-flex items-center gap-1.5 text-sm text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream mb-6">
           <ArrowLeft className="w-4 h-4" /> Devotional Library
         </Link>
 
@@ -58,55 +58,55 @@ export default function DevotionalSeriesPage({ params }: { params: { slug: strin
         )}
 
         {!loading && error === 'not_found' && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <BookMarked className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>This devotional series doesn&rsquo;t exist or isn&rsquo;t published yet.</p>
           </div>
         )}
 
         {!loading && error && error !== 'not_found' && (
-          <div className="text-center py-16 text-navy/60">{error}</div>
+          <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>
         )}
 
         {!loading && !error && series && (
           <>
-            <h1 className="text-3xl font-serif text-navy mb-2">{series.title}</h1>
-            {series.description && <p className="text-navy/60 mb-8">{series.description}</p>}
+            <h1 className="text-3xl font-serif text-navy dark:text-cream mb-2">{series.title}</h1>
+            {series.description && <p className="text-navy/60 dark:text-cream/60 mb-8">{series.description}</p>}
 
             {series.entries.length === 0 ? (
-              <p className="text-navy/50 text-sm">No days have been published for this series yet.</p>
+              <p className="text-navy/50 dark:text-cream/50 text-sm">No days have been published for this series yet.</p>
             ) : (
               <ul className="space-y-3">
                 {series.entries.map(e => (
-                  <li key={e.id} className="rounded-xl bg-white border border-navy/8 overflow-hidden">
+                  <li key={e.id} className="rounded-xl bg-white dark:bg-navy-dark border border-navy/8 overflow-hidden">
                     <button
                       onClick={() => setOpenDay(openDay === e.day_number ? null : e.day_number)}
                       className="w-full flex items-center justify-between p-5 text-left"
                     >
                       <div>
-                        <span className="text-xs uppercase tracking-wide text-navy/40">Day {e.day_number}</span>
-                        <h3 className="font-serif text-navy">{e.title}</h3>
+                        <span className="text-xs uppercase tracking-wide text-navy/40 dark:text-cream/40">Day {e.day_number}</span>
+                        <h3 className="font-serif text-navy dark:text-cream">{e.title}</h3>
                       </div>
                     </button>
                     {openDay === e.day_number && (
                       <div className="px-5 pb-5">
-                        <div className="p-4 rounded-xl bg-cream border border-navy/8 mb-4">
-                          <p className="font-serif italic text-navy">{e.central_verse_reference}</p>
+                        <div className="p-4 rounded-xl bg-cream dark:bg-navy-dark border border-navy/8 mb-4">
+                          <p className="font-serif italic text-navy dark:text-cream">{e.central_verse_reference}</p>
                         </div>
-                        <p className="text-navy/80 leading-relaxed mb-4 whitespace-pre-wrap">{e.reflection}</p>
+                        <p className="text-navy/80 dark:text-cream/80 leading-relaxed mb-4 whitespace-pre-wrap">{e.reflection}</p>
                         {e.is_ai_generated && (
-                          <p className="text-xs text-navy/40 italic mb-4">
+                          <p className="text-xs text-navy/40 dark:text-cream/40 italic mb-4">
                             {e.ai_disclosure_text ?? 'This reflection was generated with AI assistance.'}
                           </p>
                         )}
                         <div className="p-4 rounded-xl bg-navy/5">
-                          <span className="text-xs uppercase tracking-wide text-navy/40 block mb-1">Prayer</span>
-                          <p className="text-navy/80 whitespace-pre-wrap">{e.guided_prayer}</p>
+                          <span className="text-xs uppercase tracking-wide text-navy/40 dark:text-cream/40 block mb-1">Prayer</span>
+                          <p className="text-navy/80 dark:text-cream/80 whitespace-pre-wrap">{e.guided_prayer}</p>
                         </div>
                         {e.practical_application && (
                           <div className="mt-4 p-4 rounded-xl bg-gold/10">
-                            <span className="text-xs uppercase tracking-wide text-navy/40 block mb-1">This Week</span>
-                            <p className="text-navy/80 whitespace-pre-wrap">{e.practical_application}</p>
+                            <span className="text-xs uppercase tracking-wide text-navy/40 dark:text-cream/40 block mb-1">This Week</span>
+                            <p className="text-navy/80 dark:text-cream/80 whitespace-pre-wrap">{e.practical_application}</p>
                           </div>
                         )}
                       </div>

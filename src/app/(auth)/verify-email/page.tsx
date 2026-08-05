@@ -28,8 +28,8 @@ function VerifyEmailContent() {
 
   if (status === 'loading') return (
     <div className="text-center">
-      <Loader className="w-10 h-10 text-navy/30 animate-spin mx-auto mb-4" />
-      <p className="font-body text-sm text-charcoal/50">Verifying your email address…</p>
+      <Loader className="w-10 h-10 text-navy/30 dark:text-cream/30 animate-spin mx-auto mb-4" />
+      <p className="font-body text-sm text-charcoal/50 dark:text-cream/50">Verifying your email address…</p>
     </div>
   )
 
@@ -38,8 +38,8 @@ function VerifyEmailContent() {
       <div className="w-16 h-16 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-6">
         <Check className="w-7 h-7 text-green-500" />
       </div>
-      <h1 className="font-display text-2xl font-semibold text-navy mb-3">Email verified!</h1>
-      <p className="text-charcoal/60 font-body text-sm leading-relaxed mb-8">{message}</p>
+      <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Email verified!</h1>
+      <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm leading-relaxed mb-8">{message}</p>
       <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 bg-navy hover:bg-navy-light text-white font-body font-medium text-sm rounded-full transition-colors">
         Sign in to your account →
       </Link>
@@ -51,8 +51,8 @@ function VerifyEmailContent() {
       <div className="w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-200 flex items-center justify-center mx-auto mb-6">
         <AlertTriangle className="w-7 h-7 text-amber-500" />
       </div>
-      <h1 className="font-display text-2xl font-semibold text-navy mb-3">Verification failed</h1>
-      <p className="text-charcoal/60 font-body text-sm leading-relaxed mb-8">{message}</p>
+      <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Verification failed</h1>
+      <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm leading-relaxed mb-8">{message}</p>
       <Link href="/register" className="text-gold hover:text-gold-dark font-body text-sm font-medium transition-colors">
         Create a new account →
       </Link>
@@ -62,7 +62,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="text-charcoal/40 font-body text-sm text-center">Loading…</div>}>
+    <Suspense fallback={<div className="text-charcoal/40 dark:text-cream/40 font-body text-sm text-center">Loading…</div>}>
       <VerifyEmailContent />
     </Suspense>
   )

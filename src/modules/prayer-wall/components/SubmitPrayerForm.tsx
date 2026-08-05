@@ -55,16 +55,16 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-navy/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed inset-x-3 bottom-0 sm:inset-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg z-50 bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl shadow-navy/25 flex flex-col max-h-[92vh]"
+      <div className="fixed inset-x-3 bottom-0 sm:inset-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg z-50 bg-white dark:bg-navy-dark rounded-t-3xl sm:rounded-3xl shadow-2xl shadow-navy/25 flex flex-col max-h-[92vh]"
         role="dialog" aria-modal="true" aria-label="Submit prayer request">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-navy/8 shrink-0">
           <div>
-            <h2 className="font-display text-xl font-semibold text-navy">Share a Prayer Request</h2>
-            <p className="text-xs text-charcoal/40 font-body mt-0.5">Step {step} of 2</p>
+            <h2 className="font-display text-xl font-semibold text-navy dark:text-cream">Share a Prayer Request</h2>
+            <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5">Step {step} of 2</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl text-charcoal/35 hover:text-navy hover:bg-navy/5 transition-colors" aria-label="Close">
+          <button onClick={onClose} className="p-2 rounded-xl text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream hover:bg-navy/5 transition-colors" aria-label="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -86,25 +86,25 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
             <>
               {/* Title */}
               <div>
-                <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">
+                <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">
                   Prayer Title <span className="text-red-400">*</span>
                 </label>
                 <input
                   value={title} onChange={e => setTitle(e.target.value)} maxLength={100}
                   placeholder="A short title for your prayer request…"
-                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy font-body text-sm outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all"
                 />
-                <p className="text-xs text-charcoal/30 font-body mt-1 text-right">{title.length}/100</p>
+                <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1 text-right">{title.length}/100</p>
               </div>
 
               {/* Category */}
               <div>
-                <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">Category</label>
+                <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Category</label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {PRAYER_CATEGORIES.map(cat => (
                     <button key={cat.id} onClick={() => setCategory(cat.id)}
                       className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border text-xs font-body transition-all ${
-                        category === cat.id ? 'border-navy bg-navy text-white' : 'border-navy/10 text-charcoal/55 hover:border-navy/25 hover:text-navy'
+                        category === cat.id ? 'border-navy bg-navy text-white' : 'border-navy/10 text-charcoal/55 dark:text-cream/55 hover:border-navy/25 hover:text-navy dark:text-cream'
                       }`}>
                       <span className="text-lg">{cat.icon}</span>
                       <span className="leading-tight text-center">{cat.label}</span>
@@ -115,33 +115,33 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
 
               {/* Prayer content */}
               <div>
-                <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">
+                <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">
                   Your Prayer Request <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={content} onChange={e => setContent(e.target.value)} rows={5} maxLength={2000}
                   placeholder="Share what you'd like the community to pray with you about… Be as specific as you feel comfortable."
-                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy font-body text-sm outline-none resize-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none resize-none transition-all"
                   style={{ caretColor: '#C9A84C' }}
                 />
-                <p className="text-xs text-charcoal/30 font-body mt-1 text-right">{content.length}/2000</p>
+                <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1 text-right">{content.length}/2000</p>
               </div>
 
               {/* Attachment */}
               <div>
-                <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">
-                  Attachment <span className="text-charcoal/30 font-normal normal-case">Optional — image or PDF</span>
+                <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">
+                  Attachment <span className="text-charcoal/30 dark:text-cream/30 font-normal normal-case">Optional — image or PDF</span>
                 </label>
                 {!attachment ? (
                   <button
                     onClick={() => fileRef.current?.click()}
                     className="w-full flex flex-col items-center gap-2 p-5 rounded-xl border-2 border-dashed border-navy/15 hover:border-gold/40 hover:bg-gold/4 transition-all group"
                   >
-                    <Upload className="w-6 h-6 text-navy/25 group-hover:text-gold transition-colors" />
-                    <span className="text-sm font-body text-charcoal/40 group-hover:text-navy transition-colors">
+                    <Upload className="w-6 h-6 text-navy/25 dark:text-cream/25 group-hover:text-gold transition-colors" />
+                    <span className="text-sm font-body text-charcoal/40 dark:text-cream/40 group-hover:text-navy dark:text-cream transition-colors">
                       Click to upload image or PDF
                     </span>
-                    <span className="text-xs text-charcoal/25 font-body">JPG, PNG, WebP, GIF, PDF — max 5MB</span>
+                    <span className="text-xs text-charcoal/25 dark:text-cream/25 font-body">JPG, PNG, WebP, GIF, PDF — max 5MB</span>
                   </button>
                 ) : (
                   <div className="rounded-xl border border-navy/12 overflow-hidden">
@@ -151,19 +151,19 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                         <img src={preview} alt="Attachment preview" className="w-full h-40 object-cover" />
                         <button
                           onClick={removeAttachment}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-charcoal/60 hover:text-red-500 shadow-sm"
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 dark:bg-navy-dark flex items-center justify-center text-charcoal/60 dark:text-cream/60 hover:text-red-500 shadow-sm"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-3 p-4">
-                        <FileText className="w-8 h-8 text-navy/40 shrink-0" />
+                        <FileText className="w-8 h-8 text-navy/40 dark:text-cream/40 shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-body font-medium text-navy truncate">{attachment.name}</p>
-                          <p className="text-xs text-charcoal/40 font-body">{(attachment.size / 1024).toFixed(0)} KB</p>
+                          <p className="text-sm font-body font-medium text-navy dark:text-cream truncate">{attachment.name}</p>
+                          <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">{(attachment.size / 1024).toFixed(0)} KB</p>
                         </div>
-                        <button onClick={removeAttachment} className="text-charcoal/30 hover:text-red-400 transition-colors">
+                        <button onClick={removeAttachment} className="text-charcoal/30 dark:text-cream/30 hover:text-red-400 transition-colors">
                           <X className="w-4 h-4" />
                         </button>
                       </div>
@@ -179,7 +179,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
             <>
               {/* Privacy — DEFAULT IS PRIVATE */}
               <div>
-                <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">
+                <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">
                   Privacy Setting
                 </label>
                 <div className="space-y-2">
@@ -193,13 +193,13 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                     >
                       <span className="text-xl">{opt.icon}</span>
                       <div className="flex-1">
-                        <p className={`text-sm font-body font-semibold ${privacy === opt.id ? 'text-navy' : 'text-charcoal/60'}`}>
+                        <p className={`text-sm font-body font-semibold ${privacy === opt.id ? 'text-navy dark:text-cream' : 'text-charcoal/60 dark:text-cream/60'}`}>
                           {opt.label} {opt.id === 'community' && <span className="text-xs text-gold font-normal">(Default)</span>}
                         </p>
-                        <p className="text-xs text-charcoal/40 font-body">{opt.description}</p>
+                        <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">{opt.description}</p>
                       </div>
                       <div className={`w-4 h-4 rounded-full border-2 transition-all ${privacy === opt.id ? 'border-navy bg-navy' : 'border-navy/20'}`}>
-                        {privacy === opt.id && <div className="w-2 h-2 bg-white rounded-full m-auto mt-[2px]" />}
+                        {privacy === opt.id && <div className="w-2 h-2 bg-white dark:bg-navy-dark rounded-full m-auto mt-[2px]" />}
                       </div>
                     </button>
                   ))}
@@ -209,21 +209,21 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
               {/* Display name (if not private/anonymous) */}
               {(privacy === 'community' || privacy === 'public') && (
                 <div>
-                  <label className="block text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-1.5">
-                    Display Name <span className="text-charcoal/30 font-normal normal-case">Optional</span>
+                  <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">
+                    Display Name <span className="text-charcoal/30 dark:text-cream/30 font-normal normal-case">Optional</span>
                   </label>
                   <input
                     value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={50}
                     placeholder="How should we show your name? (e.g. Sarah M.)"
-                    className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 text-navy font-body text-sm outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all"
                   />
                 </div>
               )}
 
               {/* Privacy notice */}
               <div className="flex items-start gap-2 p-3.5 rounded-xl bg-navy/4 border border-navy/8">
-                <Lock className="w-4 h-4 text-navy/40 shrink-0 mt-0.5" />
-                <p className="text-xs font-body text-charcoal/55 leading-relaxed">
+                <Lock className="w-4 h-4 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
+                <p className="text-xs font-body text-charcoal/55 dark:text-cream/55 leading-relaxed">
                   {privacy === 'private'
                     ? 'This request will only be visible to you. It will not appear on the Prayer Wall.'
                     : privacy === 'anonymous'
@@ -236,10 +236,10 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
               </div>
 
               {/* Request summary */}
-              <div className="p-4 rounded-xl bg-cream border border-navy/8">
-                <p className="text-xs font-body font-semibold text-navy/40 tracking-wider uppercase mb-2">Your Request Summary</p>
-                <p className="text-sm font-display font-semibold text-navy mb-1">{title}</p>
-                <p className="text-xs font-body text-charcoal/50 line-clamp-2">{content}</p>
+              <div className="p-4 rounded-xl bg-cream dark:bg-navy-dark border border-navy/8">
+                <p className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-wider uppercase mb-2">Your Request Summary</p>
+                <p className="text-sm font-display font-semibold text-navy dark:text-cream mb-1">{title}</p>
+                <p className="text-xs font-body text-charcoal/50 dark:text-cream/50 line-clamp-2">{content}</p>
                 {attachment && (
                   <p className="text-xs text-gold font-body font-medium mt-1.5">📎 {attachment.name}</p>
                 )}
@@ -251,7 +251,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
         {/* Footer */}
         <div className="px-6 py-4 border-t border-navy/8 flex gap-3 shrink-0">
           {step === 2 && (
-            <button onClick={() => setStep(1)} className="flex-1 py-3 border border-navy/15 text-navy/60 hover:text-navy text-sm font-body font-medium rounded-2xl transition-all">
+            <button onClick={() => setStep(1)} className="flex-1 py-3 border border-navy/15 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-sm font-body font-medium rounded-2xl transition-all">
               Back
             </button>
           )}

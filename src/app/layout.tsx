@@ -52,7 +52,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="min-h-screen bg-cream dark:bg-navy-dark text-charcoal dark:text-cream font-body antialiased transition-colors duration-200">
+      <body className="min-h-screen bg-cream dark:bg-navy-dark dark:bg-navy-dark text-charcoal dark:text-cream dark:text-cream font-body antialiased transition-colors duration-200">
         <ThemeProvider>
           <PWAProvider>
             {children}

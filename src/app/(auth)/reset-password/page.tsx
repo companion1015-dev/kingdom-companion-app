@@ -60,8 +60,8 @@ function ResetPasswordForm() {
         <div className="w-16 h-16 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-6">
           <Check className="w-7 h-7 text-green-500" />
         </div>
-        <h1 className="font-display text-2xl font-semibold text-navy mb-3">Password updated</h1>
-        <p className="text-charcoal/60 font-body text-sm leading-relaxed mb-8">
+        <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Password updated</h1>
+        <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm leading-relaxed mb-8">
           Your password has been reset. You have been signed out of all devices for your security.
         </p>
         <Link
@@ -80,8 +80,8 @@ function ResetPasswordForm() {
         <div className="w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-200 flex items-center justify-center mx-auto mb-6">
           <AlertTriangle className="w-7 h-7 text-amber-500" />
         </div>
-        <h1 className="font-display text-2xl font-semibold text-navy mb-3">Invalid link</h1>
-        <p className="text-charcoal/60 font-body text-sm mb-8">
+        <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Invalid link</h1>
+        <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm mb-8">
           This password reset link is invalid or has expired.
         </p>
         <Link href="/forgot-password" className="text-gold hover:text-gold-dark font-body text-sm font-medium transition-colors">
@@ -91,12 +91,12 @@ function ResetPasswordForm() {
     )
   }
 
-  const inputBase = 'w-full px-4 py-3 rounded-xl border border-navy/15 focus:border-gold/60 focus:ring-2 focus:ring-gold/15 font-body text-sm text-navy placeholder-charcoal/35 outline-none transition-all bg-white'
+  const inputBase = 'w-full px-4 py-3 rounded-xl border border-navy/15 focus:border-gold/60 focus:ring-2 focus:ring-gold/15 font-body text-sm text-navy dark:text-cream placeholder-charcoal/35 outline-none transition-all bg-white dark:bg-navy-dark'
 
   return (
     <>
-      <h1 className="font-display text-3xl font-semibold text-navy mb-2">Create new password</h1>
-      <p className="text-charcoal/55 font-body text-sm mb-8">
+      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-2">Create new password</h1>
+      <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-8">
         Choose a strong password for your account.
       </p>
 
@@ -108,7 +108,7 @@ function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             New password
           </label>
           <div className="relative">
@@ -117,7 +117,7 @@ function ResetPasswordForm() {
               className={`${inputBase} pr-12`}
             />
             <button type="button" onClick={() => setShowPw(v => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 hover:text-navy transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream transition-colors"
               aria-label={showPw ? 'Hide' : 'Show'}
             >
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -126,7 +126,7 @@ function ResetPasswordForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Confirm new password
           </label>
           <div className="relative">
@@ -135,7 +135,7 @@ function ResetPasswordForm() {
               className={`${inputBase} pr-12`}
             />
             <button type="button" onClick={() => setShowCpw(v => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 hover:text-navy transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream transition-colors"
               aria-label={showCpw ? 'Hide' : 'Show'}
             >
               {showCpw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -158,7 +158,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="text-charcoal/40 font-body text-sm">Loading…</div>}>
+    <Suspense fallback={<div className="text-charcoal/40 dark:text-cream/40 font-body text-sm">Loading…</div>}>
       <ResetPasswordForm />
     </Suspense>
   )

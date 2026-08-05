@@ -219,7 +219,7 @@ export default function BibleReader() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-navy-dark flex flex-col">
       <BibleToolbar
         currentBook={currentBook}
         currentChapter={chapter}
@@ -238,7 +238,7 @@ export default function BibleReader() {
         {panel && (
           <>
             <div className="fixed inset-0 z-20 bg-navy/20 backdrop-blur-sm" onClick={() => setPanel(null)} />
-            <div className="fixed left-0 top-14 bottom-0 z-30 w-80 bg-white shadow-2xl shadow-navy/20 flex flex-col">
+            <div className="fixed left-0 top-14 bottom-0 z-30 w-80 bg-white dark:bg-navy-dark shadow-2xl shadow-navy/20 flex flex-col">
               {panel === 'book'    && <BookSelector books={books} currentBookId={bookId} onSelect={b => { setBookId(b.bookId); setChapter(1); setPanel('chapter') }} onClose={() => setPanel(null)} />}
               {panel === 'chapter' && currentBook && <ChapterSelector book={currentBook} currentChapter={chapter} onSelect={c => { setChapter(c); setPanel(null) }} onClose={() => setPanel(null)} />}
               {panel === 'search'  && <BibleSearch translation={translation} onSelectVerse={handleSearchResult} onClose={() => setPanel(null)} />}
@@ -257,29 +257,29 @@ export default function BibleReader() {
                   <Image src="/images/logo.png" alt="" fill className="object-cover" sizes="32px" />
                 </div>
               </div>
-              <p className="text-xs font-body font-medium text-navy/35 tracking-widest uppercase mb-1">{translation}</p>
-              <h1 className="font-display text-3xl sm:text-4xl font-light text-navy">
+              <p className="text-xs font-body font-medium text-navy/35 dark:text-cream/35 tracking-widest uppercase mb-1">{translation}</p>
+              <h1 className="font-display text-3xl sm:text-4xl font-light text-navy dark:text-cream">
                 {currentBook?.name} {chapter}
               </h1>
-              {chapterData && <p className="text-xs text-charcoal/30 font-body mt-1">{chapterData.totalVerses} verses</p>}
+              {chapterData && <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1">{chapterData.totalVerses} verses</p>}
             </div>
 
             {/* Note format toggle — OLD vs NEW */}
             {!loading && !error && chapterData && Object.keys(studyState.notes).length > 0 && (
               <div className="flex items-center justify-end gap-2 mb-4">
-                <span className="text-xs text-charcoal/35 font-body">Notes:</span>
+                <span className="text-xs text-charcoal/35 dark:text-cream/35 font-body">Notes:</span>
                 <div className="flex bg-navy/5 rounded-lg p-0.5">
                   <button
                     onClick={() => setNoteFormat('popup')}
                     title="Old format: note link in verse actions"
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-body transition-all ${noteFormat === 'popup' ? 'bg-white text-navy shadow-sm' : 'text-charcoal/40 hover:text-navy'}`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-body transition-all ${noteFormat === 'popup' ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream'}`}
                   >
                     <FileText className="w-3 h-3" /> Links
                   </button>
                   <button
                     onClick={() => setNoteFormat('inline')}
                     title="New format: explanatory text under verse"
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-body transition-all ${noteFormat === 'inline' ? 'bg-white text-navy shadow-sm' : 'text-charcoal/40 hover:text-navy'}`}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-body transition-all ${noteFormat === 'inline' ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream'}`}
                   >
                     <AlignLeft className="w-3 h-3" /> Inline
                   </button>
@@ -300,7 +300,7 @@ export default function BibleReader() {
                   </div>
                 ))}
                 <div className="flex justify-center pt-4">
-                  <Loader2 className="w-5 h-5 text-navy/20 animate-spin" />
+                  <Loader2 className="w-5 h-5 text-navy/20 dark:text-cream/20 animate-spin" />
                 </div>
               </div>
             )}
@@ -308,8 +308,8 @@ export default function BibleReader() {
             {/* Error state */}
             {!loading && error && (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <WifiOff className="w-12 h-12 text-navy/20 mb-4" />
-                <p className="font-body text-sm text-charcoal/50 mb-2">{error}</p>
+                <WifiOff className="w-12 h-12 text-navy/20 dark:text-cream/20 mb-4" />
+                <p className="font-body text-sm text-charcoal/50 dark:text-cream/50 mb-2">{error}</p>
                 <button onClick={() => loadChapter(translation, bookId, chapter)} className="px-5 py-2 bg-navy text-white text-sm font-body font-medium rounded-full hover:bg-navy-light transition-colors">
                   Try again
                 </button>
@@ -337,12 +337,12 @@ export default function BibleReader() {
                         aria-label={`${verse.reference}: ${verse.text}. Press Enter for verse actions.`}
                       >
                         {/* Verse number */}
-                        <span className="select-none text-xs font-body font-semibold text-navy/30 mt-1 shrink-0 w-5 text-right leading-normal" aria-hidden="true">
+                        <span className="select-none text-xs font-body font-semibold text-navy/30 dark:text-cream/30 mt-1 shrink-0 w-5 text-right leading-normal" aria-hidden="true">
                           {verse.verseNumber}
                         </span>
 
                         {/* Verse text */}
-                        <p className="font-display text-navy/85 leading-relaxed flex-1" style={{ fontSize: `${fontSize}px`, lineHeight: '1.75' }}>
+                        <p className="font-display text-navy/85 dark:text-cream/85 leading-relaxed flex-1" style={{ fontSize: `${fontSize}px`, lineHeight: '1.75' }}>
                           {verse.text}
                           {/* OLD FORMAT: note link shown inline with verse text */}
                           {noteFormat === 'popup' && note && (
@@ -377,7 +377,7 @@ export default function BibleReader() {
                             <FileText className="w-2.5 h-2.5 text-gold/70 shrink-0" />
                             <span className="text-xs text-gold/70 font-body font-semibold">Your note</span>
                           </div>
-                          <p className="text-xs text-charcoal/60 font-body leading-relaxed line-clamp-3">
+                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed line-clamp-3">
                             {note.content}
                           </p>
                           {note.tags.length > 0 && (
@@ -412,7 +412,7 @@ export default function BibleReader() {
                     <Image src="/images/logo.png" alt="" fill className="object-cover" sizes="20px" />
                   </div>
                 </div>
-                <p className="text-xs text-charcoal/25 font-body leading-relaxed">
+                <p className="text-xs text-charcoal/25 dark:text-cream/25 font-body leading-relaxed">
                   Scripture quotations marked ({translation}) are taken from the Holy Bible,{' '}
                   {TRANSLATIONS.find(t => t.code === translation)?.name}. All rights reserved.
                 </p>
@@ -422,13 +422,13 @@ export default function BibleReader() {
 
           {/* Chapter nav */}
           {!loading && !error && chapterData && (
-            <div className="sticky bottom-0 bg-white/95 backdrop-blur-md border-t border-navy/8">
+            <div className="sticky bottom-0 bg-white/95 dark:bg-navy-dark backdrop-blur-md border-t border-navy/8">
               <div className="max-w-2xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
-                <button onClick={goToPrevChapter} disabled={!chapterData.previousChapter} className="flex items-center gap-2 px-4 py-2 rounded-full border border-navy/12 text-navy/60 hover:text-navy hover:border-navy/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-body font-medium">
+                <button onClick={goToPrevChapter} disabled={!chapterData.previousChapter} className="flex items-center gap-2 px-4 py-2 rounded-full border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream hover:border-navy/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-body font-medium">
                   <ChevronLeft className="w-4 h-4" /> Previous
                 </button>
-                <span className="text-xs text-charcoal/30 font-body">{currentBook?.name} {chapter} · {translation}</span>
-                <button onClick={goToNextChapter} disabled={!chapterData.nextChapter} className="flex items-center gap-2 px-4 py-2 rounded-full border border-navy/12 text-navy/60 hover:text-navy hover:border-navy/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-body font-medium">
+                <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body">{currentBook?.name} {chapter} · {translation}</span>
+                <button onClick={goToNextChapter} disabled={!chapterData.nextChapter} className="flex items-center gap-2 px-4 py-2 rounded-full border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream hover:border-navy/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-body font-medium">
                   Next <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

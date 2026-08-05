@@ -47,7 +47,7 @@ export default function DailyEncouragementSection() {
             <Sunrise className="w-4 h-4" />
             <span className="text-xs font-body font-medium tracking-widest uppercase">Daily Encouragement</span>
           </div>
-          <div className="flex-1 h-px bg-white/10" />
+          <div className="flex-1 h-px bg-white/10 dark:bg-navy-dark" />
           <span className="text-xs text-white/30 font-body">{todayLabel}</span>
         </div>
 
@@ -69,11 +69,11 @@ export default function DailyEncouragementSection() {
 
           {loading && (
             <div className="animate-pulse space-y-4">
-              <div className="h-8 w-3/4 bg-white/10 rounded" />
-              <div className="h-4 w-1/3 bg-white/10 rounded" />
-              <div className="h-px bg-white/10 my-6" />
-              <div className="h-4 w-full bg-white/8 rounded" />
-              <div className="h-4 w-5/6 bg-white/8 rounded" />
+              <div className="h-8 w-3/4 bg-white/10 dark:bg-navy-dark rounded" />
+              <div className="h-4 w-1/3 bg-white/10 dark:bg-navy-dark rounded" />
+              <div className="h-px bg-white/10 dark:bg-navy-dark my-6" />
+              <div className="h-4 w-full bg-white/8 dark:bg-navy-dark rounded" />
+              <div className="h-4 w-5/6 bg-white/8 dark:bg-navy-dark rounded" />
             </div>
           )}
 
@@ -103,7 +103,7 @@ export default function DailyEncouragementSection() {
               </p>
 
               {/* Challenge */}
-              <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/8 mb-8">
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 dark:bg-navy-dark border border-white/8 mb-8">
                 <span className="text-base mt-0.5">📖</span>
                 <div>
                   <span className="text-xs text-gold/70 font-body font-medium tracking-wider uppercase block mb-1">Today&rsquo;s Challenge</span>

@@ -82,7 +82,7 @@ export default function HeroSection() {
           <div className="flex justify-center mb-10 animate-fade-in">
               <a
               href={`/bible?book=${dailyVerse.book_id}&chapter=${dailyVerse.chapter}`}
-              className="inline-flex items-center gap-2.5 glass rounded-full px-5 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/12 transition-all group"
+              className="inline-flex items-center gap-2.5 glass rounded-full px-5 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/12 dark:bg-navy-dark transition-all group"
             >
               <BookOpen className="w-3.5 h-3.5 text-gold" />
               <span className="font-display italic text-white/70">&ldquo;{dailyVerse.text.slice(0, 55)}…&rdquo;</span>
@@ -189,8 +189,8 @@ export default function HeroSection() {
                 className={`
                   inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200
                   ${input.trim()
-                    ? 'bg-gold hover:bg-gold-light text-navy shadow-lg shadow-gold/20 hover:scale-105'
-                    : 'bg-white/10 text-white/30 cursor-not-allowed'
+                    ? 'bg-gold hover:bg-gold-light text-navy dark:text-cream shadow-lg shadow-gold/20 hover:scale-105'
+                    : 'bg-white/10 dark:bg-navy-dark text-white/30 cursor-not-allowed'
                   }
                 `}
               >
@@ -215,7 +215,7 @@ export default function HeroSection() {
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-30">
         <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center pt-1.5">
-          <div className="w-1 h-2 rounded-full bg-white/60" />
+          <div className="w-1 h-2 rounded-full bg-white/60 dark:bg-navy-dark" />
         </div>
       </div>
     </section>

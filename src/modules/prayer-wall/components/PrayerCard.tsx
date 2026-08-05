@@ -99,7 +99,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
   }
 
   return (
-    <div className={`bg-white rounded-2xl border transition-all duration-200 hover:shadow-md hover:shadow-navy/8 ${
+    <div className={`bg-white dark:bg-navy-dark rounded-2xl border transition-all duration-200 hover:shadow-md hover:shadow-navy/8 ${
       prayer.is_featured ? 'border-gold/30 shadow-sm shadow-gold/10' : 'border-navy/8'
     }`}>
       {/* Featured banner */}
@@ -122,29 +122,29 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
               }
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-body font-semibold text-navy truncate">
+              <p className="text-sm font-body font-semibold text-navy dark:text-cream truncate">
                 {prayer.display_name ?? 'Anonymous'}
               </p>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {flag && <span className="text-xs">{flag}</span>}
-                <span className="text-xs text-charcoal/35 font-body flex items-center gap-1">
+                <span className="text-xs text-charcoal/35 dark:text-cream/35 font-body flex items-center gap-1">
                   <Clock className="w-2.5 h-2.5" /> {formatPrayerTime(prayer.created_at)}
                 </span>
               </div>
             </div>
           </div>
           {/* Category badge */}
-          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-navy/5 text-xs font-body text-navy/60 font-medium">
+          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-navy/5 text-xs font-body text-navy/60 dark:text-cream/60 font-medium">
             {cat?.icon} {cat?.label}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="font-display text-lg font-semibold text-navy mb-2">{prayer.title}</h3>
+        <h3 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">{prayer.title}</h3>
 
         {/* Content */}
         <div>
-          <p className="text-sm font-body text-charcoal/65 leading-relaxed">{display}</p>
+          <p className="text-sm font-body text-charcoal/65 dark:text-cream/65 leading-relaxed">{display}</p>
           {isLong && (
             <button
               onClick={() => setExpanded(e => !e)}
@@ -164,9 +164,9 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
               </div>
             ) : (
               <a href={prayer.attachment_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2.5 p-3 rounded-xl border border-navy/8 hover:border-gold/20 bg-cream transition-colors group">
-                <FileText className="w-5 h-5 text-navy/40 group-hover:text-gold transition-colors" />
-                <span className="text-sm font-body text-navy/60 group-hover:text-navy">View attachment</span>
+                className="flex items-center gap-2.5 p-3 rounded-xl border border-navy/8 hover:border-gold/20 bg-cream dark:bg-navy-dark transition-colors group">
+                <FileText className="w-5 h-5 text-navy/40 dark:text-cream/40 group-hover:text-gold transition-colors" />
+                <span className="text-sm font-body text-navy/60 dark:text-cream/60 group-hover:text-navy dark:text-cream">View attachment</span>
               </a>
             )}
           </div>
@@ -174,12 +174,12 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
 
         {/* Stats */}
         <div className="flex items-center gap-4 mt-4 pb-4 border-b border-navy/6">
-          <span className="flex items-center gap-1.5 text-xs text-charcoal/45 font-body">
+          <span className="flex items-center gap-1.5 text-xs text-charcoal/45 dark:text-cream/45 font-body">
             <Heart className={`w-3.5 h-3.5 ${prayed ? 'text-red-400 fill-current' : ''}`} />
             {prayCount} {prayCount === 1 ? 'person praying' : 'people praying'}
           </span>
           {(prayer.encouragement_count ?? 0) > 0 && (
-            <span className="flex items-center gap-1.5 text-xs text-charcoal/35 font-body">
+            <span className="flex items-center gap-1.5 text-xs text-charcoal/35 dark:text-cream/35 font-body">
               <MessageSquare className="w-3.5 h-3.5" />
               {prayer.encouragement_count} encouragements
             </span>
@@ -205,7 +205,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
           {/* Encourage */}
           <button
             onClick={() => { setShowEnc(e => !e); setShowVerse(false); setShowReport(false) }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border border-navy/12 text-navy/60 hover:border-navy/25 hover:text-navy transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/25 hover:text-navy dark:text-cream transition-all"
           >
             <MessageSquare className="w-3.5 h-3.5" /> Encourage
           </button>
@@ -213,7 +213,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
           {/* Share Scripture */}
           <button
             onClick={() => { setShowVerse(e => !e); setShowEnc(false); setShowReport(false) }}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border border-navy/12 text-navy/60 hover:border-navy/25 hover:text-navy transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/25 hover:text-navy dark:text-cream transition-all"
           >
             <BookOpen className="w-3.5 h-3.5" /> Scripture
           </button>
@@ -222,7 +222,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
           <button
             onClick={handleSave}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border transition-all ${
-              saved ? 'border-gold/40 text-gold bg-gold/8' : 'border-navy/12 text-navy/60 hover:border-navy/25 hover:text-navy'
+              saved ? 'border-gold/40 text-gold bg-gold/8' : 'border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/25 hover:text-navy dark:text-cream'
             }`}
           >
             <Bookmark className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} /> {saved ? 'Saved' : 'Save'}
@@ -231,7 +231,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
           {/* Share */}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border border-navy/12 text-navy/60 hover:border-navy/25 hover:text-navy transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-body font-medium border border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/25 hover:text-navy dark:text-cream transition-all"
           >
             <Share2 className="w-3.5 h-3.5" /> Share
           </button>
@@ -250,7 +250,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
           {!isOwner && (
             <button
               onClick={() => { setShowReport(e => !e); setShowEnc(false); setShowVerse(false) }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-body text-charcoal/30 hover:text-red-400 transition-colors ml-auto"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-body text-charcoal/30 dark:text-cream/30 hover:text-red-400 transition-colors ml-auto"
             >
               <Flag className="w-3 h-3" /> Report
             </button>
@@ -259,18 +259,18 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
 
         {/* Encouragement input */}
         {showEnc && (
-          <div className="mt-4 p-4 rounded-xl bg-cream border border-navy/8">
-            <p className="text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-2">Send Encouragement</p>
+          <div className="mt-4 p-4 rounded-xl bg-cream dark:bg-navy-dark border border-navy/8">
+            <p className="text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-2">Send Encouragement</p>
             <textarea
               value={encText}
               onChange={e => setEncText(e.target.value)}
               placeholder="Write a word of encouragement…"
               rows={3}
               maxLength={500}
-              className="w-full bg-white rounded-lg border border-navy/10 px-3 py-2 text-sm font-body text-navy placeholder-charcoal/30 outline-none focus:border-gold/40 resize-none"
+              className="w-full bg-white dark:bg-navy-dark rounded-lg border border-navy/10 px-3 py-2 text-sm font-body text-navy dark:text-cream placeholder-charcoal/30 outline-none focus:border-gold/40 resize-none"
             />
             <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-charcoal/30 font-body">{encText.length}/500</span>
+              <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body">{encText.length}/500</span>
               <button
                 onClick={handleEncouragement}
                 disabled={!encText.trim() || loading === 'enc'}
@@ -284,14 +284,14 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
 
         {/* Scripture input */}
         {showVerse && (
-          <div className="mt-4 p-4 rounded-xl bg-cream border border-navy/8">
-            <p className="text-xs font-body font-semibold text-navy/50 tracking-wider uppercase mb-2">Share a Scripture</p>
+          <div className="mt-4 p-4 rounded-xl bg-cream dark:bg-navy-dark border border-navy/8">
+            <p className="text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-2">Share a Scripture</p>
             <input
               value={verseText}
               onChange={e => setVerseText(e.target.value)}
               placeholder='e.g. "Cast all your anxiety on him" — 1 Peter 5:7'
               maxLength={300}
-              className="w-full bg-white rounded-lg border border-navy/10 px-3 py-2.5 text-sm font-body text-navy placeholder-charcoal/30 outline-none focus:border-gold/40"
+              className="w-full bg-white dark:bg-navy-dark rounded-lg border border-navy/10 px-3 py-2.5 text-sm font-body text-navy dark:text-cream placeholder-charcoal/30 outline-none focus:border-gold/40"
             />
             <div className="flex justify-end mt-2">
               <button
@@ -315,7 +315,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
                   key={r}
                   onClick={() => setReportReason(r)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-body border transition-all text-left ${
-                    reportReason === r ? 'bg-red-100 border-red-300 text-red-700 font-semibold' : 'border-red-100 text-charcoal/50 hover:border-red-200'
+                    reportReason === r ? 'bg-red-100 border-red-300 text-red-700 font-semibold' : 'border-red-100 text-charcoal/50 dark:text-cream/50 hover:border-red-200'
                   }`}
                 >
                   {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -323,7 +323,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
               ))}
             </div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowReport(false)} className="px-3 py-1.5 text-xs font-body text-charcoal/40 hover:text-navy">Cancel</button>
+              <button onClick={() => setShowReport(false)} className="px-3 py-1.5 text-xs font-body text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream">Cancel</button>
               <button
                 onClick={handleReport}
                 disabled={!reportReason || loading === 'report'}

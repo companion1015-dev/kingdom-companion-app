@@ -24,13 +24,13 @@ export default function MissionStrip() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/bible"
-            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gold hover:bg-gold-light text-navy font-body font-medium text-sm rounded-full transition-all duration-200 hover:scale-105"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gold hover:bg-gold-light text-navy dark:text-cream font-body font-medium text-sm rounded-full transition-all duration-200 hover:scale-105"
           >
             📖 Open the Bible
           </Link>
           <Link
             href="/register"
-            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border border-white/20 hover:border-white/40 text-white hover:bg-white/8 font-body font-medium text-sm rounded-full transition-all duration-200"
+            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border border-white/20 hover:border-white/40 text-white hover:bg-white/8 dark:bg-navy-dark font-body font-medium text-sm rounded-full transition-all duration-200"
           >
             Create free account
           </Link>

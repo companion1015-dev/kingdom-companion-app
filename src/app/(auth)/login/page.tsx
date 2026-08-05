@@ -47,13 +47,13 @@ export default function LoginPage() {
     }
   }
 
-  const inputBase   = 'w-full px-4 py-3 rounded-xl border font-body text-sm text-navy placeholder-charcoal/35 outline-none transition-all duration-200 bg-white'
+  const inputBase   = 'w-full px-4 py-3 rounded-xl border font-body text-sm text-navy dark:text-cream placeholder-charcoal/35 outline-none transition-all duration-200 bg-white dark:bg-navy-dark'
   const inputNormal = `${inputBase} border-navy/15 focus:border-gold/60 focus:ring-2 focus:ring-gold/15`
 
   return (
     <>
-      <h1 className="font-display text-3xl font-semibold text-navy mb-1">Welcome back</h1>
-      <p className="text-charcoal/55 font-body text-sm mb-8">
+      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-1">Welcome back</h1>
+      <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-8">
         Sign in to continue your spiritual journey.
       </p>
 
@@ -66,7 +66,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
         <div>
-          <label className="block text-xs font-body font-medium text-navy/60 mb-1.5 tracking-wide uppercase">
+          <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
             Email address
           </label>
           <input
@@ -78,7 +78,7 @@ export default function LoginPage() {
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-body font-medium text-navy/60 tracking-wide uppercase">
+            <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 tracking-wide uppercase">
               Password
             </label>
             <Link href="/forgot-password" className="text-xs text-gold hover:text-gold-dark transition-colors font-body">
@@ -93,7 +93,7 @@ export default function LoginPage() {
             />
             <button
               type="button" onClick={() => setShowPw(v => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 hover:text-navy transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-charcoal/35 dark:text-cream/35 hover:text-navy dark:text-cream transition-colors"
               aria-label={showPw ? 'Hide password' : 'Show password'}
             >
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -118,18 +118,18 @@ export default function LoginPage() {
           <div className="w-full border-t border-navy/8" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-cream px-4 text-xs text-charcoal/35 font-body">or continue without an account</span>
+          <span className="bg-cream dark:bg-navy-dark px-4 text-xs text-charcoal/35 dark:text-cream/35 font-body">or continue without an account</span>
         </div>
       </div>
 
       <Link
         href="/bible"
-        className="w-full flex items-center justify-center gap-2 py-3.5 border border-navy/15 hover:border-navy/30 text-navy/70 hover:text-navy font-body font-medium text-sm rounded-xl transition-all duration-200"
+        className="w-full flex items-center justify-center gap-2 py-3.5 border border-navy/15 hover:border-navy/30 text-navy/70 dark:text-cream/70 hover:text-navy dark:text-cream font-body font-medium text-sm rounded-xl transition-all duration-200"
       >
         📖 Read the Bible — no account needed
       </Link>
 
-      <p className="mt-6 text-center text-sm font-body text-charcoal/50">
+      <p className="mt-6 text-center text-sm font-body text-charcoal/50 dark:text-cream/50">
         Don&apos;t have an account?{' '}
         <Link href="/register" className="text-gold font-medium hover:text-gold-dark transition-colors">
           Create one free

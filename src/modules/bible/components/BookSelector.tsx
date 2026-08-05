@@ -32,10 +32,10 @@ export default function BookSelector({ books, currentBookId, onSelect, onClose }
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-navy/10">
-        <h2 className="font-display text-lg font-semibold text-navy">Choose a Book</h2>
+        <h2 className="font-display text-lg font-semibold text-navy dark:text-cream">Choose a Book</h2>
         <button
           onClick={onClose}
-          className="p-2 rounded-lg text-charcoal/40 hover:text-navy hover:bg-navy/5 transition-colors"
+          className="p-2 rounded-lg text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream hover:bg-navy/5 transition-colors"
           aria-label="Close book selector"
         >
           <X className="w-5 h-5" />
@@ -51,7 +51,7 @@ export default function BookSelector({ books, currentBookId, onSelect, onClose }
             className={`flex-1 py-2 rounded-lg text-sm font-body font-medium transition-all ${
               testament === t
                 ? 'bg-navy text-white'
-                : 'text-charcoal/50 hover:bg-navy/5 hover:text-navy'
+                : 'text-charcoal/50 dark:text-cream/50 hover:bg-navy/5 hover:text-navy dark:text-cream'
             }`}
           >
             {t === 'OT' ? 'Old Testament' : 'New Testament'}
@@ -67,12 +67,12 @@ export default function BookSelector({ books, currentBookId, onSelect, onClose }
               onClick={() => toggleGroup(group)}
               className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-navy/3 transition-colors"
             >
-              <span className="text-xs font-body font-semibold text-navy/40 tracking-widest uppercase">
+              <span className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase">
                 {group}
               </span>
               {openGroups[group]
-                ? <ChevronDown className="w-3.5 h-3.5 text-navy/30" />
-                : <ChevronRight className="w-3.5 h-3.5 text-navy/30" />
+                ? <ChevronDown className="w-3.5 h-3.5 text-navy/30 dark:text-cream/30" />
+                : <ChevronRight className="w-3.5 h-3.5 text-navy/30 dark:text-cream/30" />
               }
             </button>
 
@@ -86,12 +86,12 @@ export default function BookSelector({ books, currentBookId, onSelect, onClose }
                       px-3 py-2.5 rounded-lg text-left transition-all duration-150
                       ${book.bookId === currentBookId
                         ? 'bg-navy text-white'
-                        : 'hover:bg-navy/8 text-charcoal/70 hover:text-navy'
+                        : 'hover:bg-navy/8 text-charcoal/70 dark:text-cream/70 hover:text-navy dark:text-cream'
                       }
                     `}
                   >
                     <span className="block text-sm font-body font-medium truncate">{book.name}</span>
-                    <span className={`text-xs ${book.bookId === currentBookId ? 'text-white/60' : 'text-charcoal/35'}`}>
+                    <span className={`text-xs ${book.bookId === currentBookId ? 'text-white/60' : 'text-charcoal/35 dark:text-cream/35'}`}>
                       {book.chapterCount} ch.
                     </span>
                   </button>

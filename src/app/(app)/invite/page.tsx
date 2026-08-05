@@ -53,14 +53,14 @@ export default function InviteDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-2xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-          <Users className="w-7 h-7 text-navy" />
-          <h1 className="text-3xl font-serif text-navy">Invite Friends</h1>
+          <Users className="w-7 h-7 text-navy dark:text-cream" />
+          <h1 className="text-3xl font-serif text-navy dark:text-cream">Invite Friends</h1>
         </div>
-        <p className="text-navy/60 mb-8">
+        <p className="text-navy/60 dark:text-cream/60 mb-8">
           Share Kingdom Companion with someone who could use a little encouragement today. Always free, no strings attached.
         </p>
 
@@ -71,8 +71,8 @@ export default function InviteDashboardPage() {
         )}
 
         {!loading && error && (
-          <div className="bg-white rounded-2xl border border-navy/8 p-8 text-center">
-            <p className="text-charcoal/55 font-body text-sm mb-4">{error}</p>
+          <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-8 text-center">
+            <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-4">{error}</p>
             {error.includes('sign in') && (
               <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all">
                 Sign In
@@ -84,10 +84,10 @@ export default function InviteDashboardPage() {
         {!loading && data && (
           <>
             {/* Your link */}
-            <div className="bg-white rounded-2xl border border-navy/8 p-6 mb-5">
-              <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">Your Invite Link</label>
+            <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 mb-5">
+              <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">Your Invite Link</label>
               <div className="flex items-center gap-2">
-                <div className="flex-1 px-4 py-3 rounded-xl bg-cream border border-navy/10 text-navy font-body text-sm truncate">
+                <div className="flex-1 px-4 py-3 rounded-xl bg-cream dark:bg-navy-dark border border-navy/10 text-navy dark:text-cream font-body text-sm truncate">
                   {data.link}
                 </div>
                 <button onClick={handleCopy}
@@ -98,14 +98,14 @@ export default function InviteDashboardPage() {
             </div>
 
             {/* Share channels */}
-            <div className="bg-white rounded-2xl border border-navy/8 p-6 mb-5">
-              <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">Share Via</label>
+            <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 mb-5">
+              <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">Share Via</label>
               <div className="grid grid-cols-4 gap-3">
                 {SHARE_CHANNELS.map(channel => (
                   <button key={channel.id} onClick={() => handleShare(channel.id)}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-navy/8 hover:border-gold/30 hover:bg-cream transition-all">
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-navy/8 hover:border-gold/30 hover:bg-cream dark:bg-navy-dark transition-all">
                     <span className="text-xl">{channel.icon}</span>
-                    <span className="text-[10px] font-body text-charcoal/55 text-center leading-tight">{channel.label}</span>
+                    <span className="text-[10px] font-body text-charcoal/55 dark:text-cream/55 text-center leading-tight">{channel.label}</span>
                   </button>
                 ))}
               </div>
@@ -113,35 +113,35 @@ export default function InviteDashboardPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="bg-white rounded-2xl border border-navy/8 p-4 text-center">
-                <TrendingUp className="w-4 h-4 text-navy/40 mx-auto mb-1.5" />
-                <p className="font-display text-2xl font-light text-navy">{data.clicks}</p>
-                <p className="text-xs text-charcoal/45 font-body">Clicks</p>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-4 text-center">
+                <TrendingUp className="w-4 h-4 text-navy/40 dark:text-cream/40 mx-auto mb-1.5" />
+                <p className="font-display text-2xl font-light text-navy dark:text-cream">{data.clicks}</p>
+                <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body">Clicks</p>
               </div>
-              <div className="bg-white rounded-2xl border border-navy/8 p-4 text-center">
-                <UserPlus className="w-4 h-4 text-navy/40 mx-auto mb-1.5" />
-                <p className="font-display text-2xl font-light text-navy">{data.pending}</p>
-                <p className="text-xs text-charcoal/45 font-body">Joined</p>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-4 text-center">
+                <UserPlus className="w-4 h-4 text-navy/40 dark:text-cream/40 mx-auto mb-1.5" />
+                <p className="font-display text-2xl font-light text-navy dark:text-cream">{data.pending}</p>
+                <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body">Joined</p>
               </div>
-              <div className="bg-white rounded-2xl border border-navy/8 p-4 text-center">
-                <ShieldCheck className="w-4 h-4 text-navy/40 mx-auto mb-1.5" />
-                <p className="font-display text-2xl font-light text-navy">{data.successful}</p>
-                <p className="text-xs text-charcoal/45 font-body">Verified</p>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-4 text-center">
+                <ShieldCheck className="w-4 h-4 text-navy/40 dark:text-cream/40 mx-auto mb-1.5" />
+                <p className="font-display text-2xl font-light text-navy dark:text-cream">{data.successful}</p>
+                <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body">Verified</p>
               </div>
             </div>
 
             {/* Recent activity */}
             {data.recent.length > 0 && (
-              <div className="bg-white rounded-2xl border border-navy/8 p-6">
-                <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">Recent Activity</label>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6">
+                <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">Recent Activity</label>
                 <div className="space-y-2">
                   {data.recent.map((r, i) => (
                     <div key={i} className="flex items-center justify-between py-2 border-b border-navy/6 last:border-0">
-                      <span className="text-sm font-body text-charcoal/60 capitalize">
+                      <span className="text-sm font-body text-charcoal/60 dark:text-cream/60 capitalize">
                         {r.status === 'verified' ? '✅ Someone joined and verified' : r.status === 'registered' ? '👋 Someone signed up' : '🔗 Link clicked'}
-                        {r.source && <span className="text-charcoal/35"> via {r.source}</span>}
+                        {r.source && <span className="text-charcoal/35 dark:text-cream/35"> via {r.source}</span>}
                       </span>
-                      <span className="text-xs text-charcoal/30 font-body shrink-0">{new Date(r.created_at).toLocaleDateString()}</span>
+                      <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body shrink-0">{new Date(r.created_at).toLocaleDateString()}</span>
                     </div>
                   ))}
                 </div>
@@ -149,8 +149,8 @@ export default function InviteDashboardPage() {
             )}
 
             {data.recent.length === 0 && (
-              <div className="bg-white rounded-2xl border border-navy/8 p-8 text-center">
-                <p className="text-charcoal/45 font-body text-sm">No activity yet — share your link above to get started.</p>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-8 text-center">
+                <p className="text-charcoal/45 dark:text-cream/45 font-body text-sm">No activity yet — share your link above to get started.</p>
               </div>
             )}
           </>

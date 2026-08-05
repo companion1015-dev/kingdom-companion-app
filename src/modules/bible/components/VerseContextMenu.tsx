@@ -53,15 +53,15 @@ export default function VerseContextMenu({
   return (
     <div
       ref={ref}
-      className="fixed z-50 w-56 bg-white rounded-2xl shadow-2xl shadow-navy/20 border border-navy/8 overflow-hidden"
+      className="fixed z-50 w-56 bg-white dark:bg-navy-dark rounded-2xl shadow-2xl shadow-navy/20 border border-navy/8 overflow-hidden"
       style={{ left, top }}
       role="menu"
       aria-label={`Actions for ${verse.reference}`}
     >
       {/* Reference header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-navy/4 border-b border-navy/8">
-        <span className="text-xs font-body font-semibold text-navy/60">{verse.reference}</span>
-        <button onClick={onClose} className="text-charcoal/30 hover:text-navy transition-colors" aria-label="Close">
+        <span className="text-xs font-body font-semibold text-navy/60 dark:text-cream/60">{verse.reference}</span>
+        <button onClick={onClose} className="text-charcoal/30 dark:text-cream/30 hover:text-navy dark:text-cream transition-colors" aria-label="Close">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -69,16 +69,16 @@ export default function VerseContextMenu({
       {/* Existing note preview — OLD FORMAT: shown inline in popup */}
       {hasNote && (
         <div className="px-4 py-2.5 bg-gold/8 border-b border-gold/15">
-          <p className="text-xs text-charcoal/50 font-body font-medium mb-0.5">Your note:</p>
-          <p className="text-xs text-navy/70 font-body leading-relaxed line-clamp-2">{noteContent}</p>
+          <p className="text-xs text-charcoal/50 dark:text-cream/50 font-body font-medium mb-0.5">Your note:</p>
+          <p className="text-xs text-navy/70 dark:text-cream/70 font-body leading-relaxed line-clamp-2">{noteContent}</p>
         </div>
       )}
 
       {/* Highlight colours */}
       <div className="px-4 py-2.5 border-b border-navy/8">
         <div className="flex items-center gap-2 mb-2">
-          <Highlighter className="w-3 h-3 text-charcoal/35" />
-          <span className="text-xs text-charcoal/35 font-body">Highlight</span>
+          <Highlighter className="w-3 h-3 text-charcoal/35 dark:text-cream/35" />
+          <span className="text-xs text-charcoal/35 dark:text-cream/35 font-body">Highlight</span>
         </div>
         <div className="flex gap-2">
           {HIGHLIGHT_COLORS.map(color => (
@@ -102,7 +102,7 @@ export default function VerseContextMenu({
             className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
               gold
                 ? 'text-gold hover:bg-gold/6'
-                : 'text-charcoal/65 hover:bg-navy/4 hover:text-navy'
+                : 'text-charcoal/65 dark:text-cream/65 hover:bg-navy/4 hover:text-navy dark:text-cream'
             }`}
           >
             <Icon className="w-3.5 h-3.5 shrink-0" />

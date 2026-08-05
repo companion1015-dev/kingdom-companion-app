@@ -29,14 +29,14 @@ export default function TopicsSection() {
   const visible = topics?.slice(0, HOMEPAGE_LIMIT) ?? []
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-cream" aria-labelledby="topics-heading">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-navy-dark" aria-labelledby="topics-heading">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <h2 id="topics-heading" className="font-display text-3xl font-light text-navy mb-1">
+            <h2 id="topics-heading" className="font-display text-3xl font-light text-navy dark:text-cream mb-1">
               Scripture by Topic
             </h2>
-            <p className="text-charcoal/50 font-body text-sm">
+            <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm">
               Find what God&rsquo;s Word says about what matters to you.
             </p>
           </div>
@@ -57,14 +57,14 @@ export default function TopicsSection() {
 
         {/* Error */}
         {error && (
-          <p className="text-center text-charcoal/40 font-body text-sm py-10">
+          <p className="text-center text-charcoal/40 dark:text-cream/40 font-body text-sm py-10">
             Topics couldn&rsquo;t be loaded right now.
           </p>
         )}
 
         {/* Empty — honest, no invented examples */}
         {topics !== null && !error && visible.length === 0 && (
-          <p className="text-center text-charcoal/40 font-body text-sm py-10">
+          <p className="text-center text-charcoal/40 dark:text-cream/40 font-body text-sm py-10">
             Topics are coming soon.
           </p>
         )}
@@ -76,9 +76,9 @@ export default function TopicsSection() {
               <Link
                 key={topic.slug}
                 href={`/topics/${topic.slug}`}
-                className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white hover:bg-cream border border-navy/8 hover:border-gold/20 text-center transition-all duration-200 group hover:shadow-md hover:shadow-navy/8 hover:-translate-y-0.5"
+                className="flex flex-col items-center justify-center p-4 rounded-2xl bg-white dark:bg-navy-dark hover:bg-cream dark:bg-navy-dark border border-navy/8 hover:border-gold/20 text-center transition-all duration-200 group hover:shadow-md hover:shadow-navy/8 hover:-translate-y-0.5"
               >
-                <span className="font-body text-xs font-medium text-navy/80 group-hover:text-navy">{topic.name}</span>
+                <span className="font-body text-xs font-medium text-navy/80 dark:text-cream/80 group-hover:text-navy dark:text-cream">{topic.name}</span>
               </Link>
             ))}
           </div>

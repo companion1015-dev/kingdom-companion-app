@@ -32,10 +32,10 @@ export default function TopicDetailPage({ params }: { params: { slug: string } }
   useEffect(() => { load() }, [load])
 
   return (
-    <div className="min-h-screen bg-cream-gradient">
+    <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
       <main className="max-w-3xl mx-auto px-4 py-10">
-        <Link href="/topics" className="inline-flex items-center gap-1.5 text-sm text-navy/60 hover:text-navy mb-6">
+        <Link href="/topics" className="inline-flex items-center gap-1.5 text-sm text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream mb-6">
           <ArrowLeft className="w-4 h-4" /> All Topics
         </Link>
 
@@ -46,26 +46,26 @@ export default function TopicDetailPage({ params }: { params: { slug: string } }
         )}
 
         {!loading && error === 'not_found' && (
-          <div className="text-center py-16 text-navy/50">
+          <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <Compass className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>This topic doesn&rsquo;t exist or isn&rsquo;t published yet.</p>
           </div>
         )}
 
         {!loading && error && error !== 'not_found' && (
-          <div className="text-center py-16 text-navy/60">{error}</div>
+          <div className="text-center py-16 text-navy/60 dark:text-cream/60">{error}</div>
         )}
 
         {!loading && !error && topic && (
           <>
-            <h1 className="text-3xl font-serif text-navy mb-2">{topic.name}</h1>
-            <p className="text-navy/60 mb-8 leading-relaxed">{topic.description}</p>
+            <h1 className="text-3xl font-serif text-navy dark:text-cream mb-2">{topic.name}</h1>
+            <p className="text-navy/60 dark:text-cream/60 mb-8 leading-relaxed">{topic.description}</p>
 
-            <h2 className="text-sm font-medium uppercase tracking-wide text-navy/40 mb-3">
+            <h2 className="text-sm font-medium uppercase tracking-wide text-navy/40 dark:text-cream/40 mb-3">
               Related Scripture
             </h2>
             {topic.verses.length === 0 ? (
-              <p className="text-navy/50 text-sm">No verses have been linked to this topic yet.</p>
+              <p className="text-navy/50 dark:text-cream/50 text-sm">No verses have been linked to this topic yet.</p>
             ) : (
               <ul className="space-y-2">
                 {topic.verses.map(v => (
@@ -77,9 +77,9 @@ export default function TopicDetailPage({ params }: { params: { slug: string } }
                         from Topics is a near-term priority; flagged as a real follow-up. */}
                     <Link
                       href="/bible"
-                      className="block p-4 rounded-xl bg-white border border-navy/8 hover:border-gold/20 transition-colors"
+                      className="block p-4 rounded-xl bg-white dark:bg-navy-dark border border-navy/8 hover:border-gold/20 transition-colors"
                     >
-                      <span className="font-medium text-navy">{v.verse_reference}</span>
+                      <span className="font-medium text-navy dark:text-cream">{v.verse_reference}</span>
                     </Link>
                   </li>
                 ))}

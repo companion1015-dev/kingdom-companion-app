@@ -100,7 +100,7 @@ export default function SupportPage() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen bg-cream pt-16">
+      <main className="min-h-screen bg-cream dark:bg-navy-dark pt-16">
 
         {/* Hero */}
         <div className="bg-hero-gradient relative overflow-hidden">
@@ -115,7 +115,7 @@ export default function SupportPage() {
               Thank you for using Kingdom Companion. Your optional gift helps us maintain the app,
               improve AI features, keep servers running, and make God&rsquo;s Word more accessible worldwide.
             </p>
-            <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 border border-white/12">
+            <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/8 dark:bg-navy-dark border border-white/12">
               <Heart className="w-3.5 h-3.5 text-gold" />
               <span className="text-white/60 font-body text-xs">Always voluntary — Bible access is always free</span>
             </div>
@@ -128,14 +128,14 @@ export default function SupportPage() {
             <div className="space-y-5">
 
               {/* Currency */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-5">
-                <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">
                   Currency {countryCode && <span className="text-gold normal-case font-normal">— detected from your region</span>}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {Object.keys(CURRENCY_CONFIG).map(code => (
                     <button key={code} onClick={() => setCurrency(code as DonationCurrency)}
-                      className={`px-3 py-1.5 rounded-full border text-xs font-body font-medium transition-all ${currency === code ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/55 hover:border-navy/30 hover:text-navy'}`}>
+                      className={`px-3 py-1.5 rounded-full border text-xs font-body font-medium transition-all ${currency === code ? 'bg-navy text-white border-navy' : 'border-navy/12 text-charcoal/55 dark:text-cream/55 hover:border-navy/30 hover:text-navy dark:text-cream'}`}>
                       {CURRENCY_CONFIG[code as DonationCurrency].symbol} {code}
                     </button>
                   ))}
@@ -143,12 +143,12 @@ export default function SupportPage() {
               </div>
 
               {/* Frequency */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-5">
-                <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">How often?</label>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">How often?</label>
                 <div className="grid grid-cols-4 gap-2">
                   {(Object.keys(FREQUENCY_LABELS) as DonationFrequencyFull[]).map(f => (
                     <button key={f} onClick={() => setFrequency(f)}
-                      className={`py-2.5 rounded-xl border text-xs font-body font-semibold transition-all ${frequency === f ? 'bg-navy text-white border-navy' : 'border-navy/12 text-navy/60 hover:border-navy/30'}`}>
+                      className={`py-2.5 rounded-xl border text-xs font-body font-semibold transition-all ${frequency === f ? 'bg-navy text-white border-navy' : 'border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/30'}`}>
                       {FREQUENCY_LABELS[f]}
                     </button>
                   ))}
@@ -156,42 +156,42 @@ export default function SupportPage() {
               </div>
 
               {/* Amount */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-5">
-                <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-4">Choose Amount</label>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-4">Choose Amount</label>
                 <div className="grid grid-cols-5 gap-2 mb-4">
                   {PRESET_AMOUNTS.map(a => (
                     <button key={a} onClick={() => handleAmountSelect(a)}
-                      className={`py-3 rounded-xl border text-sm font-body font-semibold transition-all ${selected === a ? 'bg-navy text-white border-navy shadow-md shadow-navy/20' : 'border-navy/12 text-navy/70 hover:border-navy/30 hover:bg-navy/4'}`}>
+                      className={`py-3 rounded-xl border text-sm font-body font-semibold transition-all ${selected === a ? 'bg-navy text-white border-navy shadow-md shadow-navy/20' : 'border-navy/12 text-navy/70 dark:text-cream/70 hover:border-navy/30 hover:bg-navy/4'}`}>
                       {currencyObj.symbol}{a}
                     </button>
                   ))}
                 </div>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 font-body text-sm font-semibold">{currencyObj.symbol}</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/40 dark:text-cream/40 font-body text-sm font-semibold">{currencyObj.symbol}</span>
                   <input type="number" value={custom} onChange={e => handleCustomChange(e.target.value)}
                     placeholder="Custom amount" min="1" max="10000" step="0.01"
-                    className="w-full pl-8 pr-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy font-body text-sm outline-none transition-all" />
+                    className="w-full pl-8 pr-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
                 </div>
                 {error && <p className="text-red-500 font-body text-xs mt-2">{error}</p>}
                 {isValid && (
-                  <div className="mt-4 p-3 bg-cream rounded-xl text-center">
-                    <p className="text-xs text-charcoal/40 font-body mb-0.5">{FREQUENCY_LABELS[frequency]} gift</p>
-                    <p className="font-display text-2xl font-light text-navy">
-                      {currencyObj.symbol}{amount.toFixed(2)} <span className="text-sm text-charcoal/40">{currency}</span>
+                  <div className="mt-4 p-3 bg-cream dark:bg-navy-dark rounded-xl text-center">
+                    <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mb-0.5">{FREQUENCY_LABELS[frequency]} gift</p>
+                    <p className="font-display text-2xl font-light text-navy dark:text-cream">
+                      {currencyObj.symbol}{amount.toFixed(2)} <span className="text-sm text-charcoal/40 dark:text-cream/40">{currency}</span>
                     </p>
                   </div>
                 )}
               </div>
 
               {/* Dedication */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-5">
-                <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">
-                  Dedicate this gift <span className="text-charcoal/30 font-normal normal-case">Optional</span>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">
+                  Dedicate this gift <span className="text-charcoal/30 dark:text-cream/30 font-normal normal-case">Optional</span>
                 </label>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   {DEDICATION_OPTIONS.map(d => (
                     <button key={d.id} onClick={() => setDedication(dedication === d.id ? null : d.id)}
-                      className={`px-3 py-2 rounded-xl border text-xs font-body text-left transition-all ${dedication === d.id ? 'bg-gold/10 border-gold/40 text-gold-dark font-semibold' : 'border-navy/10 text-charcoal/55 hover:border-navy/25'}`}>
+                      className={`px-3 py-2 rounded-xl border text-xs font-body text-left transition-all ${dedication === d.id ? 'bg-gold/10 border-gold/40 text-gold-dark font-semibold' : 'border-navy/10 text-charcoal/55 dark:text-cream/55 hover:border-navy/25'}`}>
                       {d.label}
                     </button>
                   ))}
@@ -199,24 +199,24 @@ export default function SupportPage() {
                 {dedicationConfig?.needsName && (
                   <input value={dedicationName} onChange={e => setDedicationName(e.target.value)}
                     placeholder="Enter a name..." maxLength={100}
-                    className="w-full px-3 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy font-body text-sm outline-none transition-all" />
+                    className="w-full px-3 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
                 )}
               </div>
 
               {/* Donor preferences (collapsible) */}
-              <div className="bg-white rounded-2xl border border-navy/8 overflow-hidden">
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 overflow-hidden">
                 <button onClick={() => setShowPrefs(s => !s)} className="w-full flex items-center justify-between p-5">
-                  <span className="text-xs font-body font-semibold text-navy/40 tracking-widest uppercase">Your Preferences</span>
-                  <ChevronDown className={`w-4 h-4 text-charcoal/30 transition-transform ${showPrefs ? 'rotate-180' : ''}`} />
+                  <span className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase">Your Preferences</span>
+                  <ChevronDown className={`w-4 h-4 text-charcoal/30 dark:text-cream/30 transition-transform ${showPrefs ? 'rotate-180' : ''}`} />
                 </button>
                 {showPrefs && (
                   <div className="px-5 pb-5 space-y-3">
                     <input value={prefs.donor_display_name} onChange={e => setPrefs(p => ({ ...p, donor_display_name: e.target.value }))}
                       placeholder="Your name (shown if not anonymous)" disabled={prefs.is_anonymous} maxLength={100}
-                      className="w-full px-3 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy font-body text-sm outline-none transition-all disabled:opacity-40" />
+                      className="w-full px-3 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all disabled:opacity-40" />
                     <input value={prefs.donor_email} onChange={e => setPrefs(p => ({ ...p, donor_email: e.target.value }))}
                       type="email" placeholder="Email (for receipt, optional)" maxLength={255}
-                      className="w-full px-3 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy font-body text-sm outline-none transition-all" />
+                      className="w-full px-3 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
                     {[
                       { key: 'is_anonymous' as const,  label: 'Give anonymously' },
                       { key: 'hide_amount' as const,   label: 'Hide donation amount' },
@@ -225,8 +225,8 @@ export default function SupportPage() {
                     ].map(({ key, label }) => (
                       <label key={key} className="flex items-center gap-2.5 cursor-pointer">
                         <input type="checkbox" checked={prefs[key]} onChange={e => setPrefs(p => ({ ...p, [key]: e.target.checked }))}
-                          className="w-4 h-4 rounded border-navy/20 text-navy focus:ring-gold/30" />
-                        <span className="text-sm font-body text-charcoal/65">{label}</span>
+                          className="w-4 h-4 rounded border-navy/20 text-navy dark:text-cream focus:ring-gold/30" />
+                        <span className="text-sm font-body text-charcoal/65 dark:text-cream/65">{label}</span>
                       </label>
                     ))}
                   </div>
@@ -234,62 +234,62 @@ export default function SupportPage() {
               </div>
 
               {/* Payment method selection -- honest live vs requires_account */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-5">
-                <label className="block text-xs font-body font-semibold text-navy/40 tracking-widest uppercase mb-3">Payment Method</label>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-3">Payment Method</label>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <button onClick={() => setPaymentChoice('stripe')}
-                    className={`p-3 rounded-xl border text-xs font-body font-semibold transition-all ${paymentChoice === 'stripe' ? 'bg-navy text-white border-navy' : 'border-navy/12 text-navy/60 hover:border-navy/30'}`}>
+                    className={`p-3 rounded-xl border text-xs font-body font-semibold transition-all ${paymentChoice === 'stripe' ? 'bg-navy text-white border-navy' : 'border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/30'}`}>
                     💳 Card / Apple Pay / Google Pay
                   </button>
                   <button onClick={() => setPaymentChoice('paypal')}
-                    className={`p-3 rounded-xl border text-xs font-body font-semibold transition-all ${paymentChoice === 'paypal' ? 'bg-navy text-white border-navy' : 'border-navy/12 text-navy/60 hover:border-navy/30'}`}>
+                    className={`p-3 rounded-xl border text-xs font-body font-semibold transition-all ${paymentChoice === 'paypal' ? 'bg-navy text-white border-navy' : 'border-navy/12 text-navy/60 dark:text-cream/60 hover:border-navy/30'}`}>
                     🅿️ PayPal
                   </button>
                 </div>
                 {suggestedMethods.some(m => m.status === 'requires_account' && m.regions.includes(countryCode ?? '')) && (
-                  <p className="text-xs text-charcoal/40 font-body">
+                  <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">
                     {suggestedMethods.find(m => m.status === 'requires_account' && m.regions.includes(countryCode ?? ''))?.label} is planned for your region but not yet connected — card and PayPal work everywhere in the meantime.
                   </p>
                 )}
               </div>
 
               <button onClick={handleProceed} disabled={!isValid || loading}
-                className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-body font-semibold transition-all duration-200 ${isValid && !loading ? 'bg-navy hover:bg-navy-light text-white shadow-lg shadow-navy/20 hover:scale-[1.01]' : 'bg-charcoal/8 text-charcoal/30 cursor-not-allowed'}`}>
+                className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-body font-semibold transition-all duration-200 ${isValid && !loading ? 'bg-navy hover:bg-navy-light text-white shadow-lg shadow-navy/20 hover:scale-[1.01]' : 'bg-charcoal/8 text-charcoal/30 dark:text-cream/30 cursor-not-allowed'}`}>
                 {loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Heart className="w-4 h-4" />}
                 {loading ? 'Preparing…' : `Continue with ${currencyObj.symbol}${amount > 0 ? amount.toFixed(2) : '0.00'}`}
               </button>
 
               {/* What donations fund */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-6">
-                <h2 className="font-display text-lg font-semibold text-navy mb-4">How your gift helps</h2>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6">
+                <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-4">How your gift helps</h2>
                 <div className="grid grid-cols-2 gap-3">
-                  {DONATION_USES.map(({ icon, label }) => (<div key={label} className="flex items-center gap-2.5 p-3 bg-cream rounded-xl">
+                  {DONATION_USES.map(({ icon, label }) => (<div key={label} className="flex items-center gap-2.5 p-3 bg-cream dark:bg-navy-dark rounded-xl">
                       <span className="text-lg">{icon}</span>
-                      <span className="text-xs font-body text-charcoal/65 leading-snug">{label}</span>
+                      <span className="text-xs font-body text-charcoal/65 dark:text-cream/65 leading-snug">{label}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Transparency (collapsible) */}
-              <div className="bg-white rounded-2xl border border-navy/8 overflow-hidden">
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 overflow-hidden">
                 <button onClick={() => setShowTransparency(s => !s)} className="w-full flex items-center justify-between p-5">
-                  <span className="font-body text-sm font-semibold text-navy">Transparency & FAQ</span>
-                  <ChevronDown className={`w-4 h-4 text-charcoal/30 transition-transform ${showTransparency ? 'rotate-180' : ''}`} />
+                  <span className="font-body text-sm font-semibold text-navy dark:text-cream">Transparency & FAQ</span>
+                  <ChevronDown className={`w-4 h-4 text-charcoal/30 dark:text-cream/30 transition-transform ${showTransparency ? 'rotate-180' : ''}`} />
                 </button>
                 {showTransparency && (
-                  <div className="px-5 pb-5 space-y-4 text-sm text-charcoal/60 font-body leading-relaxed">
-                    <p><strong className="text-navy">Where does my gift go?</strong> Server hosting, Bible content licensing, AI service costs, security, and ongoing development — never to pay for access to Scripture, which is always free.</p>
-                    <p><strong className="text-navy">Can I cancel a recurring gift?</strong> Yes, any time — a link to manage or cancel is included in every receipt email.</p>
-                    <p><strong className="text-navy">Is my payment secure?</strong> Yes — we never see or store your card details. Payments are processed directly by Stripe or PayPal, both PCI DSS compliant.</p>
-                    <p><strong className="text-navy">Do I have to give to use the app?</strong> No. Every feature of Kingdom Companion, including the full Bible and all study tools, is free forever.</p>
+                  <div className="px-5 pb-5 space-y-4 text-sm text-charcoal/60 dark:text-cream/60 font-body leading-relaxed">
+                    <p><strong className="text-navy dark:text-cream">Where does my gift go?</strong> Server hosting, Bible content licensing, AI service costs, security, and ongoing development — never to pay for access to Scripture, which is always free.</p>
+                    <p><strong className="text-navy dark:text-cream">Can I cancel a recurring gift?</strong> Yes, any time — a link to manage or cancel is included in every receipt email.</p>
+                    <p><strong className="text-navy dark:text-cream">Is my payment secure?</strong> Yes — we never see or store your card details. Payments are processed directly by Stripe or PayPal, both PCI DSS compliant.</p>
+                    <p><strong className="text-navy dark:text-cream">Do I have to give to use the app?</strong> No. Every feature of Kingdom Companion, including the full Bible and all study tools, is free forever.</p>
                   </div>
                 )}
               </div>
 
               {/* PayPal direct link (fallback, always visible) */}
-              <div className="bg-white rounded-2xl border border-navy/8 p-5">
-                <h3 className="font-body text-sm font-semibold text-navy mb-3">Prefer to give directly?</h3>
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                <h3 className="font-body text-sm font-semibold text-navy dark:text-cream mb-3">Prefer to give directly?</h3>
                 <a href="https://paypal.me/kingdomcompanion" target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-between p-4 rounded-xl bg-[#003087]/5 border border-[#003087]/10 hover:border-[#003087]/25 transition-all group">
                   <div className="flex items-center gap-3">
@@ -297,11 +297,11 @@ export default function SupportPage() {
                       <span className="text-white font-bold text-xs">PP</span>
                     </div>
                     <div>
-                      <p className="text-sm font-body font-semibold text-navy">Donate via PayPal</p>
-                      <p className="text-xs text-charcoal/40 font-body">Opens PayPal directly</p>
+                      <p className="text-sm font-body font-semibold text-navy dark:text-cream">Donate via PayPal</p>
+                      <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">Opens PayPal directly</p>
                     </div>
                   </div>
-                  <ExternalLink className="w-4 h-4 text-charcoal/30 group-hover:text-navy transition-colors" />
+                  <ExternalLink className="w-4 h-4 text-charcoal/30 dark:text-cream/30 group-hover:text-navy dark:text-cream transition-colors" />
                 </a>
               </div>
 
@@ -318,12 +318,12 @@ export default function SupportPage() {
           )}
 
           {step === 'payment' && (
-            <div className="bg-white rounded-2xl border border-navy/8 overflow-hidden">
-              <div className="p-6 border-b border-navy/8 bg-cream/50">
+            <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 overflow-hidden">
+              <div className="p-6 border-b border-navy/8 bg-cream/50 dark:bg-navy-dark">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-charcoal/40 font-body tracking-wider uppercase mb-1">{FREQUENCY_LABELS[frequency]} gift</p>
-                    <p className="font-display text-3xl font-light text-navy">{currencyObj.symbol}{amount.toFixed(2)}</p>
+                    <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body tracking-wider uppercase mb-1">{FREQUENCY_LABELS[frequency]} gift</p>
+                    <p className="font-display text-3xl font-light text-navy dark:text-cream">{currencyObj.symbol}{amount.toFixed(2)}</p>
                   </div>
                   <button onClick={() => setStep('amount')} className="text-xs text-gold hover:text-gold-dark font-body font-medium transition-colors">Change</button>
                 </div>
@@ -338,10 +338,10 @@ export default function SupportPage() {
                   </div>
                 )}
                 <div className="space-y-4 mb-6"><div>
-                    <label className="block text-xs font-body font-semibold text-navy/40 tracking-wider uppercase mb-2">
+                    <label className="block text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-wider uppercase mb-2">
                       {paymentChoice === 'paypal' ? 'PayPal' : 'Card number'}
                     </label>
-                    <div className="p-3.5 rounded-xl border border-navy/12 bg-navy/2 text-charcoal/35 font-body text-sm">
+                    <div className="p-3.5 rounded-xl border border-navy/12 bg-navy/2 text-charcoal/35 dark:text-cream/35 font-body text-sm">
                       {demoMode ? '•••• •••• •••• •••• (Demo)' : paymentChoice === 'paypal' ? 'Redirecting to PayPal…' : 'Card form loads here (Stripe Elements)'}
                     </div>
                   </div>
@@ -352,8 +352,8 @@ export default function SupportPage() {
                   {demoMode ? 'Complete Demo Donation' : `Give ${currencyObj.symbol}${amount.toFixed(2)}`}
                 </button>
                 <div className="flex items-center justify-center gap-2 mt-4">
-                  <Shield className="w-3.5 h-3.5 text-charcoal/30" />
-                  <p className="text-xs text-charcoal/30 font-body">Secured by {paymentChoice === 'paypal' ? 'PayPal' : 'Stripe'} · No card data stored</p>
+                  <Shield className="w-3.5 h-3.5 text-charcoal/30 dark:text-cream/30" />
+                  <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body">Secured by {paymentChoice === 'paypal' ? 'PayPal' : 'Stripe'} · No card data stored</p>
                 </div>
               </div>
             </div>
@@ -365,38 +365,38 @@ export default function SupportPage() {
                 style={{ background: 'linear-gradient(135deg, #1B3A5C 0%, #2A5080 100%)' }}>
                 <Heart className="w-10 h-10 text-gold fill-current" />
               </div>
-              <h2 className="font-display text-3xl font-light text-navy mb-3">Thank You!</h2>
-              <p className="text-charcoal/60 font-body text-base leading-relaxed mb-2 max-w-md mx-auto">
+              <h2 className="font-display text-3xl font-light text-navy dark:text-cream mb-3">Thank You!</h2>
+              <p className="text-charcoal/60 dark:text-cream/60 font-body text-base leading-relaxed mb-2 max-w-md mx-auto">
                 Thank you for supporting Kingdom Companion. Your generosity helps us continue improving
                 the app and making God&rsquo;s Word accessible to more people around the world.
               </p>
-              <div className="my-8 p-6 bg-white rounded-2xl border border-navy/8 max-w-md mx-auto text-left">
-                <p className="font-display italic text-navy text-lg leading-relaxed mb-3">
+              <div className="my-8 p-6 bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 max-w-md mx-auto text-left">
+                <p className="font-display italic text-navy dark:text-cream text-lg leading-relaxed mb-3">
                   &ldquo;Each of you should give what you have decided in your heart to give,
                   not reluctantly or under compulsion, for God loves a cheerful giver.&rdquo;
                 </p>
                 <p className="text-gold text-sm font-body font-semibold">— 2 Corinthians 9:7 (NIV)</p>
               </div>
               <div className="mb-8">
-                <p className="text-xs text-charcoal/40 font-body mb-3">Let others know you support this ministry? (No amounts shared)</p>
+                <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mb-3">Let others know you support this ministry? (No amounts shared)</p>
                 <button onClick={handleShare}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-full border text-sm font-body font-medium transition-all ${shared ? 'border-green-200 bg-green-50 text-green-700' : 'border-navy/15 text-navy/70 hover:border-navy/30 hover:text-navy'}`}>
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-full border text-sm font-body font-medium transition-all ${shared ? 'border-green-200 bg-green-50 text-green-700' : 'border-navy/15 text-navy/70 dark:text-cream/70 hover:border-navy/30 hover:text-navy dark:text-cream'}`}>
                   {shared ? <><Check className="w-4 h-4" /> Shared!</> : <><Share2 className="w-4 h-4" /> Share your support</>}
                 </button>
               </div>
               <div className="grid sm:grid-cols-2 gap-3 max-w-md mx-auto">
-                <Link href="/bible" className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-navy/8 hover:border-gold/20 transition-all text-left group">
+                <Link href="/bible" className="flex items-center gap-3 p-4 bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 hover:border-gold/20 transition-all text-left group">
                   <span className="text-xl">📖</span>
-                  <div><p className="text-sm font-body font-semibold text-navy">Read the Bible</p><p className="text-xs text-charcoal/40 font-body">Continue your reading</p></div>
-                  <ChevronRight className="w-4 h-4 text-navy/20 group-hover:text-gold ml-auto transition-colors" />
+                  <div><p className="text-sm font-body font-semibold text-navy dark:text-cream">Read the Bible</p><p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">Continue your reading</p></div>
+                  <ChevronRight className="w-4 h-4 text-navy/20 dark:text-cream/20 group-hover:text-gold ml-auto transition-colors" />
                 </Link>
-                <Link href="/prayer-wall" className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-navy/8 hover:border-gold/20 transition-all text-left group">
+                <Link href="/prayer-wall" className="flex items-center gap-3 p-4 bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 hover:border-gold/20 transition-all text-left group">
                   <span className="text-xl">🙏</span>
-                  <div><p className="text-sm font-body font-semibold text-navy">Prayer Wall</p><p className="text-xs text-charcoal/40 font-body">Pray with others</p></div>
-                  <ChevronRight className="w-4 h-4 text-navy/20 group-hover:text-gold ml-auto transition-colors" />
+                  <div><p className="text-sm font-body font-semibold text-navy dark:text-cream">Prayer Wall</p><p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">Pray with others</p></div>
+                  <ChevronRight className="w-4 h-4 text-navy/20 dark:text-cream/20 group-hover:text-gold ml-auto transition-colors" />
                 </Link>
               </div>
-              <Link href="/" className="inline-flex items-center gap-2 mt-8 text-sm text-charcoal/40 hover:text-navy font-body transition-colors">← Back to home</Link>
+              <Link href="/" className="inline-flex items-center gap-2 mt-8 text-sm text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream font-body transition-colors">← Back to home</Link>
             </div>
           )}
         </div>
