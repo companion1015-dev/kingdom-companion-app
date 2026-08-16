@@ -126,6 +126,13 @@ export default function SupportPage() {
 
           {step === 'amount' && (
             <div className="space-y-5">
+              {/* Legal notice */}
+              <div className="bg-navy/4 dark:bg-cream/5 rounded-2xl border border-navy/8 p-4">
+                <p className="text-xs font-body text-charcoal/55 dark:text-cream/55 leading-relaxed">
+                  <strong className="text-navy dark:text-cream">Legal notice:</strong> contributions are strictly voluntary. Kingdom Companion is not a charity or religious organization. Contributions do not unlock any feature and are not tax-deductible.
+                </p>
+              </div>
+
 
               {/* Currency */}
               <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
