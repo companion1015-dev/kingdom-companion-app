@@ -3,6 +3,7 @@ import { useState, useRef } from 'react'
 import { X, Upload, FileText, ImageIcon, AlertTriangle, Lock } from 'lucide-react'
 import { PRAYER_CATEGORIES, PRIVACY_OPTIONS } from '../types'
 import { submitPrayerRequest } from '../services/prayer-service'
+import { containsBlockedContent, sanitizeContent, BLOCKED_MESSAGE } from '../utils/content-safety'
 
 type Props = { onClose: () => void; onSuccess: () => void }
 
@@ -19,6 +20,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
   const [preview,     setPreview]     = useState<string | null>(null)
   const [loading,     setLoading]     = useState(false)
   const [error,       setError]       = useState<string | null>(null)
+  const [safetyWarning, setSafetyWarning] = useState(false)
   const [step,        setStep]        = useState<1 | 2>(1)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -43,11 +45,23 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
   const handleSubmit = async () => {
     if (!title.trim() || !content.trim()) { setError('Please fill in the title and prayer request.'); return }
     if (content.trim().length < 20) { setError('Please write at least 20 characters for your prayer request.'); return }
+    if (containsBlockedContent(title) || containsBlockedContent(content)) {
+      setError(BLOCKED_MESSAGE)
+      setSafetyWarning(true)
+      return
+    }
     setLoading(true); setError(null)
     const result = await submitPrayerRequest({ title, content, category, privacy, display_name: displayName, attachment })
     setLoading(false)
     if (result.success) onSuccess()
     else setError(result.error ?? 'Something went wrong. Please try again.')
+  }
+
+  const handleAutoRemove = () => {
+    setTitle(t => sanitizeContent(t))
+    setContent(c => sanitizeContent(c))
+    setSafetyWarning(false)
+    setError(null)
   }
 
   const privacySelected = PRIVACY_OPTIONS.find(p => p.id === privacy)
@@ -78,7 +92,14 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
           {error && (
             <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100">
               <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-xs font-body text-red-600">{error}</p>
+              <div className="flex-1">
+                <p className="text-xs font-body text-red-600">{error}</p>
+                {safetyWarning && (
+                  <button onClick={handleAutoRemove} className="mt-2 text-xs font-body font-semibold text-red-700 underline hover:text-red-800">
+                    Auto-remove flagged content and continue
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

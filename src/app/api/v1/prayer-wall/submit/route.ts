@@ -3,6 +3,7 @@ import { withOptionalAuth } from '@/lib/auth/middleware'
 import { successResponse, createdResponse, errorResponse, serverErrorResponse } from '@/lib/api-response'
 import { checkRateLimit, getRateLimitKey } from '@/lib/auth/rate-limit'
 import { prisma } from '@/lib/db/client'
+import { containsBlockedContent, BLOCKED_MESSAGE } from '@/modules/prayer-wall/utils/content-safety'
 
 // POST /api/v1/prayer-wall/submit
 // Anonymous submissions are allowed by design -- privacy defaults to
@@ -47,6 +48,11 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
     }
     if (content.trim().length < 20) {
       return errorResponse('CONTENT_TOO_SHORT', 'Please write at least 20 characters for your prayer request.', 400)
+    }
+    // Server-side safety check -- cannot be bypassed by disabling client JS.
+    // Same shared regex rules as the client form (src/modules/prayer-wall/utils/content-safety.ts).
+    if (containsBlockedContent(title) || containsBlockedContent(content)) {
+      return errorResponse('UNSAFE_CONTENT', BLOCKED_MESSAGE, 400)
     }
     if (!VALID_CATEGORIES.includes(category)) category = 'other'
     if (!VALID_PRIVACY.includes(privacy)) privacy = 'private'
