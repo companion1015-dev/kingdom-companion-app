@@ -3,6 +3,7 @@ import { withOptionalAuth } from '@/lib/auth/middleware'
 import { successResponse, createdResponse, errorResponse, serverErrorResponse } from '@/lib/api-response'
 import { checkRateLimit, getRateLimitKey } from '@/lib/auth/rate-limit'
 import { prisma } from '@/lib/db/client'
+import { sendAdminAlertEmail } from '@/lib/email/service'
 import { containsBlockedContent, BLOCKED_MESSAGE } from '@/modules/prayer-wall/utils/content-safety'
 
 // POST /api/v1/prayer-wall/submit
@@ -70,6 +71,14 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
       },
       select: { id: true },
     })
+
+    ;(async () => {
+      const admins = await (prisma as any).user.findMany({ where: { role: { in: ['admin', 'super_admin'] } }, select: { email: true } })
+      const preview = title.trim().slice(0, 100)
+      for (const admin of admins) {
+        sendAdminAlertEmail(admin.email, preview).catch(err => console.error('[PrayerWall] Admin alert email failed:', err))
+      }
+    })()
 
     return createdResponse({ id: created.id }, 'Prayer request submitted.')
   } catch (error) {

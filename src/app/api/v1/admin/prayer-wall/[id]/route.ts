@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { withAdmin } from '@/lib/auth/middleware'
 import { successResponse, errorResponse, serverErrorResponse } from '@/lib/api-response'
 import { prisma } from '@/lib/db/client'
+import { sendPrayerRejectedEmail } from '@/lib/email/service'
 
 // PATCH /api/v1/admin/prayer-wall/[id]  body: { action: 'approve' | 'reject', reason?: string }
 // DELETE /api/v1/admin/prayer-wall/[id]  -- soft delete (sets deleted_at), used for
@@ -34,9 +35,13 @@ export const PATCH = withAdmin(async (req: NextRequest, user, context) => {
         reviewed_by: user.id,
         reviewer_notes: action === 'reject' ? reason : null,
       },
-      select: { id: true, moderation_status: true },
+      select: { id: true, moderation_status: true, title: true, user: { select: { email: true } } },
     })
 
+
+    if (action === 'reject' && updated.user?.email) {
+      sendPrayerRejectedEmail(updated.user.email, updated.user.email.split('@')[0], reason).catch(err => console.error('[AdminPrayerWall] Rejection email failed:', err))
+    }
     return successResponse(updated, `Prayer request ${action === 'approve' ? 'approved' : 'rejected'}.`)
   } catch (error) {
     console.error('[AdminPrayerWall] Action error:', error)

@@ -169,4 +169,65 @@ export async function sendWelcomeEmail(
       </div>
     `),
   })
+}export async function sendPrayerRejectedEmail(
+  email: string,
+  displayName: string,
+  reason: string,
+): Promise<void> {
+  await sendEmail({
+    to:      email,
+    subject: 'Update on your Prayer Wall request',
+    text:    `Hi ${displayName},\n\nThank you for sharing your prayer request with us. After review, we're unable to post it to the Community Prayer Wall at this time.\n\nReason: ${reason}\n\nTo keep the Prayer Wall safe for everyone, we don't allow personal contact information, links, or donation requests.\n\nYou can still use your Prayer Journal for private prayers, or submit a new request with general wording: ${APP_URL}/prayer-wall\n\n"The Lord is close to the brokenhearted and saves those who are crushed in spirit." — Psalm 34:18`,
+    html: baseTemplate(`
+      <h2 style="margin:0 0 16px;color:#1B3A5C;font-size:22px;font-weight:600;font-family:Georgia,serif">Update on your prayer request</h2>
+      <p style="${bodyStyle}">Hi ${displayName}, thank you for sharing your prayer request with us. After review, we're unable to post it to the Community Prayer Wall at this time.</p>
+      <p style="${bodyStyle}"><strong style="color:#1B3A5C">Reason:</strong> ${reason}</p>
+      <p style="${bodyStyle}">To keep the Prayer Wall safe for everyone, we don't allow personal contact information, links, or donation requests.</p>
+      <p style="${bodyStyle}">You can still use your Prayer Journal for private prayers, or submit a new request with general wording.</p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${APP_URL}/prayer-wall" style="${btnStyle}">Submit a New Request</a>
+      </div>
+      <div style="${verseStyle}">
+        <p style="margin:0;color:#1B3A5C;font-style:italic;font-size:14px;font-family:Georgia,serif">"The Lord is close to the brokenhearted and saves those who are crushed in spirit."</p>
+        <p style="margin:6px 0 0;color:#C9A84C;font-size:12px;font-family:Arial,sans-serif;font-weight:500">— Psalm 34:18</p>
+      </div>
+    `),
+  })
+}
+
+export async function sendReportReceivedEmail(
+  email: string,
+  displayName: string,
+  reportReason: string,
+): Promise<void> {
+  await sendEmail({
+    to:      email,
+    subject: 'We received your report',
+    text:    `Hi ${displayName},\n\nThank you for helping us keep the Prayer Wall safe. We've received your report and our team will review it shortly.\n\nReport details: ${reportReason}\n\nFor your privacy, we won't share what action we take. If the post violates our guidelines, it will be removed.\n\nThis is an automated message — please do not reply.`,
+    html: baseTemplate(`
+      <h2 style="margin:0 0 16px;color:#1B3A5C;font-size:22px;font-weight:600;font-family:Georgia,serif">We received your report</h2>
+      <p style="${bodyStyle}">Hi ${displayName}, thank you for helping us keep the Prayer Wall safe. We've received your report and our team will review it shortly.</p>
+      <p style="${bodyStyle}"><strong style="color:#1B3A5C">Report details:</strong> ${reportReason}</p>
+      <p style="${bodyStyle}">For your privacy, we won't share what action we take. If the post violates our guidelines, it will be removed.</p>
+      <p style="margin:24px 0 0;color:#888;font-size:12px;font-family:Arial,sans-serif">This is an automated message — please do not reply.</p>
+    `),
+  })
+}
+
+export async function sendAdminAlertEmail(
+  adminEmail: string,
+  prayerPreview: string,
+): Promise<void> {
+  await sendEmail({
+    to:      adminEmail,
+    subject: 'New Prayer Request Pending Review',
+    text:    `A new prayer request has been submitted and is awaiting review.\n\nPreview: ${prayerPreview}\n\nReview it here: ${APP_URL}/admin/prayer-wall`,
+    html: baseTemplate(`
+      <h2 style="margin:0 0 16px;color:#1B3A5C;font-size:22px;font-weight:600;font-family:Georgia,serif">New prayer request pending review</h2>
+      <p style="${bodyStyle}"><strong style="color:#1B3A5C">Preview:</strong> ${prayerPreview}</p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${APP_URL}/admin/prayer-wall" style="${btnStyle}">Review in Admin Dashboard</a>
+      </div>
+    `),
+  })
 }

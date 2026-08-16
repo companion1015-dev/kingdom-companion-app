@@ -3,6 +3,7 @@ import { withOptionalAuth } from '@/lib/auth/middleware'
 import { successResponse, errorResponse, serverErrorResponse } from '@/lib/api-response'
 import { checkRateLimit, getRateLimitKey } from '@/lib/auth/rate-limit'
 import { prisma } from '@/lib/db/client'
+import { sendReportReceivedEmail } from '@/lib/email/service'
 
 // POST /api/v1/prayer-wall/report
 // No auto-hiding on first report -- goes to moderation_status: "pending"
@@ -37,6 +38,10 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
     await db.prayerReport.create({
       data: { request_id, user_id: user?.id ?? null, reason, details: details?.slice(0, 1000) ?? null },
     })
+
+    if (user?.email) {
+      sendReportReceivedEmail(user.email, user.email.split('@')[0], reason).catch(err => console.error('[PrayerWall] Report confirmation email failed:', err))
+    }
 
     const reportCount = await db.prayerReport.count({ where: { request_id, status: 'pending' } })
     if (reportCount >= AUTO_PENDING_THRESHOLD) {
