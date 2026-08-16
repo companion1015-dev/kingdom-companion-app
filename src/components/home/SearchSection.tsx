@@ -8,10 +8,42 @@ import { Search, ArrowRight, Loader2 } from 'lucide-react'
 // /api/v1/bible/search (itself now backed by real full-text search across
 // the complete Bible, not 5 hardcoded samples), with results that
 // deep-link to the actual verse.
+//
+// Real fix 2: reference-style suggestions ("Psalm 23", "John 3:16") always
+// returned zero results from full-text search, since verse content never
+// contains its own citation label. Now detected and routed directly to the
+// passage instead of being searched for as text.
 
 const suggestions = ['John 3:16', 'Psalm 23', 'Anxiety', 'Romans 8', 'Hope', 'Forgiveness', 'Fear', 'Isaiah 40:31']
 
 type Result = { verseId: string; reference: string; text: string; bookId: string; chapterNumber: number }
+
+const BOOK_NAME_TO_ID: Record<string, string> = {
+  genesis: 'GEN', exodus: 'EXO', leviticus: 'LEV', numbers: 'NUM', deuteronomy: 'DEU',
+  joshua: 'JOS', judges: 'JDG', ruth: 'RUT', '1 samuel': '1SA', '2 samuel': '2SA',
+  '1 kings': '1KI', '2 kings': '2KI', '1 chronicles': '1CH', '2 chronicles': '2CH',
+  ezra: 'EZR', nehemiah: 'NEH', esther: 'EST', job: 'JOB', psalm: 'PSA', psalms: 'PSA',
+  proverbs: 'PRO', ecclesiastes: 'ECC', 'song of songs': 'SNG', 'song of solomon': 'SNG',
+  isaiah: 'ISA', jeremiah: 'JER', lamentations: 'LAM', ezekiel: 'EZK', daniel: 'DAN',
+  hosea: 'HOS', joel: 'JOL', amos: 'AMO', obadiah: 'OBA', jonah: 'JON', micah: 'MIC',
+  nahum: 'NAM', habakkuk: 'HAB', zephaniah: 'ZEP', haggai: 'HAG', zechariah: 'ZEC',
+  malachi: 'MAL', matthew: 'MAT', mark: 'MRK', luke: 'LUK', john: 'JHN', acts: 'ACT',
+  romans: 'ROM', '1 corinthians': '1CO', '2 corinthians': '2CO', galatians: 'GAL',
+  ephesians: 'EPH', philippians: 'PHP', colossians: 'COL', '1 thessalonians': '1TH',
+  '2 thessalonians': '2TH', '1 timothy': '1TI', '2 timothy': '2TI', titus: 'TIT',
+  philemon: 'PHM', hebrews: 'HEB', james: 'JAS', '1 peter': '1PE', '2 peter': '2PE',
+  '1 john': '1JN', '2 john': '2JN', '3 john': '3JN', jude: 'JUD', revelation: 'REV',
+}
+
+/** Detects queries like "Psalm 23" or "John 3:16" and returns the real book_id + chapter. */
+function parseReference(raw: string): { bookId: string; chapter: number } | null {
+  const m = raw.trim().match(/^([1-3]?\s?[A-Za-z ]+?)\s+(\d+)(?::\d+)?$/)
+  if (!m) return null
+  const bookName = m[1].trim().toLowerCase().replace(/\s+/g, ' ')
+  const bookId = BOOK_NAME_TO_ID[bookName]
+  if (!bookId) return null
+  return { bookId, chapter: parseInt(m[2], 10) }
+}
 
 export default function SearchSection() {
   const router = useRouter()
@@ -28,6 +60,7 @@ export default function SearchSection() {
   useEffect(() => {
     clearTimeout(debounceRef.current)
     if (query.trim().length < 3) { setResults([]); return }
+    if (parseReference(query)) { setResults([]); return } // reference queries skip text search entirely
     debounceRef.current = setTimeout(async () => {
       setLoading(true)
       try {
@@ -46,7 +79,15 @@ export default function SearchSection() {
 
   const handleSearch = () => {
     if (!query.trim()) return
+    const ref = parseReference(query)
+    if (ref) { goToVerse(ref.bookId, ref.chapter); return }
     if (results.length > 0) goToVerse(results[0].bookId, results[0].chapterNumber)
+  }
+
+  const handleSuggestionClick = (s: string) => {
+    setQuery(s)
+    const ref = parseReference(s)
+    if (ref) goToVerse(ref.bookId, ref.chapter)
   }
 
   return (
@@ -112,7 +153,7 @@ export default function SearchSection() {
               {filteredSuggestions.map(s => (
                 <button
                   key={s}
-                  onClick={() => setQuery(s)}
+                  onClick={() => handleSuggestionClick(s)}
                   className="w-full flex items-center gap-2 px-5 py-3 hover:bg-navy/4 transition-colors text-sm font-body text-charcoal/60 dark:text-cream/60"
                 >
                   <Search className="w-3.5 h-3.5 text-navy/30 dark:text-cream/30" />
@@ -129,7 +170,7 @@ export default function SearchSection() {
             {suggestions.map(s => (
               <button
                 key={s}
-                onClick={() => setQuery(s)}
+                onClick={() => handleSuggestionClick(s)}
                 className="px-3.5 py-1.5 rounded-full bg-white dark:bg-navy-dark border border-navy/10 text-xs font-body text-charcoal/55 dark:text-cream/55 hover:border-gold/30 hover:text-navy dark:text-cream transition-all"
               >
                 {s}
