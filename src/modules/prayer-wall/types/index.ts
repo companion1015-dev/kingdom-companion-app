@@ -41,6 +41,7 @@ export type PrayerRequest = {
   created_at:         string
   answered_at:        string | null
   has_prayed?:        boolean
+  has_reported?:      boolean
   has_saved?:         boolean
   is_owner?:          boolean
   encouragement_count?:number

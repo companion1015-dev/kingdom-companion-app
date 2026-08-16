@@ -146,6 +146,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                   style={{ caretColor: '#C9A84C' }}
                 />
                 <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1 text-right">{content.length}/2000</p>
+                <p className="text-xs text-navy/40 dark:text-cream/40 font-body mt-2 leading-relaxed">We review all posts and take reports seriously. Do not include personal contact information.</p>
               </div>
 
               {/* Attachment */}

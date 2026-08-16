@@ -50,6 +50,7 @@ export const GET = withOptionalAuth(async (req: NextRequest, user) => {
     // Per-user "has_prayed" / "has_saved" flags -- only computed when signed in.
     let prayedSet = new Set<string>()
     let savedSet  = new Set<string>()
+    let reportedSet = new Set<string>()
     if (user) {
       const ids = requests.map((r: { id: string }) => r.id)
       const [prayed, saved] = await Promise.all([
@@ -58,6 +59,7 @@ export const GET = withOptionalAuth(async (req: NextRequest, user) => {
       ])
       prayedSet = new Set(prayed.map((p: { request_id: string }) => p.request_id))
       savedSet  = new Set(saved.map((s: { request_id: string }) => s.request_id))
+      reportedSet = new Set((await db.prayerReport.findMany({ where: { user_id: user.id, request_id: { in: ids } }, select: { request_id: true } })).map((r: { request_id: string }) => r.request_id))
     }
 
     const shaped = requests.map((r: Record<string, unknown> & { id: string; user_id: string | null; _count: { reactions: number } }) => ({
@@ -65,6 +67,7 @@ export const GET = withOptionalAuth(async (req: NextRequest, user) => {
       encouragement_count: r._count.reactions,
       has_prayed: prayedSet.has(r.id),
       has_saved:  savedSet.has(r.id),
+      has_reported: reportedSet.has(r.id),
       is_owner:   user ? r.user_id === user.id : false,
       user_id: undefined, // never expose the raw owner ID to the client
       _count: undefined,

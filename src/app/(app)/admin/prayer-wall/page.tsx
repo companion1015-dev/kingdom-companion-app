@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { AlertTriangle, Check, X, Trash2, Search, Loader2, ShieldAlert } from 'lucide-react'
+import { AlertTriangle, Check, X, Trash2, Search, Loader2, ShieldAlert, Flag } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 
@@ -19,29 +19,51 @@ type QueueItem = {
   flagged: string[]
 }
 
-type StatusTab = 'pending' | 'approved' | 'hidden'
+type ReportItem = {
+  id: string
+  reason: string
+  details: string | null
+  status: string
+  created_at: string
+  user: { email: string } | null
+  request: { id: string; title: string; content: string; moderation_status: string }
+}
 
-const TAB_LABELS: Record<StatusTab, string> = { pending: 'Pending', approved: 'Approved', hidden: 'Rejected' }
-const TAB_COLORS: Record<StatusTab, string> = {
+type View = 'pending' | 'approved' | 'hidden' | 'reports'
+
+const TAB_LABELS: Record<View, string> = { pending: 'Pending', approved: 'Approved', hidden: 'Rejected', reports: 'Reports' }
+const TAB_COLORS: Record<View, string> = {
   pending:  'bg-amber-100 text-amber-800 border-amber-200',
   approved: 'bg-green-100 text-green-800 border-green-200',
   hidden:   'bg-red-100 text-red-800 border-red-200',
+  reports:  'bg-red-100 text-red-800 border-red-200',
+}
+
+const REASON_LABELS: Record<string, string> = {
+  personal_information: 'Personal Information',
+  donation_fundraising: 'Donation / Fundraising',
+  hateful_abusive:      'Hateful / Abusive',
+  spam:                 'Spam',
+  other:                'Other',
 }
 
 export default function AdminPrayerWallPage() {
-  const [tab, setTab] = useState<StatusTab>('pending')
+  const [tab, setTab] = useState<View>('pending')
   const [items, setItems] = useState<QueueItem[]>([])
+  const [reportItems, setReportItems] = useState<ReportItem[]>([])
+  const [openReportCount, setOpenReportCount] = useState(0)
   const [counts, setCounts] = useState({ pending: 0, approved: 0, rejected: 0 })
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [reviewing, setReviewing] = useState<QueueItem | null>(null)
+  const [reviewingReportPost, setReviewingReportPost] = useState<ReportItem['request'] | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [forbidden, setForbidden] = useState(false)
 
-  const load = useCallback(async () => {
+  const loadQueue = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({ status: tab })
@@ -60,8 +82,26 @@ export default function AdminPrayerWallPage() {
     }
   }, [tab, search])
 
-  useEffect(() => { load() }, [load])
+  const loadReports = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/v1/admin/prayer-wall/reports?status=pending', { credentials: 'include' })
+      if (res.status === 403) { setForbidden(true); setLoading(false); return }
+      const data = await res.json()
+      if (data.success) {
+        setReportItems(data.data.items)
+        setOpenReportCount(data.data.openCount)
+      }
+    } catch {
+      /* leave existing state on network failure */
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { tab === 'reports' ? loadReports() : loadQueue() }, [tab, loadQueue, loadReports])
   useEffect(() => { setSelected(new Set()) }, [tab])
+  useEffect(() => { if (tab !== 'reports') loadReports() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
@@ -88,7 +128,7 @@ export default function AdminPrayerWallPage() {
       if (data.success) {
         showToast(action === 'approve' ? 'Approved' : 'Rejected')
         setReviewing(null); setRejectReason('')
-        load()
+        loadQueue()
       } else {
         showToast(data.message ?? 'Something went wrong.')
       }
@@ -115,7 +155,7 @@ export default function AdminPrayerWallPage() {
       if (data.success) {
         showToast(data.message)
         setSelected(new Set())
-        load()
+        loadQueue()
       } else {
         showToast(data.message ?? 'Something went wrong.')
       }
@@ -130,8 +170,29 @@ export default function AdminPrayerWallPage() {
     try {
       const res = await fetch(`/api/v1/admin/prayer-wall/${id}`, { method: 'DELETE', credentials: 'include' })
       const data = await res.json()
-      if (data.success) { showToast('Deleted'); load() }
+      if (data.success) { showToast('Deleted'); loadQueue() }
       else showToast(data.message ?? 'Something went wrong.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const reportAction = async (id: string, action: 'dismiss' | 'remove_post') => {
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/v1/admin/prayer-wall/reports', {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        showToast(data.message)
+        setReviewingReportPost(null)
+        loadReports()
+      } else {
+        showToast(data.message ?? 'Something went wrong.')
+      }
     } finally {
       setActionLoading(false)
     }
@@ -164,7 +225,6 @@ export default function AdminPrayerWallPage() {
             Every post must be approved here before it appears on the public Prayer Wall.
           </p>
 
-          {/* Disclaimer */}
           <div className="flex items-start gap-2 p-4 rounded-xl bg-amber-50 border border-amber-200 mb-6">
             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-xs font-body text-amber-800 leading-relaxed">
@@ -172,9 +232,8 @@ export default function AdminPrayerWallPage() {
             </p>
           </div>
 
-          {/* Tabs + counts */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {(['pending', 'approved', 'hidden'] as StatusTab[]).map(t => (
+            {(['pending', 'approved', 'hidden'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-4 py-2 rounded-full border text-xs font-body font-semibold transition-all ${
                   tab === t ? TAB_COLORS[t] : 'border-navy/12 text-charcoal/50 dark:text-cream/50 hover:border-navy/25'
@@ -182,113 +241,180 @@ export default function AdminPrayerWallPage() {
                 {TAB_LABELS[t]} · {t === 'hidden' ? counts.rejected : counts[t]}
               </button>
             ))}
+            <button onClick={() => setTab('reports')}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-body font-semibold transition-all ${
+                tab === 'reports' ? TAB_COLORS.reports : 'border-navy/12 text-charcoal/50 dark:text-cream/50 hover:border-navy/25'
+              }`}>
+              <Flag className="w-3 h-3" /> Reports {openReportCount > 0 && `(${openReportCount})`}
+            </button>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 dark:text-cream/30" />
-            <input
-              value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search by keyword…"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all bg-white dark:bg-navy-dark"
-            />
-          </div>
+          {tab !== 'reports' && (
+            <>
+              <div className="relative mb-4">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal/30 dark:text-cream/30" />
+                <input
+                  value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder="Search by keyword…"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all bg-white dark:bg-navy-dark"
+                />
+              </div>
 
-          {/* Bulk actions */}
-          {selected.size > 0 && (
-            <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-navy/4 border border-navy/10">
-              <span className="text-xs font-body text-navy/60 dark:text-cream/60">{selected.size} selected</span>
-              <button onClick={() => bulkAction('approve')} disabled={actionLoading}
-                className="ml-auto px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-body font-semibold transition-colors disabled:opacity-50">
-                Approve All
-              </button>
-              <button onClick={() => bulkAction('reject')} disabled={actionLoading}
-                className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-body font-semibold transition-colors disabled:opacity-50">
-                Reject All
-              </button>
-            </div>
+              {selected.size > 0 && (
+                <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-navy/4 border border-navy/10">
+                  <span className="text-xs font-body text-navy/60 dark:text-cream/60">{selected.size} selected</span>
+                  <button onClick={() => bulkAction('approve')} disabled={actionLoading}
+                    className="ml-auto px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-body font-semibold transition-colors disabled:opacity-50">
+                    Approve All
+                  </button>
+                  <button onClick={() => bulkAction('reject')} disabled={actionLoading}
+                    className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-body font-semibold transition-colors disabled:opacity-50">
+                    Reject All
+                  </button>
+                </div>
+              )}
+
+              <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 overflow-hidden">
+                {loading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="w-6 h-6 text-navy/30 dark:text-cream/30 animate-spin" />
+                  </div>
+                ) : items.length === 0 ? (
+                  <p className="text-center py-16 text-sm text-charcoal/40 dark:text-cream/40 font-body">No {TAB_LABELS[tab].toLowerCase()} prayer requests.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-navy/8 text-left">
+                          <th className="p-3">
+                            <input type="checkbox" checked={selected.size === items.length} onChange={toggleSelectAll}
+                              className="w-4 h-4 rounded border-navy/20" />
+                          </th>
+                          <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Submitted</th>
+                          <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Content Preview</th>
+                          <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Privacy</th>
+                          <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider hidden sm:table-cell">User</th>
+                          <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map(item => (
+                          <tr key={item.id} className="border-b border-navy/5 last:border-0">
+                            <td className="p-3">
+                              <input type="checkbox" checked={selected.has(item.id)} onChange={() => toggleSelect(item.id)}
+                                className="w-4 h-4 rounded border-navy/20" />
+                            </td>
+                            <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body whitespace-nowrap">
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="p-3 max-w-xs">
+                              <button onClick={() => setReviewing(item)} className="text-left hover:text-gold transition-colors">
+                                <p className="font-body font-medium text-navy dark:text-cream text-sm truncate">{item.title}</p>
+                                <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body truncate">{item.content}</p>
+                              </button>
+                              {item.flagged.length > 0 && (
+                                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-body font-semibold">
+                                  <AlertTriangle className="w-2.5 h-2.5" /> {item.flagged.join(', ')}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body capitalize">{item.privacy}</td>
+                            <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body hidden sm:table-cell">{item.user?.email ?? '—'}</td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-1.5">
+                                {item.moderation_status === 'pending' && (
+                                  <>
+                                    <button onClick={() => singleAction(item.id, 'approve')} disabled={actionLoading}
+                                      className="p-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors" title="Approve">
+                                      <Check className="w-3.5 h-3.5" />
+                                    </button><button onClick={() => setReviewing(item)} disabled={actionLoading}
+                                      className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors" title="Reject">
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </>
+                                )}
+                                {item.moderation_status === 'approved' && (
+                                  <button onClick={() => deleteItem(item.id)} disabled={actionLoading}
+                                    className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors" title="Delete">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
-          {/* Table */}
-          <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 overflow-hidden">
-            {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-6 h-6 text-navy/30 dark:text-cream/30 animate-spin" />
-              </div>
-            ) : items.length === 0 ? (
-              <p className="text-center py-16 text-sm text-charcoal/40 dark:text-cream/40 font-body">No {TAB_LABELS[tab].toLowerCase()} prayer requests.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-navy/8 text-left">
-                      <th className="p-3">
-                        <input type="checkbox" checked={selected.size === items.length} onChange={toggleSelectAll}
-                          className="w-4 h-4 rounded border-navy/20" />
-                      </th>
-                      <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Submitted</th>
-                      <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Content Preview</th>
-                      <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Privacy</th>
-                      <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider hidden sm:table-cell">User</th>
-                      <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map(item => (
-                      <tr key={item.id} className="border-b border-navy/5 last:border-0">
-                        <td className="p-3">
-                          <input type="checkbox" checked={selected.has(item.id)} onChange={() => toggleSelect(item.id)}
-                            className="w-4 h-4 rounded border-navy/20" />
-                        </td>
-                        <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body whitespace-nowrap">
-                          {new Date(item.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="p-3 max-w-xs">
-                          <button onClick={() => setReviewing(item)} className="text-left hover:text-gold transition-colors">
-                            <p className="font-body font-medium text-navy dark:text-cream text-sm truncate">{item.title}</p>
-                            <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body truncate">{item.content}</p>
-                          </button>
-                          {item.flagged.length > 0 && (
-                            <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-body font-semibold">
-                              <AlertTriangle className="w-2.5 h-2.5" /> {item.flagged.join(', ')}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body capitalize">{item.privacy}</td>
-                        <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body hidden sm:table-cell">{item.user?.email ?? '—'}</td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1.5">
-                            {item.moderation_status === 'pending' && (
-                              <>
-                                <button onClick={() => singleAction(item.id, 'approve')} disabled={actionLoading}
-                                  className="p-1.5 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors" title="Approve">
-                                  <Check className="w-3.5 h-3.5" />
-                                </button>
-                                <button onClick={() => setReviewing(item)} disabled={actionLoading}
-                                  className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors" title="Reject">
-                                  <X className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            )}
-                            {item.moderation_status === 'approved' && (
-                              <button onClick={() => deleteItem(item.id)} disabled={actionLoading}
-                                className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors" title="Delete">
+          {tab === 'reports' && (
+            <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 overflow-hidden">
+              {loading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-6 h-6 text-navy/30 dark:text-cream/30 animate-spin" />
+                </div>
+              ) : reportItems.length === 0 ? (
+                <p className="text-center py-16 text-sm text-charcoal/40 dark:text-cream/40 font-body">No open reports — the Prayer Wall is clean.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-navy/8 text-left">
+                        <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Date</th>
+                        <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Reported Post</th>
+                        <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Reason</th>
+                        <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider hidden sm:table-cell">Reported By</th>
+                        <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Status</th>
+                        <th className="p-3 font-body font-semibold text-navy/40 dark:text-cream/40 text-xs uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reportItems.map(r => (
+                        <tr key={r.id} className="border-b border-navy/5 last:border-0">
+                          <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body whitespace-nowrap">
+                            {new Date(r.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="p-3 max-w-xs">
+                            <button onClick={() => setReviewingReportPost(r.request)} className="text-left hover:text-gold transition-colors">
+                              <p className="font-body font-medium text-navy dark:text-cream text-sm truncate">{r.request.title}</p>
+                              <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body truncate">{r.request.content}</p>
+                            </button>
+                          </td>
+                          <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body">{REASON_LABELS[r.reason] ?? r.reason}</td>
+                          <td className="p-3 text-xs text-charcoal/50 dark:text-cream/50 font-body hidden sm:table-cell">{r.user?.email ?? 'Anonymous'}</td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-body font-semibold capitalize">{r.status}</span>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-1.5">
+                              <button onClick={() => setReviewingReportPost(r.request)} className="px-2 py-1 rounded-lg text-xs font-body text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream border border-navy/12">
+                                View Post
+                              </button>
+                              <button onClick={() => reportAction(r.id, 'dismiss')} disabled={actionLoading}
+                                className="p-1.5 rounded-lg bg-navy/8 text-navy/60 dark:text-cream/60 hover:bg-navy/15 transition-colors" title="Dismiss">
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => reportAction(r.id, 'remove_post')} disabled={actionLoading}
+                                className="p-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors" title="Remove Post">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Review modal */}
       {reviewing && (
         <>
           <div className="fixed inset-0 z-40 bg-navy/30 backdrop-blur-sm" onClick={() => { setReviewing(null); setRejectReason('') }} />
@@ -326,6 +452,21 @@ export default function AdminPrayerWallPage() {
             {reviewing.reviewer_notes && (
               <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mt-3"><strong>Reviewer notes:</strong> {reviewing.reviewer_notes}</p>
             )}
+          </div>
+        </>
+      )}
+
+      {reviewingReportPost && (
+        <>
+          <div className="fixed inset-0 z-40 bg-navy/30 backdrop-blur-sm" onClick={() => setReviewingReportPost(null)} />
+          <div className="fixed inset-x-3 bottom-0 sm:inset-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg z-50 bg-white dark:bg-navy-dark rounded-t-3xl sm:rounded-3xl shadow-2xl p-6">
+            <h3 className="font-display text-lg font-semibold text-navy dark:text-cream mb-1">{reviewingReportPost.title}</h3>
+            <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mb-4 capitalize">Current status: {reviewingReportPost.moderation_status}</p>
+            <p className="text-sm text-charcoal/70 dark:text-cream/70 font-body leading-relaxed mb-4 whitespace-pre-wrap">{reviewingReportPost.content}</p>
+            <button onClick={() => setReviewingReportPost(null)}
+              className="w-full py-3 border border-navy/15 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-sm font-body font-medium rounded-2xl transition-all">
+              Close
+            </button>
           </div>
         </>
       )}

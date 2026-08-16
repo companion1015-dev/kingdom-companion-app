@@ -27,9 +27,18 @@ const COUNTRY_FLAGS: Record<string, string> = {
   AU:'🇦🇺', CA:'🇨🇦', IN:'🇮🇳', PH:'🇵🇭', BR:'🇧🇷', DE:'🇩🇪',
 }
 
+const REPORT_REASONS: { id: string; label: string }[] = [
+  { id: 'personal_information', label: 'Personal Information' },
+  { id: 'donation_fundraising', label: 'Donation / Fundraising' },
+  { id: 'hateful_abusive',      label: 'Hateful / Abusive' },
+  { id: 'spam',                 label: 'Spam' },
+  { id: 'other',                label: 'Other' },
+]
+
 export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compact }: Props) {
   const [prayed,      setPrayed]      = useState(prayer.has_prayed ?? false)
   const [saved,       setSaved]       = useState(prayer.has_saved  ?? false)
+  const [reported,    setReported]    = useState(prayer.has_reported ?? false)
   const [prayCount,   setPrayCount]   = useState(prayer.prayer_count)
   const [showEnc,     setShowEnc]     = useState(false)
   const [showReport,  setShowReport]  = useState(false)
@@ -38,6 +47,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
   const [encText,     setEncText]     = useState('')
   const [verseText,   setVerseText]   = useState('')
   const [reportReason,setReportReason]= useState('')
+  const [reportDetails, setReportDetails] = useState('')
   const [toast,       setToast]       = useState<string | null>(null)
   const [loading,     setLoading]     = useState<string | null>(null)
 
@@ -84,9 +94,14 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
   const handleReport = async () => {
     if (!reportReason) return
     setLoading('report')
-    await reportPrayer(prayer.id, reportReason)
+    const ok = await reportPrayer(prayer.id, reportReason, reportDetails.trim() || undefined)
     setShowReport(false)
-    showToast('🚩 Report submitted — thank you')
+    if (ok) {
+      setReported(true)
+      showToast('Thank you. Our team will review this.')
+    } else {
+      showToast('You have already reported this prayer request.')
+    }
     setLoading(null)
   }
 
@@ -248,12 +263,18 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
 
           {/* Report (not owner) */}
           {!isOwner && (
-            <button
-              onClick={() => { setShowReport(e => !e); setShowEnc(false); setShowVerse(false) }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-body text-charcoal/30 dark:text-cream/30 hover:text-red-400 transition-colors ml-auto"
-            >
-              <Flag className="w-3 h-3" /> Report
-            </button>
+            reported ? (
+              <span className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-body text-charcoal/30 dark:text-cream/30 ml-auto">
+                <Flag className="w-3 h-3" /> Already reported
+              </span>
+            ) : (
+              <button
+                onClick={() => { setShowReport(e => !e); setShowEnc(false); setShowVerse(false) }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-body text-charcoal/30 dark:text-cream/30 hover:text-red-400 transition-colors ml-auto"
+              >
+                <Flag className="w-3 h-3" /> Report
+              </button>
+            )
           )}
         </div>
 
@@ -308,20 +329,29 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
         {/* Report input */}
         {showReport && (
           <div className="mt-4 p-4 rounded-xl bg-red-50 border border-red-100">
-            <p className="text-xs font-body font-semibold text-red-600 tracking-wider uppercase mb-2">Report this request</p>
+            <p className="text-xs font-body font-semibold text-red-600 tracking-wider uppercase mb-1">Report this prayer</p>
+            <p className="text-xs font-body text-red-500/80 mb-3">Help us keep the Prayer Wall safe. This is anonymous to other users.</p>
             <div className="grid grid-cols-2 gap-1.5 mb-3">
-              {['spam','scam','offensive','misinformation','harassment','other'].map(r => (
+              {REPORT_REASONS.map(r => (
                 <button
-                  key={r}
-                  onClick={() => setReportReason(r)}
+                  key={r.id}
+                  onClick={() => setReportReason(r.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-body border transition-all text-left ${
-                    reportReason === r ? 'bg-red-100 border-red-300 text-red-700 font-semibold' : 'border-red-100 text-charcoal/50 dark:text-cream/50 hover:border-red-200'
+                    reportReason === r.id ? 'bg-red-100 border-red-300 text-red-700 font-semibold' : 'border-red-100 text-charcoal/50 dark:text-cream/50 hover:border-red-200'
                   }`}
                 >
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                  {r.label}
                 </button>
               ))}
             </div>
+            <textarea
+              value={reportDetails}
+              onChange={e => setReportDetails(e.target.value)}
+              placeholder="Additional details (optional)…"
+              rows={2}
+              maxLength={1000}
+              className="w-full bg-white dark:bg-navy-dark rounded-lg border border-red-100 px-3 py-2 text-sm font-body text-navy dark:text-cream placeholder-charcoal/30 outline-none focus:border-red-300 resize-none mb-3"
+            />
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowReport(false)} className="px-3 py-1.5 text-xs font-body text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream">Cancel</button>
               <button

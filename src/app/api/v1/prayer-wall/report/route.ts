@@ -11,7 +11,7 @@ import { prisma } from '@/lib/db/client'
 
 const REPORT_RATE = { limit: 10, windowMs: 60 * 60 * 1000 }
 const AUTO_PENDING_THRESHOLD = 3
-const VALID_REASONS = ['spam', 'scam', 'offensive', 'misinformation', 'harassment', 'other']
+const VALID_REASONS = ['personal_information', 'donation_fundraising', 'hateful_abusive', 'spam', 'other']
 
 export const POST = withOptionalAuth(async (req: NextRequest, user) => {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
@@ -28,6 +28,11 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
     const db = prisma as any
     const request = await db.prayerRequest.findUnique({ where: { id: request_id }, select: { id: true } })
     if (!request) return errorResponse('NOT_FOUND', 'Prayer request not found.', 404)
+
+    if (user) {
+      const existing = await db.prayerReport.findUnique({ where: { user_id_request_id: { user_id: user.id, request_id } } })
+      if (existing) return errorResponse('ALREADY_REPORTED', 'You have already reported this prayer request.', 409)
+    }
 
     await db.prayerReport.create({
       data: { request_id, user_id: user?.id ?? null, reason, details: details?.slice(0, 1000) ?? null },

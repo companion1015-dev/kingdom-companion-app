@@ -863,6 +863,7 @@ model PrayerReport {
   user    User?         @relation(fields: [user_id], references: [id])
 
   @@index([request_id])
+  @@unique([user_id, request_id])
   @@index([status])
   @@map("prayer_report")
 }
