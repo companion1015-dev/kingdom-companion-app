@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer'
 // project, page never existed. Draft, needs real legal review.
 
 export default function TermsPage() {
-  const lastUpdated = 'July 2026'
+  const lastUpdated = 'August 2026'
 
   return (
     <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
@@ -24,51 +24,49 @@ export default function TermsPage() {
         <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 sm:p-8 space-y-6 text-sm text-charcoal/70 dark:text-cream/70 font-body leading-relaxed">
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">1. Acceptance of terms</h2>
-            <p>By using Kingdom Companion, you agree to these terms. If you do not agree, please do not use the app.</p>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">1. Acceptance</h2>
+            <p>By using Kingdom Companion, you agree to these Terms. Kingdom Companion is provided &ldquo;as is&rdquo; for personal, non-commercial Bible study and encouragement. If you do not agree, please do not use the app.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">2. What we offer</h2>
-            <p>Kingdom Companion is a free Christian discipleship platform: Bible reading, study tools, an AI Companion, a Prayer Wall, devotionals, and reading plans. Access to Scripture and every core feature is free and will remain free. Donations are entirely optional.</p>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">2. Eligibility</h2>
+            <p>You must be 13 or older to use this app. By using it, you confirm that you meet this age requirement.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">3. Your account</h2>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">3. Free access</h2>
+            <p>All core features, including Scripture, AI insight, devotionals, and the Prayer Journal, are free. No feature is locked behind payment.</p>
+          </section>
+
+          <section>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">4. Voluntary contributions</h2>
+            <p>You may make a voluntary contribution to help cover server, API, and development costs. Contributions are not donations, do not unlock any feature, and are not tax-deductible. We are not a charity or religious organization.</p>
+          </section>
+
+          <section>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">5. Your account</h2>
             <p>You are responsible for keeping your password secure and for anything that happens under your account. Please tell us right away if you believe your account has been accessed without your permission.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">4. Acceptable use</h2>
-            <p className="mb-2">When using the Prayer Wall, chat, or any shared space, you agree not to:</p>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">6. User content &amp; Prayer Wall rules</h2>
+            <p className="mb-2">You are responsible for content you post. Do not post:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Harass, threaten, or abuse other users</li>
-              <li>Post spam, advertising, or solicit money from other users</li>
-              <li>Post content that is illegal, hateful, or sexually explicit</li>
-              <li>Impersonate another person or organisation</li>
-              <li>Attempt to disrupt, hack, or reverse-engineer the app</li>
+              <li>Personal information about yourself or others</li>
+              <li>Fundraising requests, links, phone numbers, or payment information</li>
+              <li>Hateful, abusive, or illegal content</li>
             </ul>
-            <p className="mt-2">We may remove content or suspend accounts that violate these terms.</p>
+            <p className="mt-2">We may remove posts and suspend accounts that violate these rules.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">5. Your content</h2>
-            <p>You keep ownership of anything you write or submit (prayer requests, journal entries, notes). By posting to shared spaces like the Prayer Wall, you give us permission to display that content to other users according to the privacy setting you chose.</p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">6. The AI Companion</h2>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">7. The AI Companion</h2>
             <p>The AI Companion offers Scripture-centred reflection and encouragement, generated by AI. It is <strong className="text-navy dark:text-cream">not a substitute for pastoral care, professional counselling, or medical or mental health advice</strong>. If you are in crisis, please contact a crisis line or emergency services directly rather than relying on the AI Companion.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">7. Donations</h2>
-            <p>Donations are voluntary and given at your own discretion. Payments are processed by Stripe or PayPal under their own terms. Please contact us through the <a href="/contact" className="text-gold hover:text-gold-dark underline">Contact page</a> if you believe a donation was made in error.</p>
-          </section>
-
-          <section>
             <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">8. Intellectual property</h2>
-            <p>The Kingdom Companion name, design, and original written content belong to us. Bible text and commentary are provided under the terms of their respective sources and remain the property of those sources.</p>
+            <p>Scripture quotations are from the Berean Standard Bible (BSB), a public-domain translation. App design and original written content are &copy; Kingdom Companion. You may not copy, sell, or redistribute the app.</p>
           </section>
 
           <section>
@@ -77,13 +75,23 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">10. Changes</h2>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">10. Termination</h2>
+            <p>We may suspend or terminate access for violations of these Terms.</p>
+          </section>
+
+          <section>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">11. Governing law</h2>
+            <p>For users in the United Arab Emirates, use of the app is subject to UAE laws and regulations.</p>
+          </section>
+
+          <section>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">12. Changes</h2>
             <p>We may update these terms as the app changes. We will update the &ldquo;Last updated&rdquo; date above when we do. Continued use of the app after a change means you accept the updated terms.</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">11. Contact us</h2>
-            <p>Questions about these terms can be sent through our <a href="/contact" className="text-gold hover:text-gold-dark underline">Contact page</a>.</p>
+            <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-2">13. Contact us</h2>
+            <p>Questions about these Terms can be sent through our <a href="/contact" className="text-gold hover:text-gold-dark underline">Contact page</a>.</p>
           </section>
 
         </div>
