@@ -86,6 +86,7 @@ export default function SearchSection() {
 
   const handleSuggestionClick = (s: string) => {
     setQuery(s)
+    setFocused(true)
     const ref = parseReference(s)
     if (ref) goToVerse(ref.bookId, ref.chapter)
   }
