@@ -195,7 +195,7 @@ export default function DevotionalSection() {
               </p>
               <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body mb-4">— Psalm 119:105</p>
               <Link
-                href="/bible"
+                href="/bible?book=PSA&chapter=119"
                 className="inline-flex items-center gap-2 text-sm font-body font-medium text-sage-dark hover:text-navy dark:text-cream transition-colors group"
               >
                 Open the Bible <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
