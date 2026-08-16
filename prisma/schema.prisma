@@ -814,6 +814,9 @@ model PrayerRequest {
   updated_at      DateTime  @updatedAt @db.Timestamptz
   answered_at     DateTime? @db.Timestamptz
   deleted_at      DateTime? @db.Timestamptz
+  reviewed_at     DateTime? @db.Timestamptz
+  reviewer_notes  String?
+  reviewed_by     String?   @db.Uuid
 
   user          User?              @relation(fields: [user_id], references: [id])
   reactions     PrayerReaction[]

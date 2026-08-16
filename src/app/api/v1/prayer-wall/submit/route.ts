@@ -65,6 +65,7 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
         content:      content.trim(),
         category,
         privacy,
+        moderation_status: 'pending',
         display_name: privacy === 'anonymous' || privacy === 'private' ? null : display_name,
       },
       select: { id: true },
