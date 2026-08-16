@@ -47,7 +47,7 @@ export default function ProfilePage() {
         if (data.success) {
           setProfile(data.data)
           setDisplayName(data.data.display_name)
-          setTranslation(data.data.preferred_translation)
+          setTranslation(['BSB', 'KJV', 'ASV', 'WEBUS'].includes(data.data.preferred_translation) ? data.data.preferred_translation : 'BSB')
           setFontSize(data.data.font_size)
         } else {
           setError(data.error?.message ?? 'Unable to load your profile.')
