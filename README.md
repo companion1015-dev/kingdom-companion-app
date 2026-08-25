@@ -1,69 +1,77 @@
-# Kingdom Companion — Deployment
+# Live Prayer — Streaming Implementation
 
-## Status
+A working implementation of the live video streaming core described in the
+*Live Video Intercessory Prayer — Implementation Blueprint* (Kingdom
+Companion), Sections 1–3: watch without an account, join/publish only with
+one, and role-gated permissions enforced server-side.
 
-- Next.js 14.2.5, TypeScript, Prisma 7.8.0/PostgreSQL, JWT auth, npm.
-- `npm run build` and `npx tsc --noEmit` pass.
-- Git repository initialised, `main` branch, one commit containing the current working state.
-- No migrations have ever been created or run. No production database exists. No secrets exist anywhere in this environment.
+**Provider:** [LiveKit](https://livekit.io) — open-source WebRTC SFU,
+sub-second latency, self-hostable or LiveKit Cloud. Chosen per the
+blueprint's own provider comparison as the best fit once the feature grows
+past pure one-way broadcast into stage invites (Intercessors/Worship
+Leaders) and future breakout rooms (Section 18). If your near-term need is
+*strictly* one host broadcasting to a passive audience with no interactivity
+roadmap, Amazon IVS is the cheaper alternative the blueprint flags — the
+`server/` API is intentionally the only place that would need to change to
+swap providers, since it's the sole thing issuing credentials to clients.
 
-## What is genuinely blocking a live deployment right now
+## What's actually implemented
 
-None of the following can be done inside this sandbox — it has no access to any hosting platform account, no ability to provision a database, and cannot reach Prisma's own binary-distribution servers (only a fixed allowlist of package-registry domains). These are the exact, concrete actions required, in order:
+- **`server/`** — Node/Express API that:
+  - Registers/starts/ends prayer rooms (Host-only, enforced server-side)
+  - Issues short-lived LiveKit access tokens with permissions derived from
+    the caller's role (`server/auth.js`), never from client input:
+    - No session → **Visitor**: subscribe-only, hidden, no chat
+    - Member/Prayer Partner → subscribe + chat, cannot publish
+    - Intercessor/Worship Leader/Host/Admin → can publish camera+mic
+- **`client/`** — React + TypeScript app that:
+  - Lists rooms and shows live status
+  - Lets a Host start/end a session
+  - Joins any live session and renders video grid, chat, and (if permitted)
+    publish controls — using `@livekit/components-react`
 
-### 1. Push this repository to GitHub (or GitLab/Bitbucket)
+This is the streaming mechanics only — chat moderation, prayer request
+submission, notifications, and the rest of the blueprint's sections are not
+built here; the token/role scaffolding is written so those slot in cleanly.
 
+## Run it locally
+
+```bash
+# 1. Start a local LiveKit server (no cloud account needed for dev)
+docker compose up
+
+# 2. Backend
+cd server
+cp .env.example .env
+# edit .env: LIVEKIT_API_KEY=devkey, LIVEKIT_API_SECRET=devsecret1234567890,
+# LIVEKIT_URL=ws://localhost:7880
+npm install
+npm start   # or: node index.js
+
+# 3. Frontend
+cd client
+cp .env.example .env
+npm install
+npm run dev   # http://localhost:5173
 ```
-git remote add origin <your-repo-url>
-git push -u origin main
-```
 
-### 2. Provision a production PostgreSQL database
+To go live for real: create a free project at cloud.livekit.io, put its API
+key/secret/URL in `server/.env`, and skip the docker-compose step.
 
-Recommended: [Supabase](https://supabase.com) (already the target throughout this codebase — `@supabase/ssr` and `@supabase/supabase-js` are dependencies, and `.env.example` is written for it). Create a project, then copy:
+## Auth integration point
 
-- `DATABASE_URL` (pooled connection, port 6543)
-- `DIRECT_URL` (direct connection, port 5432 — Prisma needs this for migrations)
+`server/auth.js`'s `resolveSession()` is a stand-in for Kingdom Companion's
+real session lookup. Replace its body with your actual user/session store
+call — everything downstream (role → grant mapping, room start/end
+authorization) already works off whatever `{ userId, displayName, role }`
+it returns.
 
-### 3. Run the first migration, from an environment that can reach Prisma's servers
+## Production hardening still needed before shipping
 
-This sandbox cannot do this step — it is network-restricted. From your own machine or the hosting platform's build step (which will have normal internet access):
-
-```
-npx prisma migrate dev --name init
-```
-
-This is the **first migration this project will ever have** — there is no existing migration history to apply, only the schema to turn into one.
-
-### 4. Generate real secrets
-
-```
-openssl rand -base64 64   # → JWT_SECRET
-openssl rand -base64 64   # → JWT_REFRESH_SECRET (must be different from the above)
-```
-
-### 5. Deploy to a hosting platform
-
-Recommended: [Vercel](https://vercel.com) — zero-config for Next.js, no `Dockerfile` or platform-specific config needed. Connect the GitHub repo, then set every variable from `.env.example` in the platform's environment settings, with two changes for production:
-
-- `NEXT_PUBLIC_APP_URL` → your real production domain, not `localhost:3000`.
-- `NODE_ENV=production`.
-
-### 6. Required third-party accounts, by priority
-
-**Required for the app to function at all:**
-- Supabase (database) — step 2.
-- An email provider for `RESEND_API_KEY` (password reset, verification emails depend on this).
-
-**Required for specific features, not for the app to boot:**
-- `ANTHROPIC_API_KEY` — AI Companion.
-- `BIBLE_API_KEY` — Bible text itself; without it, the Bible reader has nothing to display, so treat as effectively required.
-- `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET`/`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` — donations only; the app functions without them, donations simply won't process.
-- `NEXT_PUBLIC_ALGOLIA_APP_ID` and related — search; the app functions without it.
-- `R2_*` — file storage; not required unless a feature that uploads files is in active use.
-- `SENTRY_DSN` — error monitoring; optional for launch.
-- `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` — analytics; optional, and per the project's own Constitution, must never be added without the associated Privacy Policy disclosure being live first.
-
-## What does NOT need to change
-
-The application code itself required no changes to become deployable — it already builds cleanly, already reads all configuration from environment variables (no hardcoded values), and already uses a standard Next.js structure Vercel handles with zero extra configuration.
+- Swap the in-memory `rooms` Map in `server/index.js` for your real DB
+  table (Section 10: Scheduling)
+- Rate-limit `/api/rooms/:roomName/token` (Section 16)
+- Add the low-bandwidth/audio-only fallback (Section 11) — LiveKit supports
+  disabling video subscription per-participant on the client
+- TLS termination in front of the API in any non-dev environment
+- Recording/VOD (Section 18) via LiveKit's Egress API if you want replays
