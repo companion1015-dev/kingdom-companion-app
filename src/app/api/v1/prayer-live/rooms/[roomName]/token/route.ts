@@ -42,7 +42,11 @@ export const POST = withOptionalAuth(async (req: NextRequest, user, context) => 
   const role = user?.role ?? PRAYER_LIVE_ROLES.VISITOR
   const name = displayName || user?.email?.split('@')[0] || 'Guest'
 
-  const result = await issuePrayerLiveToken({ roomName, identity, displayName: name, role })
-
-  return NextResponse.json(result)
+  try {
+    const result = await issuePrayerLiveToken({ roomName, identity, displayName: name, role })
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error('[prayer-live] token issuance failed:', error)
+    return NextResponse.json({ error: 'Unable to issue a session token. Please try again.' }, { status: 500 })
+  }
 })
