@@ -58,6 +58,7 @@ model User {
   saved_prayers      SavedPrayer[]
   donation_records       DonationRecord[]
   donation_subscriptions DonationSubscription[]
+  hosted_prayer_live_rooms PrayerLiveRoom[]
 
   @@index([email])
   @@index([account_status])
@@ -921,4 +922,32 @@ model DailyGenerated {
   created_at         DateTime @default(now()) @db.Timestamptz
 
   @@map("daily_generated")
+}
+
+// ─── LIVE PRAYER MODULE ───────────────────────────────────────────────────────
+// Live Video Intercessory Prayer — Implementation Blueprint, Section 1-3.
+// Distinct from `Prayer` (private journal) and `PrayerRequest` (public Prayer
+// Wall) above — this is the real-time, video-based corporate prayer session.
+// The LiveKit room itself is ephemeral/external; this table is the durable
+// record of scheduling, live state, and who's hosting, replacing what was a
+// prototype's in-memory Map with a real, persistent table.
+model PrayerLiveRoom {
+  id           String    @id @default(uuid()) @db.Uuid
+  room_name    String    @unique @db.VarChar(100) // LiveKit room identifier, e.g. "global-main"
+  title        String    @db.VarChar(255)
+  host_id      String?   @db.Uuid
+  is_live      Boolean   @default(false)
+  scheduled_at DateTime? @db.Timestamptz
+  started_at   DateTime? @db.Timestamptz
+  ended_at     DateTime? @db.Timestamptz
+  created_at   DateTime  @default(now()) @db.Timestamptz
+  updated_at   DateTime  @updatedAt @db.Timestamptz
+  deleted_at   DateTime? @db.Timestamptz
+
+  host User? @relation(fields: [host_id], references: [id])
+
+  @@index([is_live])
+  @@index([host_id])
+  @@index([scheduled_at])
+  @@map("prayer_live_room")
 }

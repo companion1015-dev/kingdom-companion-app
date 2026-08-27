@@ -83,6 +83,7 @@ export const navLinks = [
   { label: 'Devotionals',      href: '/devotionals' },
   { label: 'Reading Plans',    href: '/reading-plans' },
   { label: 'Prayer Wall',      href: '/prayer-wall' },
+  { label: 'Live Prayer',      href: '/prayer-live' },
   { label: 'Blog',             href: '/blog' },
   { label: 'Give',             href: '/support' },
   { label: 'About',            href: '/about' },
