@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ChevronLeft, ChevronRight, Loader2, WifiOff, FileText, AlignLeft } from 'lucide-react'
 import Image from 'next/image'
 import type { Chapter, Verse, Book, Translation, SearchResult } from '@/modules/bible/types'
@@ -35,6 +36,8 @@ function loadPosition() {
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function BibleReader() {
+  const searchParams = useSearchParams()
+  const appliedInitialPosition = useRef(false)
   const [translation, setTranslation] = useState('BSB') // NIV is access-denied with this API key/tier — see bible-api.ts header
   const [bookId,      setBookId]      = useState('JHN')
   const [chapter,     setChapter]     = useState(3)
@@ -132,15 +135,25 @@ export default function BibleReader() {
     // saved reading position -- this is what makes "Read Isaiah 40" style
     // links from elsewhere in the app (homepage daily verse, etc.) actually
     // navigate to that specific passage instead of just opening wherever
-    // the reader last left off.
-    const params = new URLSearchParams(window.location.search)
-    const linkedBook    = params.get('book')
-    const linkedChapter = params.get('chapter')
+    // the reader last left off. Keyed off useSearchParams (not a one-shot
+    // window.location.search read) so a second link to /bible while the
+    // reader is already mounted -- App Router doesn't remount on same-route
+    // navigation -- still lands on the newly linked passage instead of
+    // silently staying put.
+    const linkedBook    = searchParams.get('book')
+    const linkedChapter = searchParams.get('chapter')
     if (linkedBook && BOOKS.some(b => b.bookId === linkedBook)) {
       const c = Math.max(1, parseInt(linkedChapter ?? '1') || 1)
       setBookId(linkedBook); setChapter(c); loadChapter(translation, linkedBook, c)
       return
     }
+
+    // No (valid) deep link in the URL -- fall back to the saved reading
+    // position, but only on the very first load, so navigating elsewhere
+    // and back to a bare /bible doesn't fight the Next/Prev/selector state
+    // the user already set up in this session.
+    if (appliedInitialPosition.current) return
+    appliedInitialPosition.current = true
 
     const saved = loadPosition()
     // Guard against a stale saved translation from before this fix (e.g.
@@ -155,7 +168,7 @@ export default function BibleReader() {
     }
     else loadChapter(translation, bookId, chapter)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [searchParams])
 
   useEffect(() => { loadChapter(translation, bookId, chapter) }, [translation, bookId, chapter, loadChapter])
 

@@ -1,30 +1,21 @@
-// ─── BIBLE API SERVICE — YouVersion Platform ─────────────────────────────────
-// Corrected 2026: this file previously targeted api.scripture.api.bible
-// (API.Bible, run by American Bible Society) — a completely different
-// service from YouVersion (run by Life.Church), which is what this project
-// actually has credentials for. That mismatch caused every request to fail
-// with 403 Forbidden, regardless of key correctness — a valid YouVersion key
-// was simply being sent to the wrong company's servers.
+// ─── BIBLE API SERVICE ────────────────────────────────────────────────────────
+// getChapter() (actual reading-view Scripture text) is sourced from
+// bible.helloao.org -- see the dedicated note above that function. It needs
+// no API key and covers every translation this app offers for free.
 //
-// Real YouVersion Platform API, verified directly against
-// developers.youversion.com as of this fix:
+// getBooks()/getTranslations() below still optionally use YouVersion Platform
+// API when BIBLE_API_KEY is configured (both already fall back to the local
+// BOOKS/TRANSLATIONS lists without one, which match the real 66-book
+// structure, so this is optional polish, not required for the app to work):
 //   Base URL:       https://api.youversion.com/v1
 //   Auth header:    X-YVP-App-Key: <your key>
-//   Bible versions: integer IDs (e.g. 111 = NIV), NOT the alphanumeric
-//                   hash-style IDs API.Bible uses — the old TRANSLATION_IDS
-//                   map below was entirely wrong and has been replaced.
+//   Get a key from: platform.youversion.com -> your app -> App Keys
 //
-// HOW TO CONNECT YOUR API KEY:
-// 1. platform.youversion.com -> your app -> App Keys
-// 2. Add to .env.local:  BIBLE_API_KEY=your-key-here
-// 3. Add to Vercel:      Settings -> Environment Variables -> BIBLE_API_KEY
-// 4. Redeploy
-//
-// KNOWN LIMITATION, stated honestly rather than papered over: YouVersion's
-// public API does not currently expose a full-text search endpoint (unlike
-// API.Bible, which the old code assumed existed). searchBible() below uses
-// local sample data only -- this is a genuine product gap, not a bug, until
-// YouVersion adds one or a separate search provider is integrated.
+// KNOWN LIMITATION, stated honestly rather than papered over: neither
+// YouVersion nor HelloAO exposes NIV -- it's commercially licensed by
+// Biblica, and no free/keyless provider carries it. BSB (Berean Standard
+// Bible) is the default specifically because it's free and reads similarly
+// to modern translations like NIV.
 //
 // NOTE: Scripture text is NEVER stored permanently (Constitution paragraph 4, DSD 1.10)
 // It is fetched fresh each request and cached per Workbox strategy only.
@@ -35,20 +26,15 @@ import { TRANSLATIONS, BOOKS, getMockChapter, SAMPLE_SEARCH_RESULTS } from './mo
 const YOUVERSION_API_BASE = 'https://api.youversion.com/v1'
 const BIBLE_API_KEY       = process.env.BIBLE_API_KEY
 
-// Real YouVersion integer Bible version IDs (confirmed from official docs).
-// NOTE, confirmed by a live request during this fix: version 111 (NIV)
-// returns "Access denied" with this app's current key/tier -- NIV is a
-// commercially licensed translation (Biblica), and YouVersion appears to
-// gate its full text behind a separate licence this app doesn't hold yet.
-// BSB, ASV, and WEBUS are open-licence translations and work without issue,
-// so BSB is now the default fallback rather than NIV. NIV stays in the map
-// in case licensing is granted later, but nothing should default to it.
+// Real YouVersion integer Bible version IDs (confirmed from official docs),
+// used only by getBooks()/getTranslations() below -- getChapter() no longer
+// depends on these, see HELLOAO_TRANSLATION_IDS further down.
 const TRANSLATION_IDS: Record<string, number> = {
   ASV:   12,
   NIV:   111,
   WEBUS: 206,
   BSB:   3034,
-  KJV:   1, // Confirmed via bible.com/versions/1-kjv-king-james-version. Public domain.
+  KJV:   1,
 }
 
 function apiHeaders() {
@@ -129,79 +115,71 @@ export async function getBooks(translationCode: string): Promise<Book[]> {
 }
 
 // --- CHAPTER ------------------------------------------------------------------
+// Sourced from bible.helloao.org -- the same free, key-less, MIT-licensed,
+// no-rate-limit API this file already trusts for full-text search (see
+// loadCompleteBible below) and that the commentary module (helloao.ts)
+// already depends on. Unlike YouVersion, it needs no signup or app key, so
+// every translation this app actually offers (BSB, KJV, ASV, WEBUS -- all
+// open-licence) gets real Scripture text with zero setup. NIV is still not
+// obtainable here either: it's commercially licensed by Biblica and HelloAO,
+// like every other provider, doesn't carry it -- see the file-level note
+// above for why that's a licensing wall, not a bug.
+const HELLOAO_API_BASE = 'https://bible.helloao.org/api'
+
+// Our app's short codes -> HelloAO's own translation ids (confirmed against
+// https://bible.helloao.org/api/available_translations.json -- these do NOT
+// match our codes 1:1, e.g. KJV there is "eng_kjv", not "KJV").
+const HELLOAO_TRANSLATION_IDS: Record<string, string> = {
+  BSB:   'BSB',
+  KJV:   'eng_kjv',
+  ASV:   'eng_asv',
+  WEBUS: 'ENGWEBP',
+}
+
+function helloaoTranslationId(code: string): string {
+  return HELLOAO_TRANSLATION_IDS[code] ?? HELLOAO_TRANSLATION_IDS['BSB']
+}
 
 export async function getChapter(
   translation: string,
   bookId:      string,
   chapter:     number,
 ): Promise<Chapter | null> {
-  if (!BIBLE_API_KEY) {
-    console.log(`[BibleAPI] No API key - using mock data for ${bookId} ${chapter}`)
-    return getMockChapter(bookId, chapter, translation)
-  }
-
   try {
-    const versionId = getVersionId(translation)
-
-    // Verified against live responses: /verses gives us the ordered list of
-    // verse numbers and their passage_id (e.g. "JHN.3.16") for the chapter,
-    // but no actual Scripture text -- "title" here is just the verse number
-    // as a string. /passages, separately, returns real text but as one
-    // flowing blob per request with no verse boundaries marked inside it.
-    // Neither endpoint alone gives us what the reader UI needs (individual
-    // verses with their own text, for per-verse highlight/bookmark/note).
-    // So: list the verses first, then fetch each one's own passage text.
-    const listRes = await fetch(
-      `${YOUVERSION_API_BASE}/bibles/${versionId}/books/${bookId}/chapters/${chapter}/verses`,
-      { headers: apiHeaders(), next: { revalidate: 3600 } }
+    const tId = helloaoTranslationId(translation)
+    const res = await fetch(
+      `${HELLOAO_API_BASE}/${tId}/${bookId}/${chapter}.json`,
+      { next: { revalidate: 86400 } } // Scripture text for a given ref never changes -- safe to cache a full day.
     )
 
-    if (!listRes.ok) {
-      console.error(`[BibleAPI] Chapter ${bookId}.${chapter} failed: ${listRes.status}`)
+    if (!res.ok) {
+      console.error(`[BibleAPI] Chapter ${bookId}.${chapter} (${tId}) failed: ${res.status}`)
       return getMockChapter(bookId, chapter, translation)
     }
 
-    const listBody = await listRes.json()
+    const body = await res.json()
     const localBook = BOOKS.find(b => b.bookId === bookId)
-    const bookName  = localBook?.name ?? bookId
+    const bookName  = localBook?.name ?? String(body.book?.name ?? bookId)
 
-    const verseList: { verseNum: number; passageId: string }[] = (listBody.data ?? []).map(
-      (v: Record<string, unknown>, i: number) => ({
-        verseNum:  Number(v.title ?? v.verse ?? i + 1),
-        passageId: String(v.passage_id ?? v.id ?? `${bookId}.${chapter}.${i + 1}`),
+    const content: Record<string, unknown>[] = body.chapter?.content ?? []
+    const verses = content
+      .filter(item => item.type === 'verse' && item.number)
+      .map(item => {
+        const text = ((item.content as unknown[]) ?? [])
+          .map(p => typeof p === 'string' ? p : '')
+          .join(' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+        return {
+          id:          `${bookId}.${chapter}.${item.number}`,
+          verseNumber: Number(item.number),
+          reference:   `${bookName} ${chapter}:${item.number}`,
+          text,
+        }
       })
-    )
+      .filter(v => v.text)
 
-    if (verseList.length === 0) return getMockChapter(bookId, chapter, translation)
-
-    // Fetch every verse's real text in parallel to keep this to one round
-    // of latency rather than one-at-a-time. A known cost of this API shape:
-    // a full chapter costs N+1 requests (1 list + N passages), not 1 -- see
-    // file header note on the tradeoffs found in YouVersion's public API.
-    const texts = await Promise.all(
-      verseList.map(async ({ passageId }) => {
-        try {
-          const pRes = await fetch(
-            `${YOUVERSION_API_BASE}/bibles/${versionId}/passages/${passageId}`,
-            { headers: apiHeaders(), next: { revalidate: 3600 } }
-          )
-          if (!pRes.ok) return ''
-          const pBody = await pRes.json()
-          return cleanVerseText(String(pBody.content ?? pBody.text ?? ''))
-        } catch { return '' }
-      })
-    )
-
-    const verses = verseList.map(({ verseNum }, i) => ({
-      id:          `${bookId}.${chapter}.${verseNum}`,
-      verseNumber: verseNum,
-      reference:   `${bookName} ${chapter}:${verseNum}`,
-      text:        texts[i] || `[Verse text unavailable]`,
-    }))
-
-    if (verses.every(v => !v.text || v.text === '[Verse text unavailable]')) {
-      return getMockChapter(bookId, chapter, translation)
-    }
+    if (verses.length === 0) return getMockChapter(bookId, chapter, translation)
 
     return {
       id:            `${bookId}.${chapter}`,
@@ -218,18 +196,6 @@ export async function getChapter(
     console.error(`[BibleAPI] getChapter error for ${bookId} ${chapter}:`, error)
     return getMockChapter(bookId, chapter, translation)
   }
-}
-
-function cleanVerseText(text: string): string {
-  return text
-    .replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim()
 }
 
 // --- SEARCH ---------------------------------------------------------------------

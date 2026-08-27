@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import BibleReader from '@/modules/bible/components/BibleReader'
 
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 }
 
 export default function BiblePage() {
-  return <BibleReader />
+  return (
+    <Suspense>
+      <BibleReader />
+    </Suspense>
+  )
 }

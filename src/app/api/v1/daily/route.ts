@@ -19,18 +19,61 @@ function todayKey(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+// A much larger pool than the old 7-verse list, spread across OT/NT, so the
+// no-API-key fallback path doesn't cycle back to the same verse every week.
+const FALLBACK_REFS = [
+  'PSA.46.1', 'ISA.41.10', 'PHP.4.6', 'JHN.14.27', 'ROM.8.28', 'MAT.11.28', 'JOS.1.9',
+  'PSA.23.1', 'PRO.3.5', 'ISA.40.31', 'JER.29.11', '2CO.5.17', 'GAL.5.22', 'EPH.2.8',
+  'HEB.11.1', 'JAS.1.2', '1PE.5.7', '1JN.4.18', 'PSA.121.1', 'PSA.34.18', 'MAT.6.33',
+  'ROM.12.2', 'PHP.4.13', 'PSA.27.1', 'ISA.26.3', 'NAM.1.7', 'LAM.3.22', 'DEU.31.6',
+  'PSA.91.1', 'PSA.16.11', 'PRO.16.3', 'MIC.6.8', 'ZEP.3.17', 'HAB.3.19', 'MAL.3.10',
+  'MAT.5.4', 'LUK.1.37', 'JHN.16.33', 'ACT.1.8', '1CO.13.4', '2TI.1.7', 'HEB.12.1',
+  '1PE.1.3', 'REV.21.4',
+]
+
+// Stable per-date pseudo-random pick (not day-of-month, which repeats every
+// month at the same day) among whichever fallback refs weren't shown recently.
+function seededIndex(seed: string, mod: number): number {
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+  return hash % mod
+}
+
+function pickFallbackRef(date: string, recentKeys: Set<string>): string {
+  const candidates = FALLBACK_REFS.filter(ref => !recentKeys.has(ref.split('.').slice(0, 2).join('.')))
+  const pool = candidates.length > 0 ? candidates : FALLBACK_REFS
+  return pool[seededIndex(date, pool.length)]
+}
+
+// Verses (by book+chapter) already served in the last few weeks, so today's
+// pick -- AI-generated or fallback -- doesn't repeat one still fresh in the
+// reader's memory.
+async function getRecentBookChapters(beforeDate: string, days = 21): Promise<Set<string>> {
+  try {
+    const since = new Date(new Date(beforeDate).getTime() - days * 86400000).toISOString().slice(0, 10)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows = await (prisma as any).dailyGenerated.findMany({
+      where: { date: { gte: since, lt: beforeDate } },
+      select: { book_id: true, chapter: true },
+    })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new Set(rows.map((r: any) => `${r.book_id}.${r.chapter}`))
+  } catch {
+    return new Set()
+  }
+}
+
 async function generateTodayEntry() {
   const anthropicKey = process.env.ANTHROPIC_API_KEY
   const date = todayKey()
-
-  const FALLBACK_REFS = ['PSA.46.1', 'ISA.41.10', 'PHP.4.6', 'JHN.14.27', 'ROM.8.28', 'MAT.11.28', 'JOS.1.9']
-  const pickFallbackRef = () => FALLBACK_REFS[new Date(date).getUTCDate() % FALLBACK_REFS.length]
+  const recentKeys = await getRecentBookChapters(date)
 
   let bookId = 'PSA', chapter = 46, verse = 1
   let title = 'God is Our Refuge', reflection = '', prayer = '', challenge = '', reflectionQuestion = ''
 
   if (anthropicKey) {
     try {
+      const recentList = Array.from(recentKeys).join(', ')
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': anthropicKey, 'anthropic-version': '2023-06-01' },
@@ -38,7 +81,12 @@ async function generateTodayEntry() {
           model: 'claude-sonnet-5',
           max_tokens: 800,
           system: 'You are generating a daily devotional for a Christian app. Respond with ONLY valid JSON, no other text, matching exactly: {"book_id": "3-letter USFM code e.g. PSA, JHN, ROM", "chapter": number, "verse": number, "title": "short devotional title", "reflection": "150-250 word reflection connecting to the verse", "prayer": "80-120 word guided prayer", "challenge": "one short practical action for today", "reflection_question": "one short reflective question"}. Pick a different, meaningful verse each time -- do not always pick the most famous ones. Never invent a reference that does not exist.',
-          messages: [{ role: 'user', content: `Generate today's devotional for ${date}.` }],
+          messages: [{
+            role: 'user',
+            content: recentList
+              ? `Generate today's devotional for ${date}. Do not reuse any of these book.chapter references shown in the last 3 weeks: ${recentList}.`
+              : `Generate today's devotional for ${date}.`,
+          }],
         }),
       })
       if (res.ok) {
@@ -46,7 +94,8 @@ async function generateTodayEntry() {
         const text = data.content?.[0]?.text ?? ''
         const parsed = JSON.parse(text.trim())
         const validBook = BOOKS.find(b => b.bookId === parsed.book_id)
-        if (validBook && Number(parsed.chapter) > 0 && Number(parsed.chapter) <= validBook.chapterCount) {
+        const isRecent = recentKeys.has(`${parsed.book_id}.${parsed.chapter}`)
+        if (validBook && !isRecent && Number(parsed.chapter) > 0 && Number(parsed.chapter) <= validBook.chapterCount) {
           bookId = parsed.book_id
           chapter = Number(parsed.chapter)
           verse = Number(parsed.verse) || 1
@@ -63,7 +112,7 @@ async function generateTodayEntry() {
   }
 
   if (!reflection) {
-    const ref = pickFallbackRef()
+    const ref = pickFallbackRef(date, recentKeys)
     const [b, c, v] = ref.split('.')
     bookId = b; chapter = Number(c); verse = Number(v)
     title = 'A Word for Today'

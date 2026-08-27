@@ -79,7 +79,7 @@ export default function ProfilePage() {
       <Navigation />
       <main className="max-w-2xl mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-2">
-PROFCHUNK1EOF          <User className="w-7 h-7 text-navy dark:text-cream" />
+          <User className="w-7 h-7 text-navy dark:text-cream" />
           <h1 className="text-3xl font-serif text-navy dark:text-cream">Your Profile</h1>
         </div>
         <p className="text-navy/60 dark:text-cream/60 mb-8">Manage your name, preferred translation, and reading preferences.</p>
