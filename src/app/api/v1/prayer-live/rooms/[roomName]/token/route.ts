@@ -47,6 +47,14 @@ export const POST = withOptionalAuth(async (req: NextRequest, user, context) => 
     return NextResponse.json(result)
   } catch (error) {
     console.error('[prayer-live] token issuance failed:', error)
-    return NextResponse.json({ error: 'Unable to issue a session token. Please try again.' }, { status: 500 })
+    // TEMPORARY diagnostic round 2 -- booleans/lengths only, never the
+    // actual secret values. Remove once resolved.
+    const diag = {
+      hasKey: !!process.env.LIVEKIT_API_KEY, keyLen: (process.env.LIVEKIT_API_KEY ?? '').length,
+      hasSecret: !!process.env.LIVEKIT_API_SECRET, secretLen: (process.env.LIVEKIT_API_SECRET ?? '').length,
+      hasUrl: !!process.env.LIVEKIT_URL, url: process.env.LIVEKIT_URL ?? null,
+      message: error instanceof Error ? error.message : String(error),
+    }
+    return NextResponse.json({ error: 'Unable to issue a session token. Please try again.', diag }, { status: 500 })
   }
 })
