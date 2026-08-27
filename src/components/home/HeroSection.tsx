@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Sparkles, BookOpen, ChevronDown } from 'lucide-react'
 import { emotions } from '@/data/mock'
+import { localDateKey } from '@/lib/date'
 
 // Genuine fixes here: the emotion selector previously did
 // alert('AI Companion coming in Phase 3...') -- a leftover from before the
@@ -28,7 +29,7 @@ export default function HeroSection() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    fetch('/api/v1/daily')
+    fetch(`/api/v1/daily?local_date=${localDateKey()}`)
       .then(r => r.json())
       .then(res => {
         if (res.success) {

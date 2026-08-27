@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Sunrise } from 'lucide-react'
+import { localDateKey } from '@/lib/date'
 
 // Real fix: this previously always showed one single hardcoded entry from
 // mock.ts, regardless of the actual date. Now fetches from /api/v1/daily,
@@ -25,7 +26,7 @@ export default function DailyEncouragementSection() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/v1/daily')
+    fetch(`/api/v1/daily?local_date=${localDateKey()}`)
       .then(r => r.json())
       .then(res => { if (res.success) setEntry(res.data) })
       .catch(() => { /* card just won't render below -- not critical to page load */ })

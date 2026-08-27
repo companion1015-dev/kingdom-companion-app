@@ -7,6 +7,7 @@ import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 import type { DailyEntry } from '@/modules/daily/data/entries'
 import { BOOKS } from '@/modules/bible/services/mock-data'
+import { localDateKey } from '@/lib/date'
 
 export default function DailyPage() {
   const [entry,     setEntry]     = useState<DailyEntry | null>(null)
@@ -20,7 +21,7 @@ export default function DailyPage() {
 
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/v1/daily?offset=${offset}`)
+    fetch(`/api/v1/daily?offset=${offset}&local_date=${localDateKey()}`)
       .then(r => r.json())
       .then(d => { if (d.success) setEntry(d.data) })
       .catch(() => {})

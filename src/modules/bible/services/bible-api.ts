@@ -165,8 +165,16 @@ export async function getChapter(
     const verses = content
       .filter(item => item.type === 'verse' && item.number)
       .map(item => {
+        // Prose books give plain strings; poetic books (Psalms, Lamentations,
+        // Job, portions of the prophets) wrap each line as { text, poem }
+        // instead -- and both can include non-text markers like { noteId }
+        // interleaved, which contribute nothing to the verse text.
         const text = ((item.content as unknown[]) ?? [])
-          .map(p => typeof p === 'string' ? p : '')
+          .map(p => {
+            if (typeof p === 'string') return p
+            const t = (p as Record<string, unknown> | null)?.text
+            return typeof t === 'string' ? t : ''
+          })
           .join(' ')
           .replace(/\s+/g, ' ')
           .trim()
