@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   LiveKitRoom,
   GridLayout,
@@ -9,11 +9,12 @@ import {
   ControlBar,
   Chat,
   useTracks,
+  useLocalParticipant,
   ConnectionStateToast,
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import { Track, VideoPresets, type RoomOptions } from 'livekit-client'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Ear, EarOff } from 'lucide-react'
 
 interface TokenResponse {
   token: string
@@ -146,6 +147,7 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
         >
           <MessageSquare className="w-3.5 h-3.5" /> {chatOpen ? 'Hide chat' : 'Chat'}
         </button>
+        {canPublish && <SelfMonitorToggle />}
         {canPublish && <ControlBar controls={{ chat: false, screenShare: true }} />}
       </div>
 
@@ -153,5 +155,47 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
         <Chat style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 320 }} />
       )}
     </div>
+  )
+}
+
+/**
+ * Opt-in only, off by default -- RoomAudioRenderer deliberately never plays
+ * back the local participant's own mic (standard across every video-call
+ * app, avoids echo). Looping it back on request is fine for a host on
+ * headphones, but would cause real feedback squeal for a host on a
+ * speaker/PA setup, hence the explicit toggle instead of always-on.
+ */
+function SelfMonitorToggle() {
+  const { microphoneTrack } = useLocalParticipant()
+  const [monitoring, setMonitoring] = useState(false)
+  const elRef = useRef<HTMLMediaElement | null>(null)
+
+  useEffect(() => {
+    const track = microphoneTrack?.track
+    if (!monitoring || !track) return
+
+    const el = track.attach()
+    el.style.display = 'none'
+    document.body.appendChild(el)
+    elRef.current = el
+
+    return () => {
+      track.detach(el)
+      el.remove()
+      elRef.current = null
+    }
+  }, [monitoring, microphoneTrack])
+
+  return (
+    <button
+      onClick={() => setMonitoring((v) => !v)}
+      title="Hear your own mic -- use headphones to avoid feedback"
+      className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-body transition-colors ${
+        monitoring ? 'bg-gold text-navy' : 'bg-white/10 hover:bg-white/15 text-white/80'
+      }`}
+    >
+      {monitoring ? <Ear className="w-3.5 h-3.5" /> : <EarOff className="w-3.5 h-3.5" />}
+      {monitoring ? 'Monitoring' : 'Monitor my audio'}
+    </button>
   )
 }
