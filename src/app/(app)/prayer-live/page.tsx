@@ -1,78 +1,17 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { Radio, Users } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
-
-// LiveKit/WebRTC libraries touch browser-only globals at module scope, which
-// made Next bail the *entire* page out of server rendering (confirmed via
-// <template data-dgst="BAILOUT_TO_CLIENT_SIDE_RENDERING"> in the served HTML)
-// -- the room list and schedule form never appeared until the whole WebRTC
-// bundle finished loading client-side. Isolating the session view behind
-// ssr:false lets the rest of the page render normally.
-const PrayerLiveSession = dynamic(() => import('./PrayerLiveSession'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex flex-col items-center justify-center h-screen bg-navy gap-3">
-      <div className="w-6 h-6 border-2 border-white/20 border-t-gold rounded-full animate-spin" />
-    </div>
-  ),
-})
-
-interface RoomSummary {
-  room_name: string
-  title: string
-  is_live: boolean
-  started_at: string | null
-  scheduled_at: string | null
-}
-
-async function listRooms(): Promise<RoomSummary[]> {
-  const res = await fetch('/api/v1/prayer-live/rooms')
-  if (!res.ok) throw new Error('Failed to load prayer rooms.')
-  const body = await res.json()
-  return body.data ?? body
-}
-
-async function createRoom(roomName: string, title: string) {
-  const res = await fetch('/api/v1/prayer-live/rooms', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ room_name: roomName, title }),
-  })
-  const body = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    throw new Error(body.error?.message ?? 'Failed to schedule room.')
-  }
-}
-
-async function startRoom(roomName: string) {
-  const res = await fetch(`/api/v1/prayer-live/rooms/${encodeURIComponent(roomName)}/start`, {
-    method: 'POST',
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error?.message ?? 'Failed to start session.')
-  }
-}
-
-async function endRoom(roomName: string) {
-  const res = await fetch(`/api/v1/prayer-live/rooms/${encodeURIComponent(roomName)}/end`, {
-    method: 'POST',
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error?.message ?? 'Failed to end session.')
-  }
-}
+import { type RoomSummary, listRooms, getHostStatus, createRoom, startRoom, endRoom } from './lib'
 
 export default function PrayerLivePage() {
   const [rooms, setRooms] = useState<RoomSummary[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeRoom, setActiveRoom] = useState<string | null>(null)
+  const [isHost, setIsHost] = useState(false)
 
   const refresh = useCallback(() => {
     listRooms()
@@ -87,19 +26,9 @@ export default function PrayerLivePage() {
     return () => clearInterval(interval)
   }, [refresh])
 
-  // The active session is a full-screen, immersive video call -- deliberately
-  // rendered without the site's Navigation/Footer chrome around it, same as
-  // any video-conferencing UI.
-  if (activeRoom) {
-    const room = rooms.find((r) => r.room_name === activeRoom)
-    return (
-      <PrayerLiveSession
-        roomName={activeRoom}
-        title={room?.title ?? activeRoom}
-        onLeave={() => setActiveRoom(null)}
-      />
-    )
-  }
+  useEffect(() => {
+    getHostStatus().then(setIsHost)
+  }, [])
 
   return (
     <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
@@ -114,7 +43,7 @@ export default function PrayerLivePage() {
           Join a live, video-based corporate prayer session — watch freely without an account, or sign in to join the conversation.
         </p>
 
-        <NewRoomForm onCreated={refresh} />
+        {isHost && <NewRoomForm onCreated={refresh} />}
 
         {loading && (
           <div className="space-y-3 animate-pulse">
@@ -148,20 +77,21 @@ export default function PrayerLivePage() {
 
                 <div className="flex items-center gap-3">
                   {room.is_live && (
-                    <button
-                      onClick={() => setActiveRoom(room.room_name)}
+                    <Link
+                      href={`/prayer-live/${encodeURIComponent(room.room_name)}`}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-medium transition-colors"
                     >
                       <Users className="w-3.5 h-3.5" /> Watch now
-                    </button>
+                    </Link>
                   )}
 
-                  <HostControls
-                    roomName={room.room_name}
-                    isLive={room.is_live}
-                    onChanged={refresh}
-                    onEnterStage={() => setActiveRoom(room.room_name)}
-                  />
+                  {isHost && (
+                    <HostControls
+                      roomName={room.room_name}
+                      isLive={room.is_live}
+                      onChanged={refresh}
+                    />
+                  )}
                 </div>
               </li>
             ))}
@@ -244,12 +174,10 @@ function HostControls({
   roomName,
   isLive,
   onChanged,
-  onEnterStage,
 }: {
   roomName: string
   isLive: boolean
   onChanged: () => void
-  onEnterStage: () => void
 }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -297,25 +225,15 @@ function HostControls({
             {busy ? 'Starting…' : 'Go live'}
           </button>
         ) : (
-          <>
-            <button
-              disabled={busy}
-              onClick={onEnterStage}
-              className="px-3.5 py-1.5 rounded-full border border-navy/15 text-navy/70 dark:text-cream/70 hover:border-navy/30 text-xs font-body font-medium transition-colors"
-            >
-              Enter stage
-            </button>
-            <button
-              disabled={busy}
-              onClick={handleEnd}
-              className="px-3.5 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-body font-semibold transition-colors disabled:opacity-60"
-            >
-              {busy ? 'Ending…' : 'End session'}
-            </button>
-          </>
+          <button
+            disabled={busy}
+            onClick={handleEnd}
+            className="px-3.5 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-body font-semibold transition-colors disabled:opacity-60"
+          >
+            {busy ? 'Ending…' : 'End session'}
+          </button>
         )}
       </div>
     </details>
   )
 }
-
