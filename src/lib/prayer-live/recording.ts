@@ -5,32 +5,39 @@ const {
   LIVEKIT_API_KEY,
   LIVEKIT_API_SECRET,
   LIVEKIT_URL,
-  SUPABASE_S3_ACCESS_KEY_ID,
-  SUPABASE_S3_SECRET_ACCESS_KEY,
-  SUPABASE_S3_ENDPOINT,
-  SUPABASE_S3_REGION,
-  SUPABASE_STORAGE_BUCKET,
-  NEXT_PUBLIC_SUPABASE_URL,
+  R2_ACCESS_KEY_ID,
+  R2_SECRET_ACCESS_KEY,
+  R2_ACCOUNT_ID,
+  R2_BUCKET,
+  R2_PUBLIC_URL,
 } = process.env
 
 export const RECORDINGS_CONFIGURED = !!(
-  SUPABASE_S3_ACCESS_KEY_ID &&
-  SUPABASE_S3_SECRET_ACCESS_KEY &&
-  SUPABASE_S3_ENDPOINT &&
-  SUPABASE_S3_REGION &&
-  SUPABASE_STORAGE_BUCKET
+  R2_ACCESS_KEY_ID &&
+  R2_SECRET_ACCESS_KEY &&
+  R2_ACCOUNT_ID &&
+  R2_BUCKET &&
+  R2_PUBLIC_URL
 )
 
 if (!RECORDINGS_CONFIGURED) {
   console.error(
-    '[prayer-live] Recording storage is not configured -- SUPABASE_S3_ACCESS_KEY_ID, ' +
-    'SUPABASE_S3_SECRET_ACCESS_KEY, SUPABASE_S3_ENDPOINT, SUPABASE_S3_REGION and ' +
-    'SUPABASE_STORAGE_BUCKET must all be set. Recording requests will fail until then.',
+    '[prayer-live] Recording storage is not configured -- R2_ACCESS_KEY_ID, ' +
+    'R2_SECRET_ACCESS_KEY, R2_ACCOUNT_ID, R2_BUCKET and R2_PUBLIC_URL must all be set. ' +
+    'Recording requests will fail until then.',
   )
 }
 
 const egressClient = new EgressClient(LIVEKIT_URL ?? '', LIVEKIT_API_KEY ?? '', LIVEKIT_API_SECRET ?? '')
 
+/**
+ * Recordings upload to a dedicated Cloudflare R2 bucket via an API token
+ * scoped to only that bucket (Object Read & Write) -- deliberately not
+ * Supabase Storage, since Supabase's S3-compatible access keys currently
+ * grant full access to every bucket in the project and bypass RLS, with no
+ * per-bucket scoping available yet. This keeps LiveKit's third-party access
+ * limited to exactly one bucket it can't do anything else with.
+ */
 export async function startRecording(roomName: string): Promise<{ egressId: string; filepath: string }> {
   if (!RECORDINGS_CONFIGURED) {
     throw new Error('Recording is not configured yet.')
@@ -45,13 +52,11 @@ export async function startRecording(roomName: string): Promise<{ egressId: stri
       output: {
         case: 's3',
         value: new S3Upload({
-          accessKey: SUPABASE_S3_ACCESS_KEY_ID!,
-          secret: SUPABASE_S3_SECRET_ACCESS_KEY!,
-          endpoint: SUPABASE_S3_ENDPOINT!,
-          region: SUPABASE_S3_REGION!,
-          bucket: SUPABASE_STORAGE_BUCKET!,
-          // Supabase's S3-compatible gateway requires path-style addressing
-          // (bucket in the URL path), unlike AWS S3's virtual-hosted style.
+          accessKey: R2_ACCESS_KEY_ID!,
+          secret: R2_SECRET_ACCESS_KEY!,
+          endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+          region: 'auto',
+          bucket: R2_BUCKET!,
           forcePathStyle: true,
         }),
       },
@@ -68,9 +73,9 @@ export async function stopRecording(egressId: string): Promise<void> {
 /**
  * Constructed from the known bucket/filepath rather than trusting the
  * webhook's fileResults[].location -- for S3-compatible uploads that field
- * reflects the raw S3 endpoint, not necessarily Supabase's public object URL.
- * Requires the bucket to be public.
+ * reflects the raw R2 endpoint, not the public r2.dev/custom-domain URL.
+ * Requires the bucket's public access to be enabled.
  */
 export function buildRecordingPublicUrl(filepath: string): string {
-  return `${NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${filepath}`
+  return `${R2_PUBLIC_URL}/${filepath}`
 }
