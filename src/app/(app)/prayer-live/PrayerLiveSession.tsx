@@ -10,11 +10,12 @@ import {
   Chat,
   useTracks,
   useLocalParticipant,
+  useRoomContext,
   ConnectionStateToast,
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import { Track, VideoPresets, type RoomOptions } from 'livekit-client'
-import { MessageSquare, Ear, EarOff } from 'lucide-react'
+import { MessageSquare, Ear, EarOff, Volume2, VolumeX, Play, Pause, Square } from 'lucide-react'
 
 interface TokenResponse {
   token: string
@@ -110,7 +111,6 @@ export default function PrayerLiveSession({ roomName, title, onLeave }: { roomNa
       onDisconnected={onLeave}
     >
       <SessionLayout canPublish={session.canPublish} title={title} />
-      <RoomAudioRenderer />
       <ConnectionStateToast />
     </LiveKitRoom>
   )
@@ -126,6 +126,10 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
   )
 
   const [chatOpen, setChatOpen] = useState(false)
+  // Visitor-only local playback controls -- muting/pausing here only affects
+  // what this viewer sees/hears, it never touches the room for anyone else.
+  const [muted, setMuted] = useState(false)
+  const [paused, setPaused] = useState(false)
 
   return (
     <div className="relative h-screen flex flex-col bg-navy">
@@ -136,9 +140,17 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
         )}
       </header>
 
-      <GridLayout tracks={tracks} style={{ height: 'calc(100vh - 180px)' }}>
-        <ParticipantTile />
-      </GridLayout>
+      {paused ? (
+        <div className="flex items-center justify-center text-white/40 font-body text-sm" style={{ height: 'calc(100vh - 180px)' }}>
+          Paused
+        </div>
+      ) : (
+        <GridLayout tracks={tracks} style={{ height: 'calc(100vh - 180px)' }}>
+          <ParticipantTile />
+        </GridLayout>
+      )}
+
+      {!muted && <RoomAudioRenderer />}
 
       <div className="flex gap-2 p-4">
         <button
@@ -149,11 +161,71 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
         </button>
         {canPublish && <SelfMonitorToggle />}
         {canPublish && <ControlBar controls={{ chat: false, screenShare: true }} />}
+        {!canPublish && (
+          <VisitorControls
+            muted={muted}
+            paused={paused}
+            onToggleMute={() => setMuted((v) => !v)}
+            onTogglePause={() => setPaused((v) => !v)}
+          />
+        )}
       </div>
 
       {chatOpen && (
         <Chat style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 320 }} />
       )}
+    </div>
+  )
+}
+
+/**
+ * Watch-only controls -- these are all local to this viewer's own playback
+ * (muting/pausing here never affects the room or other participants). Stop
+ * disconnects from LiveKit and hands off to the page's onLeave, same as the
+ * host's ControlBar "leave" button.
+ */
+function VisitorControls({
+  muted,
+  paused,
+  onToggleMute,
+  onTogglePause,
+}: {
+  muted: boolean
+  paused: boolean
+  onToggleMute: () => void
+  onTogglePause: () => void
+}) {
+  const room = useRoomContext()
+
+  // room.disconnect() triggers LiveKitRoom's onDisconnected (wired to
+  // onLeave) automatically, same as how the host's ControlBar leave
+  // button works -- no need to call onLeave here too.
+  function handleStop() {
+    room.disconnect()
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={onToggleMute}
+        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white/80 text-sm font-body transition-colors"
+      >
+        {muted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+        {muted ? 'Unmute' : 'Mute'}
+      </button>
+      <button
+        onClick={onTogglePause}
+        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white/80 text-sm font-body transition-colors"
+      >
+        {paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+        {paused ? 'Play' : 'Pause'}
+      </button>
+      <button
+        onClick={handleStop}
+        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-sm font-body transition-colors"
+      >
+        <Square className="w-3.5 h-3.5" /> Stop
+      </button>
     </div>
   )
 }
