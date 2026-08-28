@@ -53,13 +53,25 @@ async function listRooms(): Promise<RoomSummary[]> {
   return body.data ?? body
 }
 
+async function createRoom(roomName: string, title: string) {
+  const res = await fetch('/api/v1/prayer-live/rooms', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ room_name: roomName, title }),
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(body.error?.message ?? 'Failed to schedule room.')
+  }
+}
+
 async function startRoom(roomName: string) {
   const res = await fetch(`/api/v1/prayer-live/rooms/${encodeURIComponent(roomName)}/start`, {
     method: 'POST',
   })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.error ?? body.message ?? 'Failed to start session.')
+    throw new Error(body.error?.message ?? 'Failed to start session.')
   }
 }
 
@@ -69,7 +81,7 @@ async function endRoom(roomName: string) {
   })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.error ?? body.message ?? 'Failed to end session.')
+    throw new Error(body.error?.message ?? 'Failed to end session.')
   }
 }
 
@@ -79,11 +91,11 @@ async function getToken(roomName: string): Promise<TokenResponse> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
   })
+  const body = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error(body.error ?? 'This session is not currently live.')
+    throw new Error(body.error?.message ?? 'This session is not currently live.')
   }
-  return res.json()
+  return body.data
 }
 
 export default function PrayerLivePage() {
@@ -131,6 +143,8 @@ export default function PrayerLivePage() {
         <p className="text-navy/60 dark:text-cream/60 font-body text-sm mb-8">
           Join a live, video-based corporate prayer session — watch freely without an account, or sign in to join the conversation.
         </p>
+
+        <NewRoomForm onCreated={refresh} />
 
         {loading && (
           <div className="space-y-3 animate-pulse">
@@ -193,6 +207,66 @@ export default function PrayerLivePage() {
 
       <Footer />
     </div>
+  )
+}
+
+function NewRoomForm({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [roomName, setRoomName] = useState('')
+  const [title, setTitle] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    try {
+      await createRoom(roomName.trim(), title.trim())
+      setRoomName('')
+      setTitle('')
+      setOpen(false)
+      onCreated()
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <details className="group mb-6" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
+      <summary className="text-xs font-body text-navy/35 dark:text-cream/35 cursor-pointer select-none hover:text-navy/60 dark:hover:text-cream/60 transition-colors list-none">
+        Schedule a room
+      </summary>
+      <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-2 bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-4 sm:p-5">
+        {error && <span className="text-red-600 text-xs font-body">{error}</span>}
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title (e.g. Sunday Evening Prayer)"
+          required
+          maxLength={255}
+          className="px-3.5 py-2 rounded-xl border border-navy/15 bg-transparent text-sm font-body text-navy dark:text-cream placeholder:text-navy/30 dark:placeholder:text-cream/30 focus:outline-none focus:border-gold"
+        />
+        <input
+          value={roomName}
+          onChange={(e) => setRoomName(e.target.value)}
+          placeholder="Room identifier (e.g. sunday-evening)"
+          required
+          maxLength={100}
+          pattern="[a-zA-Z0-9\-_]+"
+          className="px-3.5 py-2 rounded-xl border border-navy/15 bg-transparent text-sm font-body text-navy dark:text-cream placeholder:text-navy/30 dark:placeholder:text-cream/30 focus:outline-none focus:border-gold"
+        />
+        <button
+          type="submit"
+          disabled={busy}
+          className="self-start px-3.5 py-1.5 rounded-full bg-gold hover:bg-gold-light text-navy text-xs font-body font-semibold transition-colors disabled:opacity-60"
+        >
+          {busy ? 'Scheduling…' : 'Schedule room'}
+        </button>
+      </form>
+    </details>
   )
 }
 
