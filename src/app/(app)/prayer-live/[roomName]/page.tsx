@@ -4,10 +4,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Clapperboard } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
-import { type RoomSummary, listRooms } from '../lib'
+import { type RoomSummary, type Recording, listRooms, listRecordings } from '../lib'
 
 const PrayerLiveSession = dynamic(() => import('../PrayerLiveSession'), {
   ssr: false,
@@ -27,6 +27,7 @@ export default function PrayerLiveRoomPage() {
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
   const [joined, setJoined] = useState(false)
+  const [recordings, setRecordings] = useState<Recording[]>([])
 
   const refresh = useCallback(() => {
     listRooms()
@@ -45,6 +46,10 @@ export default function PrayerLiveRoomPage() {
     return () => clearInterval(interval)
   }, [refresh])
 
+  useEffect(() => {
+    listRecordings(roomName).then(setRecordings)
+  }, [roomName])
+
   if (joined && room?.is_live) {
     return (
       <PrayerLiveSession
@@ -62,7 +67,7 @@ export default function PrayerLiveRoomPage() {
     <div className="min-h-screen bg-cream dark:bg-navy-dark-gradient">
       <Navigation />
 
-      <main className="max-w-md mx-auto px-4 sm:px-6 pt-28 pb-16 text-center">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-16 text-center">
         <Link
           href="/prayer-live"
           className="inline-flex items-center gap-1.5 text-xs font-body text-navy/40 dark:text-cream/40 hover:text-navy/70 dark:hover:text-cream/70 transition-colors mb-8"
@@ -105,6 +110,29 @@ export default function PrayerLiveRoomPage() {
               Join session
             </button>
           </>
+        )}
+
+        {!loading && !notFound && recordings.length > 0 && (
+          <div className="mt-12 text-left">
+            <div className="flex items-center gap-2 mb-4">
+              <Clapperboard className="w-4 h-4 text-gold" />
+              <h2 className="font-display text-sm font-semibold text-navy dark:text-cream tracking-wide uppercase">
+                Missed it? Watch the replay
+              </h2>
+            </div>
+            <ul className="space-y-4">
+              {recordings.map((rec) => (
+                <li key={rec.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-3 sm:p-4">
+                  {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                  <video controls preload="none" className="w-full rounded-xl bg-black" src={rec.file_url} />
+                  <p className="text-xs font-body text-navy/40 dark:text-cream/40 mt-2">
+                    {new Date(rec.started_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                    {rec.duration_seconds != null && ` · ${Math.round(rec.duration_seconds / 60)} min`}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </main>
 

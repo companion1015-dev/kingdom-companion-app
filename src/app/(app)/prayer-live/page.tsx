@@ -76,12 +76,19 @@ export default function PrayerLivePage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  {room.is_live && (
+                  {room.is_live ? (
                     <Link
                       href={`/prayer-live/${encodeURIComponent(room.room_name)}`}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-medium transition-colors"
                     >
                       <Users className="w-3.5 h-3.5" /> Watch now
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/prayer-live/${encodeURIComponent(room.room_name)}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-navy/15 text-navy/60 dark:text-cream/60 hover:border-navy/30 text-sm font-body font-medium transition-colors"
+                    >
+                      Past recordings
                     </Link>
                   )}
 
@@ -181,12 +188,14 @@ function HostControls({
 }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [record, setRecord] = useState(false)
 
   async function handleStart() {
     setBusy(true)
     setError(null)
     try {
-      await startRoom(roomName)
+      const recordingError = await startRoom(roomName, record)
+      if (recordingError) setError(`Live, but recording failed to start: ${recordingError}`)
       onChanged()
     } catch (err) {
       setError((err as Error).message)
@@ -217,13 +226,24 @@ function HostControls({
       <div className="mt-3 flex items-center gap-2">
         {error && <span className="text-red-600 text-xs font-body">{error}</span>}
         {!isLive ? (
-          <button
-            disabled={busy}
-            onClick={handleStart}
-            className="px-3.5 py-1.5 rounded-full bg-gold hover:bg-gold-light text-navy text-xs font-body font-semibold transition-colors disabled:opacity-60"
-          >
-            {busy ? 'Starting…' : 'Go live'}
-          </button>
+          <>
+            <label className="flex items-center gap-1.5 text-xs font-body text-navy/50 dark:text-cream/50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={record}
+                onChange={(e) => setRecord(e.target.checked)}
+                className="rounded"
+              />
+              Record this session
+            </label>
+            <button
+              disabled={busy}
+              onClick={handleStart}
+              className="px-3.5 py-1.5 rounded-full bg-gold hover:bg-gold-light text-navy text-xs font-body font-semibold transition-colors disabled:opacity-60"
+            >
+              {busy ? 'Starting…' : 'Go live'}
+            </button>
+          </>
         ) : (
           <button
             disabled={busy}

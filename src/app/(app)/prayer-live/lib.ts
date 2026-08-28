@@ -36,14 +36,31 @@ export async function createRoom(roomName: string, title: string) {
   }
 }
 
-export async function startRoom(roomName: string) {
+export async function startRoom(roomName: string, record = false) {
   const res = await fetch(`/api/v1/prayer-live/rooms/${encodeURIComponent(roomName)}/start`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ record }),
   })
+  const body = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
     throw new Error(body.error?.message ?? 'Failed to start session.')
   }
+  return body.data?.recordingError as string | undefined
+}
+
+export interface Recording {
+  id: string
+  file_url: string
+  duration_seconds: number | null
+  started_at: string
+}
+
+export async function listRecordings(roomName: string): Promise<Recording[]> {
+  const res = await fetch(`/api/v1/prayer-live/rooms/${encodeURIComponent(roomName)}/recordings`)
+  if (!res.ok) return []
+  const body = await res.json().catch(() => ({}))
+  return body.data ?? []
 }
 
 export async function endRoom(roomName: string) {

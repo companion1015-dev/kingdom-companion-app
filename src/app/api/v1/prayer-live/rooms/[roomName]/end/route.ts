@@ -3,6 +3,7 @@ import { withAuth } from '@/lib/auth/middleware'
 import { forbiddenResponse, notFoundResponse, successResponse, serverErrorResponse } from '@/lib/api-response'
 import { prisma } from '@/lib/db/client'
 import { roomService, isHostRole } from '@/lib/prayer-live/livekit'
+import { stopRecording } from '@/lib/prayer-live/recording'
 
 /**
  * POST /api/v1/prayer-live/rooms/:roomName/end
@@ -26,6 +27,23 @@ export const POST = withAuth(async (_req: NextRequest, user, context) => {
 
     if (!room) {
       return notFoundResponse('Prayer room')
+    }
+
+    const activeRecording = await prisma.prayerLiveRecording.findFirst({
+      where: { room_id: room.id, status: 'recording' },
+    })
+    if (activeRecording) {
+      try {
+        await stopRecording(activeRecording.egress_id)
+        await prisma.prayerLiveRecording.update({
+          where: { id: activeRecording.id },
+          data: { status: 'processing', ended_at: new Date() },
+        })
+      } catch (err) {
+        // The webhook is the source of truth for final status -- log and
+        // continue ending the session regardless.
+        console.error('[prayer-live] stopRecording failed:', err)
+      }
     }
 
     try {
