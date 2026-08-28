@@ -10,12 +10,15 @@ import {
   Chat,
   useTracks,
   useLocalParticipant,
+  useRemoteParticipants,
   useRoomContext,
   ConnectionStateToast,
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import { Track, VideoPresets, type RoomOptions } from 'livekit-client'
-import { MessageSquare, Ear, EarOff, Volume2, VolumeX, Play, Pause, Square } from 'lucide-react'
+import { MessageSquare, Ear, EarOff, Volume2, VolumeX, Play, Pause, Square, HandHeart, Shield, MicOff, Mic } from 'lucide-react'
+import SubmitPrayerForm from '@/modules/prayer-wall/components/SubmitPrayerForm'
+import { moderateParticipant } from './lib'
 
 interface TokenResponse {
   token: string
@@ -110,13 +113,28 @@ export default function PrayerLiveSession({ roomName, title, onLeave }: { roomNa
       style={{ height: '100vh' }}
       onDisconnected={onLeave}
     >
-      <SessionLayout canPublish={session.canPublish} title={title} />
+      <SessionLayout
+        canPublish={session.canPublish}
+        canModerate={session.canModerate}
+        roomName={roomName}
+        title={title}
+      />
       <ConnectionStateToast />
     </LiveKitRoom>
   )
 }
 
-function SessionLayout({ canPublish, title }: { canPublish: boolean; title: string }) {
+function SessionLayout({
+  canPublish,
+  canModerate,
+  roomName,
+  title,
+}: {
+  canPublish: boolean
+  canModerate: boolean
+  roomName: string
+  title: string
+}) {
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
@@ -126,6 +144,9 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
   )
 
   const [chatOpen, setChatOpen] = useState(false)
+  const [prayerFormOpen, setPrayerFormOpen] = useState(false)
+  const [prayerSubmitted, setPrayerSubmitted] = useState(false)
+  const [moderateOpen, setModerateOpen] = useState(false)
   // Visitor-only local playback controls -- muting/pausing here only affects
   // what this viewer sees/hears, it never touches the room for anyone else.
   const [muted, setMuted] = useState(false)
@@ -152,13 +173,29 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
 
       {!muted && <RoomAudioRenderer />}
 
-      <div className="flex gap-2 p-4">
+      <div className="flex flex-wrap gap-2 p-4">
         <button
           onClick={() => setChatOpen((v) => !v)}
           className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white/80 text-sm font-body transition-colors"
         >
           <MessageSquare className="w-3.5 h-3.5" /> {chatOpen ? 'Hide chat' : 'Chat'}
         </button>
+        <button
+          onClick={() => setPrayerFormOpen(true)}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-white/80 text-sm font-body transition-colors"
+        >
+          <HandHeart className="w-3.5 h-3.5" /> Prayer request
+        </button>
+        {canModerate && (
+          <button
+            onClick={() => setModerateOpen((v) => !v)}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-body transition-colors ${
+              moderateOpen ? 'bg-gold text-navy' : 'bg-white/10 hover:bg-white/15 text-white/80'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5" /> Moderate
+          </button>
+        )}
         {canPublish && <SelfMonitorToggle />}
         {canPublish && <ControlBar controls={{ chat: false, screenShare: true }} />}
         {!canPublish && (
@@ -174,6 +211,98 @@ function SessionLayout({ canPublish, title }: { canPublish: boolean; title: stri
       {chatOpen && (
         <Chat style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 320 }} />
       )}
+
+      {moderateOpen && (
+        <ModeratePanel roomName={roomName} onClose={() => setModerateOpen(false)} />
+      )}
+
+      {prayerFormOpen && !prayerSubmitted && (
+        <SubmitPrayerForm
+          onClose={() => setPrayerFormOpen(false)}
+          onSuccess={() => {
+            setPrayerFormOpen(false)
+            setPrayerSubmitted(true)
+          }}
+        />
+      )}
+
+      {prayerSubmitted && (
+        <div className="fixed inset-x-3 bottom-6 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-50 flex items-center gap-2 px-4 py-3 rounded-2xl bg-white dark:bg-navy-dark shadow-2xl">
+          <HandHeart className="w-4 h-4 text-gold shrink-0" />
+          <p className="text-sm font-body text-navy dark:text-cream">Prayer request submitted — thank you.</p>
+          <button
+            onClick={() => setPrayerSubmitted(false)}
+            className="text-xs font-body text-navy/40 dark:text-cream/40 hover:text-navy dark:hover:text-cream ml-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Moderator-only. Lightweight chat moderation: revokes/restores a
+ * participant's canPublishData permission server-side via LiveKit -- no
+ * message history to delete since Chat is peer-to-peer and never persisted,
+ * this just silences (or restores) their future messages in real time.
+ */
+function ModeratePanel({ roomName, onClose }: { roomName: string; onClose: () => void }) {
+  const participants = useRemoteParticipants()
+  const [muted, setMutedMap] = useState<Record<string, boolean>>({})
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function toggle(identity: string) {
+    const nextMuted = !muted[identity]
+    setBusy(identity)
+    setError(null)
+    try {
+      await moderateParticipant(roomName, identity, nextMuted)
+      setMutedMap((m) => ({ ...m, [identity]: nextMuted }))
+    } catch (err) {
+      setError((err as Error).message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <div className="fixed right-4 bottom-24 z-50 w-72 bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 shadow-2xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-body font-semibold text-navy dark:text-cream">Moderate chat</p>
+        <button onClick={onClose} className="text-navy/40 dark:text-cream/40 hover:text-navy dark:hover:text-cream text-xs font-body">
+          Close
+        </button>
+      </div>
+
+      {error && <p className="text-xs font-body text-red-600 mb-2">{error}</p>}
+
+      {participants.length === 0 && (
+        <p className="text-xs font-body text-navy/40 dark:text-cream/40">No one else is in this session yet.</p>
+      )}
+
+      <ul className="space-y-1.5 max-h-64 overflow-y-auto">
+        {participants.map((p) => {
+          const isMuted = !!muted[p.identity]
+          return (
+            <li key={p.identity} className="flex items-center justify-between gap-2">
+              <span className="text-sm font-body text-navy dark:text-cream truncate">{p.name || p.identity}</span>
+              <button
+                disabled={busy === p.identity}
+                onClick={() => toggle(p.identity)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-body font-medium transition-colors disabled:opacity-50 ${
+                  isMuted ? 'bg-red-600/10 text-red-600' : 'bg-navy/6 text-navy/60 dark:bg-cream/6 dark:text-cream/60'
+                }`}
+              >
+                {isMuted ? <MicOff className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
+                {isMuted ? 'Muted' : 'Mute'}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }

@@ -55,3 +55,15 @@ export async function endRoom(roomName: string) {
     throw new Error(body.error?.message ?? 'Failed to end session.')
   }
 }
+
+export async function moderateParticipant(roomName: string, identity: string, muted: boolean) {
+  const res = await fetch(`/api/v1/prayer-live/rooms/${encodeURIComponent(roomName)}/moderate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identity, muted }),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error?.message ?? 'Failed to update participant.')
+  }
+}
