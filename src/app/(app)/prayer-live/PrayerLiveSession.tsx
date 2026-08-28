@@ -209,7 +209,23 @@ function SessionLayout({
       </div>
 
       {chatOpen && (
-        <Chat style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 320 }} />
+        <>
+          <Chat style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 320 }} />
+          {/* LiveKit ships no explicit color/background on its own chat input --
+              it relies on inheriting from [data-lk-theme], which is fragile
+              across browsers/color-scheme quirks. Pin it explicitly instead
+              of trusting inheritance. */}
+          <style jsx global>{`
+            .lk-chat-form-input {
+              color: #fff !important;
+              background-color: rgba(255, 255, 255, 0.08) !important;
+              caret-color: #fff;
+            }
+            .lk-chat-form-input::placeholder {
+              color: rgba(255, 255, 255, 0.4);
+            }
+          `}</style>
+        </>
       )}
 
       {moderateOpen && (
@@ -217,13 +233,22 @@ function SessionLayout({
       )}
 
       {prayerFormOpen && !prayerSubmitted && (
-        <SubmitPrayerForm
-          onClose={() => setPrayerFormOpen(false)}
-          onSuccess={() => {
-            setPrayerFormOpen(false)
-            setPrayerSubmitted(true)
-          }}
-        />
+        // color-scheme: dark cascades down from [data-lk-theme=default] on
+        // LiveKitRoom -- since color-scheme is inherited and SubmitPrayerForm's
+        // plain <input>/<textarea> elements set no explicit background, the
+        // browser was rendering their native control background dark while
+        // the form's own text-navy classes stayed dark, making typed text
+        // invisible. Resetting it here restores normal light-mode form
+        // control rendering for this subtree only.
+        <div style={{ colorScheme: 'normal' }}>
+          <SubmitPrayerForm
+            onClose={() => setPrayerFormOpen(false)}
+            onSuccess={() => {
+              setPrayerFormOpen(false)
+              setPrayerSubmitted(true)
+            }}
+          />
+        </div>
       )}
 
       {prayerSubmitted && (
