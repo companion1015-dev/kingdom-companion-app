@@ -787,6 +787,33 @@ model BlogArticle {
   @@map("blog_article")
 }
 
+// ─── LIBRARY (UPLOADED BOOKS) ──────────────────────────────────────────────────
+// Admin-uploaded book/manuscript files (PDF, EPUB, DOCX) -- distinct from
+// BlogArticle, whose `content` is inline text with no file attachment, and
+// from `Book` above, which is the Bible's own book catalogue (Genesis,
+// Exodus, ...), not a model name available for reuse here. This is exactly
+// the "downloads" capability the Blog & Resources module comment above
+// flagged as deferred pending a product decision; kept as its own small
+// model rather than folded into BlogArticle so uploading a book doesn't
+// first require creating a BlogAuthor/BlogCategory.
+
+model LibraryBook {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String   @db.VarChar(255)
+  author_name     String   @db.VarChar(150)
+  description     String?
+  cover_image_url String?
+  file_url        String
+  file_type       String   @db.VarChar(10) // pdf | epub | docx
+  file_size_bytes Int?
+  is_published    Boolean  @default(true)
+  created_at      DateTime @default(now()) @db.Timestamptz
+  updated_at      DateTime @updatedAt @db.Timestamptz
+
+  @@index([is_published])
+  @@map("library_book")
+}
+
 // ─── GLOBAL PRAYER WALL ───────────────────────────────────────────────────────
 // Distinct from `Prayer` above, which is the private Prayer Journal.
 // This is the public, community-facing Prayer Wall. Privacy tiers control

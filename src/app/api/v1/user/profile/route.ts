@@ -23,7 +23,9 @@ export const GET = withAuth(async (_req: NextRequest, user) => {
       },
     })
     if (!profile) return errorResponse('NOT_FOUND', 'Profile not found.', 404)
-    return successResponse(profile, 'Profile retrieved.')
+    // role comes from the verified JWT (withAuth), not re-fetched from the
+    // DB above -- Navigation.tsx uses it to conditionally show Admin links.
+    return successResponse({ ...profile, role: user.role }, 'Profile retrieved.')
   } catch (error) {
     console.error('[Profile] Get error:', error)
     return serverErrorResponse()

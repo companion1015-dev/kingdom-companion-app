@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Shield, Users, Flag, MessageSquare, Heart, Users2, Check, EyeOff, X } from 'lucide-react'
+import { Shield, Users, Flag, MessageSquare, Heart, Users2, Check, EyeOff, X, FolderCog } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 
@@ -84,7 +84,12 @@ export default function AdminDashboardPage() {
           <Shield className="w-7 h-7 text-navy dark:text-cream" />
           <h1 className="text-3xl font-serif text-navy dark:text-cream">Admin Dashboard</h1>
         </div>
-        <p className="text-navy/60 dark:text-cream/60 mb-8">Moderation, feedback, and ministry activity in one place.</p>
+        <div className="flex items-center justify-between mb-8">
+          <p className="text-navy/60 dark:text-cream/60">Moderation, feedback, and ministry activity in one place.</p>
+          <Link href="/admin/content" className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-navy/15 text-navy dark:text-cream text-xs font-body font-semibold hover:bg-navy/5 transition-all shrink-0 ml-4">
+            <FolderCog className="w-3.5 h-3.5" /> Manage Content
+          </Link>
+        </div>
 
         {loading && (
           <div className="flex justify-center py-16">

@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { User, Save, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { User, Save, Check, Lock } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 import { useTheme } from '@/components/providers/ThemeProvider'
@@ -28,6 +29,7 @@ const TRANSLATIONS = [
 ]
 
 export default function ProfilePage() {
+  const router = useRouter()
   const [profile,  setProfile]  = useState<Profile | null>(null)
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
@@ -38,6 +40,13 @@ export default function ProfilePage() {
   const [translation, setTranslation] = useState('BSB')
   const { theme, setTheme } = useTheme()
   const [fontSize,    setFontSize]    = useState(16)
+
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword,     setNewPassword]     = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwError,  setPwError]  = useState<string | null>(null)
+  const [pwSuccess, setPwSuccess] = useState(false)
 
   useEffect(() => {
     fetch('/api/v1/user/profile', { credentials: 'include' })
@@ -71,6 +80,30 @@ export default function ProfilePage() {
       setError('Network error. Please try again.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleChangePassword = async () => {
+    setPwError(null); setPwSuccess(false)
+    if (newPassword !== confirmPassword) { setPwError('New passwords do not match.'); return }
+    setPwSaving(true)
+    try {
+      const res  = await fetch('/api/v1/user/change-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ current_password: currentPassword, password: newPassword, confirm_password: confirmPassword }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setPwSuccess(true)
+        setCurrentPassword(''); setNewPassword(''); setConfirmPassword('')
+        setTimeout(() => router.push('/login'), 2000)
+      } else {
+        setPwError(data.error?.message ?? 'Unable to change password.')
+      }
+    } catch {
+      setPwError('Network error. Please try again.')
+    } finally {
+      setPwSaving(false)
     }
   }
 
@@ -158,6 +191,42 @@ export default function ProfilePage() {
               {saving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
               {saved ? 'Saved' : saving ? 'Saving…' : 'Save Changes'}
             </button>
+          </div>
+        )}
+
+        {!loading && profile && (
+          <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 sm:p-8 space-y-4 mt-6">
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-navy/50 dark:text-cream/50" />
+              <h2 className="font-display text-lg font-semibold text-navy dark:text-cream">Change Password</h2>
+            </div>
+
+            {pwError && <p className="text-xs font-body text-red-600 bg-red-50 border border-red-100 rounded-xl p-3">{pwError}</p>}
+            {pwSuccess && <p className="text-xs font-body text-green-700 bg-green-50 border border-green-100 rounded-xl p-3">Password changed. Redirecting you to sign in with your new password…</p>}
+
+            <div>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Current Password</label>
+              <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
+            </div>
+            <div>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">New Password</label>
+              <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
+              <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body mt-1">At least 8 characters, one uppercase letter, one number.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Confirm New Password</label>
+              <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all" />
+            </div>
+
+            <button onClick={handleChangePassword} disabled={pwSaving || !currentPassword || !newPassword || !confirmPassword}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-body font-semibold transition-all bg-navy hover:bg-navy-light text-white disabled:opacity-60">
+              {pwSaving ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Lock className="w-4 h-4" />}
+              {pwSaving ? 'Changing…' : 'Change Password'}
+            </button>
+            <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body">Changing your password signs you out everywhere — you'll need to sign in again.</p>
           </div>
         )}
       </main>

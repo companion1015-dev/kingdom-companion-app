@@ -81,6 +81,7 @@ export const navLinks = [
   { label: 'Topics',           href: '/topics' },
   { label: 'Daily',            href: '/daily' },
   { label: 'Devotionals',      href: '/devotionals' },
+  { label: 'Books',            href: '/books' },
   { label: 'Reading Plans',    href: '/reading-plans' },
   { label: 'Prayer Wall',      href: '/prayer-wall' },
   { label: 'Live Prayer',      href: '/prayer-live' },
@@ -93,6 +94,7 @@ export const navLinks = [
 // shown to everyone regardless of auth state, even though every one of
 // these leads straight to a "please sign in" wall for anonymous visitors.
 export const authNavLinks = [
+  { label: 'My Dashboard',     href: '/dashboard' },
   { label: 'Prayer Journal',   href: '/journal' },
   { label: 'Invite Friends',   href: '/invite' },
   { label: 'My Profile',       href: '/profile' },

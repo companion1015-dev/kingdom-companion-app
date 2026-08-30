@@ -46,6 +46,17 @@ export const ResetPasswordSchema = z.object({
   path: ['confirm_password'],
 })
 
+export const ChangePasswordSchema = z.object({
+  current_password: z.string().min(1, 'Current password is required'),
+  password:         z.string().min(8).max(128)
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  confirm_password: z.string(),
+}).refine(data => data.password === data.confirm_password, {
+  message: 'Passwords do not match',
+  path: ['confirm_password'],
+})
+
 export const RefreshTokenSchema = z.object({
   refresh_token: z.string().min(1),
 })

@@ -104,10 +104,21 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   },
 })
 
+// Prayer Wall attachments and Library Book covers upload to Supabase
+// Storage (see src/lib/storage/attachments.ts), whose public object URLs
+// live on the same host as NEXT_PUBLIC_SUPABASE_URL -- next/image needs
+// that host allow-listed here rather than hardcoded.
+const supabaseHostname = (() => {
+  try { return process.env.NEXT_PUBLIC_SUPABASE_URL ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname : null }
+  catch { return null }
+})()
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: { domains: [] },
+  images: {
+    remotePatterns: supabaseHostname ? [{ protocol: 'https', hostname: supabaseHostname }] : [],
+  },
 }
 
 module.exports = withPWA(nextConfig)

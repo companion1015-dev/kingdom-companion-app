@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, Search, User, LogOut, ChevronDown } from 'lucide-react'
+import { Menu, X, Search, User, LogOut, ChevronDown, LayoutDashboard, Shield } from 'lucide-react'
 import { navLinks, authNavLinks } from '@/data/mock'
 
 // Real fix: this previously always showed a hardcoded "Sign in" button and
@@ -28,6 +28,7 @@ export default function Navigation() {
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [scrolled,    setScrolled]    = useState(false)
   const [authed,      setAuthed]      = useState(false)
+  const [isAdmin,     setIsAdmin]     = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
@@ -43,7 +44,11 @@ export default function Navigation() {
       .then(async res => {
         if (res.status === 401) return
         const data = await res.json()
-        if (data.success) { setAuthed(true); setDisplayName(data.data.display_name || data.data.email) }
+        if (data.success) {
+          setAuthed(true)
+          setDisplayName(data.data.display_name || data.data.email)
+          setIsAdmin(data.data.role === 'admin' || data.data.role === 'super_admin')
+        }
       })
       .catch(() => { /* stay signed-out on any network failure */ })
   }, [])
@@ -125,10 +130,20 @@ export default function Navigation() {
                 </button>
                 {accountOpen && (
                   <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-navy-dark rounded-xl shadow-xl shadow-navy/15 border border-navy/8 overflow-hidden">
+                    <Link href="/dashboard" onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
+                      <LayoutDashboard className="w-3.5 h-3.5" /> My Dashboard
+                    </Link>
                     <Link href="/profile" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
                       <User className="w-3.5 h-3.5" /> My Profile
                     </Link>
+                    {isAdmin && (
+                      <Link href="/admin" onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body border-t border-navy/8">
+                        <Shield className="w-3.5 h-3.5" /> Admin Dashboard
+                      </Link>
+                    )}
                     <button onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-body text-left">
                       <LogOut className="w-3.5 h-3.5" /> Sign Out
@@ -182,6 +197,15 @@ export default function Navigation() {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 px-4 py-3 text-gold/90 hover:text-gold hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm font-semibold"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Shield className="w-4 h-4" /> Admin Dashboard
+              </Link>
+            )}
             <div className="pt-3 border-t border-white/10">
               {authed ? (
                 <button

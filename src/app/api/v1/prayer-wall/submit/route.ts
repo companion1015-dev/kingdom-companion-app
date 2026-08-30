@@ -5,6 +5,8 @@ import { checkRateLimit, getRateLimitKey } from '@/lib/auth/rate-limit'
 import { prisma } from '@/lib/db/client'
 import { sendAdminAlertEmail } from '@/lib/email/service'
 import { containsBlockedContent, BLOCKED_MESSAGE } from '@/modules/prayer-wall/utils/content-safety'
+import { uploadPublicFile, STORAGE_CONFIGURED } from '@/lib/storage/attachments'
+import { randomUUID } from 'crypto'
 
 // POST /api/v1/prayer-wall/submit
 // Anonymous submissions are allowed by design -- privacy defaults to
@@ -16,6 +18,14 @@ const SUBMIT_RATE = { limit: 10, windowMs: 60 * 60 * 1000 } // 10/hour per IP
 const VALID_CATEGORIES = ['healing','family','relationships','work','financial','salvation','mental-health','grief','gratitude','ministry','other']
 const VALID_PRIVACY    = ['private','anonymous','community','public']
 
+// Mirrors the client-side checks in SubmitPrayerForm.tsx -- enforced again
+// here since the client validation can't be trusted on its own.
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif',
+  'application/pdf': 'pdf',
+}
+
 export const POST = withOptionalAuth(async (req: NextRequest, user) => {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
   const { allowed } = checkRateLimit(getRateLimitKey('prayer-submit', ip), SUBMIT_RATE)
@@ -24,6 +34,7 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
   try {
     const contentType = req.headers.get('content-type') ?? ''
     let title: string, content: string, category: string, privacy: string, display_name: string | null
+    let attachment_url: string | null = null, attachment_type: string | null = null
 
     if (contentType.includes('multipart/form-data')) {
       const form = await req.formData()
@@ -32,9 +43,19 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
       category     = String(form.get('category') ?? 'other')
       privacy      = String(form.get('privacy') ?? 'private')
       display_name = form.get('display_name') ? String(form.get('display_name')) : null
-      // Note: actual file upload storage (S3/Vercel Blob) is not wired up
-      // yet -- attachment_url stays null until a storage provider is
-      // configured. Flagged rather than silently dropped.
+
+      const file = form.get('attachment')
+      if (file instanceof File) {
+        const ext = ALLOWED_TYPES[file.type]
+        if (!ext) return errorResponse('INVALID_FILE_TYPE', 'Attachment must be an image (JPG, PNG, WebP, GIF) or PDF.', 400)
+        if (file.size > MAX_FILE_SIZE) return errorResponse('FILE_TOO_LARGE', 'Attachment must be under 5MB.', 400)
+        if (!STORAGE_CONFIGURED) return errorResponse('STORAGE_UNAVAILABLE', 'File attachments are temporarily unavailable. Please submit without one.', 503)
+
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const key    = `prayer-wall/${randomUUID()}.${ext}`
+        attachment_url  = await uploadPublicFile(buffer, key, file.type)
+        attachment_type = file.type === 'application/pdf' ? 'pdf' : 'image'
+      }
     } else {
       const body = await req.json()
       title        = String(body.title ?? '')
@@ -68,6 +89,8 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
         privacy,
         moderation_status: 'pending',
         display_name: privacy === 'anonymous' || privacy === 'private' ? null : display_name,
+        attachment_url,
+        attachment_type,
       },
       select: { id: true },
     })
