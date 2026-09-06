@@ -7,6 +7,16 @@ import type { LocalStudyState } from '@/modules/study/types'
 import { HIGHLIGHT_COLORS } from '@/modules/study/types'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
+import { bibleHref, parseVerseId } from '@/lib/bible-links'
+
+// Every bookmark/highlight/note is keyed by verseId ("BOOKID.chapter.verse"),
+// but the "open" arrow next to each one used to link to bare /bible,
+// discarding that and always landing on whatever chapter was last read
+// instead of the actual saved verse.
+function openHref(verseId: string): string {
+  const parsed = parseVerseId(verseId)
+  return parsed ? bibleHref(parsed.bookId, parsed.chapter, parsed.verse) : '/bible'
+}
 
 type Tab = 'bookmarks' | 'highlights' | 'notes'
 
@@ -157,7 +167,7 @@ export default function StudyPage() {
                       )}
                     </div>
                     <Link
-                      href={`/bible`}
+                      href={openHref(verseId)}
                       className="p-2 text-navy/25 dark:text-cream/25 group-hover:text-navy dark:text-cream transition-colors"
                       aria-label={`Open ${data.reference}`}
                     >
@@ -197,7 +207,7 @@ export default function StudyPage() {
                         <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5 capitalize">{colorConfig.label} highlight</p>
                       </div>
                       <Link
-                        href={`/bible`}
+                        href={openHref(verseId)}
                         className="p-2 text-navy/25 dark:text-cream/25 group-hover:text-navy dark:text-cream transition-colors"
                       >
                         <ArrowRight className="w-4 h-4" />
@@ -229,7 +239,7 @@ export default function StudyPage() {
                       <p className="text-xs font-body font-semibold text-gold">{data.reference}</p>
                       <div className="flex items-center gap-1">
                         <Link
-                          href="/bible"
+                          href={openHref(verseId)}
                           className="p-1.5 text-navy/25 dark:text-cream/25 group-hover:text-navy dark:text-cream transition-colors rounded-lg hover:bg-navy/5"
                         >
                           <ArrowRight className="w-3.5 h-3.5" />

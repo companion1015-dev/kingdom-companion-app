@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Compass, ArrowLeft } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
+import { bibleHref, parseVerseId } from '@/lib/bible-links'
 
 type TopicVerse = { id: string; verse_reference: string; verse_id: string; book_id: string; chapter: number }
 type TopicDetail = { id: string; slug: string; name: string; category: string; description: string; verses: TopicVerse[] }
@@ -70,13 +71,8 @@ export default function TopicDetailPage({ params }: { params: { slug: string } }
               <ul className="space-y-2">
                 {topic.verses.map(v => (
                   <li key={v.id}>
-                    {/* NOTE: linking to /bible?ref= here would be non-functional today —
-                        the Bible page does not currently parse any query params.
-                        Linking to the plain reader instead until that's implemented.
-                        ASSUMPTION — REQUIRES PRODUCT DECISION: whether verse deep-linking
-                        from Topics is a near-term priority; flagged as a real follow-up. */}
                     <Link
-                      href="/bible"
+                      href={bibleHref(v.book_id, v.chapter, parseVerseId(v.verse_id)?.verse)}
                       className="block p-4 rounded-xl bg-white dark:bg-navy-dark border border-navy/8 hover:border-gold/20 transition-colors"
                     >
                       <span className="font-medium text-navy dark:text-cream">{v.verse_reference}</span>

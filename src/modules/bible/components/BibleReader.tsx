@@ -70,6 +70,15 @@ export default function BibleReader() {
   const contentRef = useRef<HTMLDivElement>(null)
   const currentBook = books.find(b => b.bookId === bookId) ?? null
 
+  // Verse-level deep linking (/bible?book=&chapter=&verse=) -- scrollToVerse
+  // triggers the scroll-into-view + flash effect below once the chapter has
+  // loaded; skipScrollTopRef suppresses loadChapter's normal "scroll to top
+  // of chapter" behaviour for that one load so it doesn't fight the scroll
+  // to the specific verse.
+  const [scrollToVerse, setScrollToVerse] = useState<number | null>(null)
+  const [flashVerse,    setFlashVerse]    = useState<number | null>(null)
+  const skipScrollTopRef = useRef(false)
+
   // Load study state — local-first, always instant. Then a REAL authentication
   // check (same 401-vs-200 convention already established for Journal and
   // Reading Plans) determines whether to activate the previously dormant
@@ -101,7 +110,11 @@ export default function BibleReader() {
       if (data.success && data.data) {
         setChapterData(data.data)
         savePosition(b, c, t)
-        contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+        if (skipScrollTopRef.current) {
+          skipScrollTopRef.current = false
+        } else {
+          contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+        }
 
         // Study commentary — load which verses have notes for this chapter,
         // then (inline mode only) eagerly fetch the actual note text so it
@@ -142,8 +155,12 @@ export default function BibleReader() {
     // silently staying put.
     const linkedBook    = searchParams.get('book')
     const linkedChapter = searchParams.get('chapter')
+    const linkedVerse   = searchParams.get('verse')
     if (linkedBook && BOOKS.some(b => b.bookId === linkedBook)) {
       const c = Math.max(1, parseInt(linkedChapter ?? '1') || 1)
+      const v = linkedVerse ? Math.max(1, parseInt(linkedVerse) || 0) || null : null
+      skipScrollTopRef.current = !!v
+      setScrollToVerse(v)
       setBookId(linkedBook); setChapter(c); loadChapter(translation, linkedBook, c)
       return
     }
@@ -171,6 +188,20 @@ export default function BibleReader() {
   }, [searchParams])
 
   useEffect(() => { loadChapter(translation, bookId, chapter) }, [translation, bookId, chapter, loadChapter])
+
+  // Once the linked chapter has actually rendered, scroll to the specific
+  // verse and flash it briefly so a deep link (/bible?book=&chapter=&verse=)
+  // lands precisely on the passage it named, not just the top of the chapter.
+  useEffect(() => {
+    if (!chapterData || !scrollToVerse) return
+    const el = document.getElementById(`verse-${scrollToVerse}`)
+    if (!el) { setScrollToVerse(null); return }
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setFlashVerse(scrollToVerse)
+    setScrollToVerse(null)
+    const t = setTimeout(() => setFlashVerse(v => v === scrollToVerse ? null : v), 2500)
+    return () => clearTimeout(t)
+  }, [chapterData, scrollToVerse])
 
   // Toast
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500) }
@@ -342,7 +373,8 @@ export default function BibleReader() {
                     <div key={verse.id} className="group">
                       {/* Verse row */}
                       <div
-                        className={`relative flex gap-3 px-2 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:bg-navy/3 ${hlConfig ? hlConfig.bg : ''}`}
+                        id={`verse-${verse.verseNumber}`}
+                        className={`relative flex gap-3 px-2 py-1.5 rounded-lg cursor-pointer transition-all duration-150 hover:bg-navy/3 ${flashVerse === verse.verseNumber ? 'bg-gold/25 ring-2 ring-gold/50' : hlConfig ? hlConfig.bg : ''}`}
                         onClick={e => handleVerseClick(verse, e)}
                         role="button"
                         tabIndex={0}

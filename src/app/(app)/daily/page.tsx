@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer'
 import type { DailyEntry } from '@/modules/daily/data/entries'
 import { BOOKS } from '@/modules/bible/services/mock-data'
 import { localDateKey } from '@/lib/date'
+import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
 
 export default function DailyPage() {
   const [entry,     setEntry]     = useState<DailyEntry | null>(null)
@@ -104,7 +105,7 @@ export default function DailyPage() {
                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white/70 hover:border-white/40 hover:text-white text-sm font-body font-medium transition-all">
                     <Share2 className="w-3.5 h-3.5" /> Share
                   </button>
-                  <Link href={`/bible`}
+                  <Link href={bibleHref(entry.book_id, entry.chapter, firstVerseNumber(entry.verse_reference))}
                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white/70 hover:border-white/40 hover:text-white text-sm font-body font-medium transition-all">
                     <BookOpen className="w-3.5 h-3.5" /> Read in Bible
                   </Link>
@@ -164,7 +165,7 @@ export default function DailyPage() {
                     <p className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-0.5">Suggested Reading</p>
                     <p className="font-body font-medium text-navy dark:text-cream text-sm">{BOOKS.find(b => b.bookId === entry?.book_id)?.name} {entry?.chapter}</p>
                   </div>
-                  <Link href="/bible" className="flex items-center gap-1.5 text-gold hover:text-gold-dark text-xs font-body font-semibold transition-colors">
+                  <Link href={bibleHref(entry.book_id, entry.chapter)} className="flex items-center gap-1.5 text-gold hover:text-gold-dark text-xs font-body font-semibold transition-colors">
                     Open <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>

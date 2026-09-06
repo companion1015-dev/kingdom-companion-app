@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Sunrise } from 'lucide-react'
+import { ArrowRight, Sunrise, BookOpen } from 'lucide-react'
 import { localDateKey } from '@/lib/date'
+import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
 
 // Real fix: this previously always showed one single hardcoded entry from
 // mock.ts, regardless of the actual date. Now fetches from /api/v1/daily,
@@ -15,6 +16,8 @@ type DailyEntry = {
   verse_reference: string
   verse_text: string
   translation: string
+  book_id: string
+  chapter: number
   title: string
   reflection: string
   prayer: string
@@ -85,9 +88,13 @@ export default function DailyEncouragementSection() {
                 <p className="font-display text-2xl sm:text-3xl font-light text-white leading-relaxed italic mb-3">
                   &ldquo;{entry.verse_text}&rdquo;
                 </p>
-                <p className="text-gold text-sm font-body font-medium">
+                <Link
+                  href={bibleHref(entry.book_id, entry.chapter, firstVerseNumber(entry.verse_reference))}
+                  className="inline-flex items-center gap-1.5 text-gold hover:text-gold-light text-sm font-body font-medium transition-colors group/verse"
+                >
+                  <BookOpen className="w-3.5 h-3.5 opacity-0 group-hover/verse:opacity-100 transition-opacity" />
                   — {entry.verse_reference} <span className="text-white/30">({entry.translation})</span>
-                </p>
+                </Link>
               </div>
 
               {/* Divider */}

@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, ArrowRight, Loader2 } from 'lucide-react'
+import { bibleHref, parseVerseId } from '@/lib/bible-links'
 
 // Real fix: this previously did alert(`Searching for: ${query}`) -- a
 // leftover placeholder. Now performs genuine live search against
@@ -35,14 +36,14 @@ const BOOK_NAME_TO_ID: Record<string, string> = {
   '1 john': '1JN', '2 john': '2JN', '3 john': '3JN', jude: 'JUD', revelation: 'REV',
 }
 
-/** Detects queries like "Psalm 23" or "John 3:16" and returns the real book_id + chapter. */
-function parseReference(raw: string): { bookId: string; chapter: number } | null {
-  const m = raw.trim().match(/^([1-3]?\s?[A-Za-z ]+?)\s+(\d+)(?::\d+)?$/)
+/** Detects queries like "Psalm 23" or "John 3:16" and returns the real book_id + chapter (+ verse, when given). */
+function parseReference(raw: string): { bookId: string; chapter: number; verse: number | null } | null {
+  const m = raw.trim().match(/^([1-3]?\s?[A-Za-z ]+?)\s+(\d+)(?::(\d+))?$/)
   if (!m) return null
   const bookName = m[1].trim().toLowerCase().replace(/\s+/g, ' ')
   const bookId = BOOK_NAME_TO_ID[bookName]
   if (!bookId) return null
-  return { bookId, chapter: parseInt(m[2], 10) }
+  return { bookId, chapter: parseInt(m[2], 10), verse: m[3] ? parseInt(m[3], 10) : null }
 }
 
 export default function SearchSection() {
@@ -73,22 +74,22 @@ export default function SearchSection() {
     return () => clearTimeout(debounceRef.current)
   }, [query])
 
-  const goToVerse = (bookId: string, chapter: number) => {
-    router.push(`/bible?book=${bookId}&chapter=${chapter}`)
+  const goToVerse = (bookId: string, chapter: number, verse?: number | null) => {
+    router.push(bibleHref(bookId, chapter, verse))
   }
 
   const handleSearch = () => {
     if (!query.trim()) return
     const ref = parseReference(query)
-    if (ref) { goToVerse(ref.bookId, ref.chapter); return }
-    if (results.length > 0) goToVerse(results[0].bookId, results[0].chapterNumber)
+    if (ref) { goToVerse(ref.bookId, ref.chapter, ref.verse); return }
+    if (results.length > 0) goToVerse(results[0].bookId, results[0].chapterNumber, parseVerseId(results[0].verseId)?.verse)
   }
 
   const handleSuggestionClick = (s: string) => {
     setQuery(s)
     setFocused(true)
     const ref = parseReference(s)
-    if (ref) goToVerse(ref.bookId, ref.chapter)
+    if (ref) goToVerse(ref.bookId, ref.chapter, ref.verse)
   }
 
   return (
@@ -138,7 +139,7 @@ export default function SearchSection() {
               {results.map(r => (
                 <button
                   key={r.verseId}
-                  onClick={() => goToVerse(r.bookId, r.chapterNumber)}
+                  onClick={() => goToVerse(r.bookId, r.chapterNumber, parseVerseId(r.verseId)?.verse)}
                   className="w-full flex flex-col items-start gap-0.5 px-5 py-3 hover:bg-navy/4 transition-colors border-b border-navy/6 last:border-0"
                 >
                   <span className="text-xs font-body font-semibold text-gold">{r.reference}</span>

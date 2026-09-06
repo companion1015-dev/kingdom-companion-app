@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { Send, Sparkles, RefreshCw, BookOpen, Copy, ChevronDown, WifiOff, History, Plus, Trash2, X } from 'lucide-react'
 import { emotions } from '@/data/mock'
+import { bibleHref } from '@/lib/bible-links'
 
 type Message = {
   id:      string
@@ -708,16 +709,16 @@ const BOOK_NAME_TO_ID: Record<string, string> = {
   '1 john': '1JN', '2 john': '2JN', '3 john': '3JN', jude: 'JUD', revelation: 'REV',
 }
 
-function findFirstReference(text: string): { bookId: string; chapter: number } | null {
+function findFirstReference(text: string): { bookId: string; chapter: number; verse: number | null } | null {
   if (!text) return null
-  const m = text.match(/\b([1-3]?\s?[A-Za-z]+(?:\s[A-Za-z]+)?)\s+(\d+)(?::\d+)?/)
+  const m = text.match(/\b([1-3]?\s?[A-Za-z]+(?:\s[A-Za-z]+)?)\s+(\d+)(?::(\d+))?/)
   if (!m) return null
   const bookId = BOOK_NAME_TO_ID[m[1].trim().toLowerCase()]
   if (!bookId) return null
-  return { bookId, chapter: parseInt(m[2], 10) }
+  return { bookId, chapter: parseInt(m[2], 10), verse: m[3] ? parseInt(m[3], 10) : null }
 }
 
 function getBibleHref(scriptures: string, nextStep: string): string {
   const ref = findFirstReference(scriptures) ?? findFirstReference(nextStep)
-  return ref ? `/bible?book=${ref.bookId}&chapter=${ref.chapter}` : '/bible'
+  return ref ? bibleHref(ref.bookId, ref.chapter, ref.verse) : '/bible'
 }

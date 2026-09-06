@@ -1,15 +1,19 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { BookMarked, ArrowLeft } from 'lucide-react'
+import { BookMarked, ArrowLeft, BookOpen } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
+import { bibleHref, parseVerseId } from '@/lib/bible-links'
 
 type Entry = {
   id: string
   day_number: number
   title: string
   theme: string | null
+  book_id: string
+  chapter: number
+  central_verse_id: string
   central_verse_reference: string
   reflection: string
   guided_prayer: string
@@ -90,9 +94,13 @@ export default function DevotionalSeriesPage({ params }: { params: { slug: strin
                     </button>
                     {openDay === e.day_number && (
                       <div className="px-5 pb-5">
-                        <div className="p-4 rounded-xl bg-cream dark:bg-navy-dark border border-navy/8 mb-4">
+                        <Link
+                          href={bibleHref(e.book_id, e.chapter, parseVerseId(e.central_verse_id)?.verse)}
+                          className="flex items-center justify-between gap-3 p-4 rounded-xl bg-cream dark:bg-navy-dark border border-navy/8 hover:border-gold/30 transition-colors mb-4 group"
+                        >
                           <p className="font-serif italic text-navy dark:text-cream">{e.central_verse_reference}</p>
-                        </div>
+                          <BookOpen className="w-4 h-4 text-navy/30 dark:text-cream/30 group-hover:text-gold shrink-0" />
+                        </Link>
                         <p className="text-navy/80 dark:text-cream/80 leading-relaxed mb-4 whitespace-pre-wrap">{e.reflection}</p>
                         {e.is_ai_generated && (
                           <p className="text-xs text-navy/40 dark:text-cream/40 italic mb-4">

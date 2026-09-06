@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowRight, Sparkles, BookOpen, ChevronDown } from 'lucide-react'
 import { emotions } from '@/data/mock'
 import { localDateKey } from '@/lib/date'
+import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
 
 // Genuine fixes here: the emotion selector previously did
 // alert('AI Companion coming in Phase 3...') -- a leftover from before the
@@ -18,7 +19,7 @@ import { localDateKey } from '@/lib/date'
 
 const QUICK_COUNT = 6
 
-type DailyVerse = { reference: string; text: string; book_id: string; chapter: number }
+type DailyVerse = { reference: string; text: string; book_id: string; chapter: number; verse: number | null }
 
 export default function HeroSection() {
   const router = useRouter()
@@ -38,6 +39,7 @@ export default function HeroSection() {
             text: res.data.verse_text,
             book_id: res.data.book_id,
             chapter: res.data.chapter,
+            verse: firstVerseNumber(res.data.verse_reference),
           })
         }
       })
@@ -82,7 +84,7 @@ export default function HeroSection() {
         {dailyVerse && (
           <div className="flex justify-center mb-10 animate-fade-in">
               <a
-              href={`/bible?book=${dailyVerse.book_id}&chapter=${dailyVerse.chapter}`}
+              href={bibleHref(dailyVerse.book_id, dailyVerse.chapter, dailyVerse.verse)}
               className="inline-flex items-center gap-2.5 glass rounded-full px-5 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/12 dark:bg-navy-dark transition-all group"
             >
               <BookOpen className="w-3.5 h-3.5 text-gold" />
