@@ -814,6 +814,71 @@ model LibraryBook {
   @@map("library_book")
 }
 
+// ─── DISCIPLESHIP LIBRARY ────────────────────────────────────────────────────
+// Structured, chapter-by-chapter teaching books (e.g. "Salvation & New Life"),
+// distinct from LibraryBook above: those are opaque uploaded files
+// (PDF/EPUB/DOCX) meant to be downloaded, while these are authored text
+// rendered in-app as a real reading experience (table of contents, per-chapter
+// pages, prev/next navigation). Both surface together on /books — one entry
+// type offers "Download", the other offers "Read Online" — so this doesn't
+// introduce a second, competing "library" section in the nav.
+// `sections` is a flexible ordered array of { heading, body } (and, for
+// chapters, `reflectionQuestions` is included inline within the body of a
+// "Reflection" section) rather than one column per section name, since future
+// volumes are not guaranteed to share the exact same section breakdown as
+// Volume 1 (Introduction / Biblical Foundation / Real-Life Situation / The
+// Problem / Biblical Solution / Result-Outcome / Reflection / Sample Prayer /
+// Key Truth to Remember).
+
+model DiscipleshipBook {
+  id                String   @id @default(uuid()) @db.Uuid
+  slug              String   @unique @db.VarChar(150)
+  title             String   @db.VarChar(255)
+  subtitle          String?  @db.VarChar(255)
+  author_name       String   @db.VarChar(150)
+  volume_number     Int?
+  description       String?
+  cover_image_url   String?
+  theme_verse       String?  // Volume 2 opens with a theme verse; Volume 1 has none.
+  summary_sections  Json?    // Optional closing "Volume Summary" -- same
+                              // [{ heading, body }] shape as chapter sections,
+                              // rendered after the table of contents.
+  is_published      Boolean  @default(true)
+  created_at        DateTime @default(now()) @db.Timestamptz
+  updated_at        DateTime @updatedAt @db.Timestamptz
+
+  chapters DiscipleshipChapter[]
+
+  @@index([is_published])
+  @@index([volume_number])
+  @@map("discipleship_book")
+}
+
+model DiscipleshipChapter {
+  id             String   @id @default(uuid()) @db.Uuid
+  book_id        String   @db.Uuid
+  chapter_number Int
+  title          String   @db.VarChar(255)
+  subtitle       String?  @db.VarChar(255)
+  theme_verse    String?  // Volume 3 gives each chapter its own theme verse,
+                           // shown under the title (distinct from the book-level
+                           // theme_verse, which is the volume's own opening verse).
+  sections       Json     // [{ heading: string, body: string }] — body preserves
+                           // the author's original paragraphs/bullets verbatim.
+                           // Holds the chapter-level intro only when `topics` is set.
+  topics         Json?    // Volume 2 nests multiple full lessons per chapter:
+                           // [{ topic_number, title, sections: [{ heading, body }] }].
+                           // Null for a Volume 1-style chapter with no sub-topics.
+  created_at     DateTime @default(now()) @db.Timestamptz
+  updated_at     DateTime @updatedAt @db.Timestamptz
+
+  book DiscipleshipBook @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@unique([book_id, chapter_number])
+  @@index([book_id])
+  @@map("discipleship_chapter")
+}
+
 // ─── GLOBAL PRAYER WALL ───────────────────────────────────────────────────────
 // Distinct from `Prayer` above, which is the private Prayer Journal.
 // This is the public, community-facing Prayer Wall. Privacy tiers control

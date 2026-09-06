@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { LibraryBig, Download, FileText } from 'lucide-react'
+import Link from 'next/link'
+import { LibraryBig, Download, FileText, BookOpen } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 
@@ -9,14 +10,24 @@ import Footer from '@/components/layout/Footer'
 // to go before this. Distinct from /devotionals (multi-day series typed
 // into the CMS) and /blog (inline article text): these are whole files
 // (PDF/EPUB/DOCX) uploaded from the admin's own computer.
+//
+// Extended to also list DiscipleshipBook entries (kind: 'read') alongside
+// the original uploaded-file entries (kind: 'download') -- structured
+// multi-chapter teaching books read in-app at /books/read/[slug], rather
+// than a second competing "library" nav item.
 
-type LibraryBook = {
+type Book = {
   id: string; title: string; author_name: string; description: string | null
-  cover_image_url: string | null; file_url: string; file_type: string; created_at: string
+  cover_image_url: string | null
+  kind: 'download' | 'read'
+  // download-only
+  file_url?: string; file_type?: string
+  // read-only
+  slug?: string; subtitle?: string | null; volume_number?: number | null; chapter_count?: number
 }
 
 export default function BooksPage() {
-  const [books,   setBooks]   = useState<LibraryBook[]>([])
+  const [books,   setBooks]   = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState<string | null>(null)
 
@@ -70,13 +81,24 @@ export default function BooksPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-display text-base font-semibold text-navy dark:text-cream">{b.title}</h2>
-                  <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body mb-1.5">by {b.author_name}</p>
+                  <h2 className="font-display text-base font-semibold text-navy dark:text-cream">
+                    {b.title}{b.subtitle ? ` — ${b.subtitle}` : ''}
+                  </h2>
+                  <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body mb-1.5">
+                    by {b.author_name}{b.kind === 'read' && b.chapter_count ? ` · ${b.chapter_count} chapters` : ''}
+                  </p>
                   {b.description && <p className="text-sm text-charcoal/60 dark:text-cream/60 font-body line-clamp-2 mb-3">{b.description}</p>}
-                  <a href={b.file_url} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-navy hover:bg-navy-light text-white text-xs font-body font-semibold transition-all">
-                    <Download className="w-3.5 h-3.5" /> Download {b.file_type.toUpperCase()}
-                  </a>
+                  {b.kind === 'read' ? (
+                    <Link href={`/books/read/${b.slug}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-navy hover:bg-navy-light text-white text-xs font-body font-semibold transition-all">
+                      <BookOpen className="w-3.5 h-3.5" /> Read Online
+                    </Link>
+                  ) : (
+                    <a href={b.file_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-navy hover:bg-navy-light text-white text-xs font-body font-semibold transition-all">
+                      <Download className="w-3.5 h-3.5" /> Download {b.file_type?.toUpperCase()}
+                    </a>
+                  )}
                 </div>
               </li>
             ))}
