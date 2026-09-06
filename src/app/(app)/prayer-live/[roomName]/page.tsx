@@ -70,7 +70,7 @@ export default function PrayerLiveRoomPage() {
       <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-28 pb-16 text-center">
         <Link
           href="/prayer-live"
-          className="inline-flex items-center gap-1.5 text-xs font-body text-navy/40 dark:text-cream/40 hover:text-navy/70 dark:hover:text-cream/70 transition-colors mb-8"
+          className="inline-flex items-center gap-1.5 text-xs font-body font-semibold text-navy/75 dark:text-cream/70 hover:text-navy dark:hover:text-cream transition-colors mb-8"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> All live prayer sessions
         </Link>
@@ -82,7 +82,7 @@ export default function PrayerLiveRoomPage() {
         {!loading && notFound && (
           <>
             <h1 className="font-display text-2xl font-light text-navy dark:text-cream mb-2">Session not found</h1>
-            <p className="text-navy/60 dark:text-cream/60 font-body text-sm">
+            <p className="text-navy/75 dark:text-cream/70 font-body font-medium text-sm">
               This prayer session doesn't exist or has been removed.
             </p>
           </>
@@ -91,7 +91,7 @@ export default function PrayerLiveRoomPage() {
         {!loading && room && !room.is_live && (
           <>
             <h1 className="font-display text-2xl font-light text-navy dark:text-cream mb-2">{room.title}</h1>
-            <p className="text-navy/60 dark:text-cream/60 font-body text-sm">
+            <p className="text-navy/75 dark:text-cream/70 font-body font-medium text-sm">
               This session isn't live right now — this page will update automatically when it starts.
             </p>
           </>
@@ -100,7 +100,7 @@ export default function PrayerLiveRoomPage() {
         {!loading && room && room.is_live && (
           <>
             <h1 className="font-display text-2xl font-light text-navy dark:text-cream mb-2">{room.title}</h1>
-            <p className="text-navy/60 dark:text-cream/60 font-body text-sm mb-6">
+            <p className="text-navy/75 dark:text-cream/70 font-body font-medium text-sm mb-6">
               This session is live now. Watch freely without an account, or sign in to join the conversation.
             </p>
             <button
@@ -125,7 +125,7 @@ export default function PrayerLiveRoomPage() {
                 <li key={rec.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-3 sm:p-4">
                   {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                   <video controls preload="none" className="w-full rounded-xl bg-black" src={rec.file_url} />
-                  <p className="text-xs font-body text-navy/40 dark:text-cream/40 mt-2">
+                  <p className="text-xs font-body font-medium text-navy/75 dark:text-cream/70 mt-2">
                     {new Date(rec.started_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     {rec.duration_seconds != null && ` · ${Math.round(rec.duration_seconds / 60)} min`}
                   </p>

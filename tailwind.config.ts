@@ -31,6 +31,14 @@ const config: Config = {
         'hero-gradient': 'linear-gradient(160deg, #1B3A5C 0%, #2A5080 40%, #1a3850 70%, #0f2236 100%)',
         'cream-gradient': 'linear-gradient(180deg, #FAF7F2 0%, #F0EBE0 100%)',
         'gold-shimmer':  'linear-gradient(90deg, #C9A84C, #E8CC7A, #C9A84C)',
+        // Dark-mode counterpart to cream-gradient -- used as `dark:bg-navy-dark-gradient`
+        // on most page wrappers (bg-cream in light mode). Was previously undefined,
+        // so it silently compiled to nothing: those pages stayed on their light
+        // bg-cream background in dark mode while headings switched to
+        // dark:text-cream (near-white), making primary text nearly invisible.
+        // Matches the app's own designated dark theme-color (#0f2236, see the
+        // PWA theme-color meta in layout.tsx) and navy.dark (#122840).
+        'navy-dark-gradient': 'linear-gradient(180deg, #122840 0%, #0f2236 100%)',
       },
     },
   },

@@ -39,7 +39,7 @@ export default function PrayerLivePage() {
           <Radio className="w-6 h-6 text-gold" />
           <h1 className="font-display text-3xl font-light text-navy dark:text-cream">Live Prayer</h1>
         </div>
-        <p className="text-navy/60 dark:text-cream/60 font-body text-sm mb-8">
+        <p className="text-navy/75 dark:text-cream/70 font-body font-medium text-sm mb-8">
           Join a live, video-based corporate prayer session — watch freely without an account, or sign in to join the conversation.
         </p>
 
@@ -62,12 +62,12 @@ export default function PrayerLivePage() {
             {rooms.map((room) => (
               <li key={room.room_name} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5 sm:p-6">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <h2 className="font-display text-lg font-medium text-navy dark:text-cream">{room.title}</h2>
+                  <h2 className="font-display text-lg font-semibold text-navy dark:text-cream">{room.title}</h2>
                   <span
-                    className={`inline-flex items-center gap-1 text-xs font-body font-semibold px-2.5 py-0.5 rounded-full ${
+                    className={`inline-flex items-center gap-1 text-xs font-body font-bold px-2.5 py-0.5 rounded-full ${
                       room.is_live
-                        ? 'bg-red-600/10 text-red-600'
-                        : 'bg-navy/6 text-navy/40 dark:bg-cream/6 dark:text-cream/40'
+                        ? 'bg-red-600/10 text-red-600 dark:bg-red-500/20 dark:text-red-400'
+                        : 'bg-navy/10 text-navy/80 dark:bg-cream/10 dark:text-cream/75'
                     }`}
                   >
                     {room.is_live && <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />}
@@ -86,7 +86,7 @@ export default function PrayerLivePage() {
                   ) : (
                     <Link
                       href={`/prayer-live/${encodeURIComponent(room.room_name)}`}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-navy/15 text-navy/60 dark:text-cream/60 hover:border-navy/30 text-sm font-body font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-navy/20 text-navy/75 dark:text-cream/70 hover:border-navy/40 dark:hover:border-cream/40 text-sm font-body font-semibold transition-colors"
                     >
                       Past recordings
                     </Link>
@@ -106,7 +106,7 @@ export default function PrayerLivePage() {
         )}
 
         {!loading && rooms.length === 0 && !loadError && (
-          <p className="text-navy/40 dark:text-cream/40 font-body text-sm text-center py-12">
+          <p className="text-navy/75 dark:text-cream/70 font-body font-medium text-sm text-center py-12">
             No prayer sessions scheduled yet.
           </p>
         )}
@@ -143,18 +143,18 @@ function NewRoomForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <details className="group mb-6" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
-      <summary className="text-xs font-body text-navy/35 dark:text-cream/35 cursor-pointer select-none hover:text-navy/60 dark:hover:text-cream/60 transition-colors list-none">
+      <summary className="text-xs font-body font-semibold text-navy/75 dark:text-cream/70 cursor-pointer select-none hover:text-navy dark:hover:text-cream transition-colors list-none">
         Schedule a room
       </summary>
       <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-2 bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-4 sm:p-5">
-        {error && <span className="text-red-600 text-xs font-body">{error}</span>}
+        {error && <span className="text-red-600 dark:text-red-400 text-xs font-body font-semibold">{error}</span>}
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title (e.g. Sunday Evening Prayer)"
           required
           maxLength={255}
-          className="px-3.5 py-2 rounded-xl border border-navy/15 bg-transparent text-sm font-body text-navy dark:text-cream placeholder:text-navy/30 dark:placeholder:text-cream/30 focus:outline-none focus:border-gold"
+          className="px-3.5 py-2 rounded-xl border border-navy/15 bg-transparent text-sm font-body font-medium text-navy dark:text-cream placeholder:text-navy/75 dark:placeholder:text-cream/70 focus:outline-none focus:border-gold"
         />
         <input
           value={roomName}
@@ -163,7 +163,7 @@ function NewRoomForm({ onCreated }: { onCreated: () => void }) {
           required
           maxLength={100}
           pattern="[a-zA-Z0-9\-_]+"
-          className="px-3.5 py-2 rounded-xl border border-navy/15 bg-transparent text-sm font-body text-navy dark:text-cream placeholder:text-navy/30 dark:placeholder:text-cream/30 focus:outline-none focus:border-gold"
+          className="px-3.5 py-2 rounded-xl border border-navy/15 bg-transparent text-sm font-body font-medium text-navy dark:text-cream placeholder:text-navy/75 dark:placeholder:text-cream/70 focus:outline-none focus:border-gold"
         />
         <button
           type="submit"
@@ -220,14 +220,14 @@ function HostControls({
 
   return (
     <details className="group">
-      <summary className="text-xs font-body text-navy/35 dark:text-cream/35 cursor-pointer select-none hover:text-navy/60 dark:hover:text-cream/60 transition-colors list-none">
+      <summary className="text-xs font-body font-semibold text-navy/75 dark:text-cream/70 cursor-pointer select-none hover:text-navy dark:hover:text-cream transition-colors list-none">
         Host controls
       </summary>
       <div className="mt-3 flex items-center gap-2">
-        {error && <span className="text-red-600 text-xs font-body">{error}</span>}
+        {error && <span className="text-red-600 dark:text-red-400 text-xs font-body font-semibold">{error}</span>}
         {!isLive ? (
           <>
-            <label className="flex items-center gap-1.5 text-xs font-body text-navy/50 dark:text-cream/50 cursor-pointer">
+            <label className="flex items-center gap-1.5 text-xs font-body font-medium text-navy/75 dark:text-cream/70 cursor-pointer">
               <input
                 type="checkbox"
                 checked={record}
