@@ -12,6 +12,7 @@ export const book = {
   volume_number: 2,
   description:
     'Spiritual growth is the lifelong journey of becoming more like Jesus Christ. This volume explores the essential foundations of Christian living -- walking with God, prayer, Scripture, worship, the Holy Spirit, obedience, holiness, spiritual disciplines, bearing spiritual fruit, and growing to spiritual maturity -- and shows how God transforms believers from the inside out through His Word, His Spirit, and daily fellowship with Him.',
+  cover_image_url: '/images/covers/spiritual-growth-and-christian-living-volume-2.png',
   theme_verse:
     '"Like newborn babies, crave pure spiritual milk, so that by it you may grow up in your salvation." — 1 Peter 2:2 (NIV)',
   summary_sections: [

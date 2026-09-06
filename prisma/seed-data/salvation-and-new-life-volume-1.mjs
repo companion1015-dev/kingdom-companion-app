@@ -10,6 +10,7 @@ export const book = {
   volume_number: 1,
   description:
     "Through ten foundational studies, this volume explores the heart of the Christian faith: the Gospel, repentance, faith in Christ, grace, justification, assurance of salvation, being born again, baptism, identity in Christ, and eternal life. Each chapter pairs biblical teaching with a real-life story, honest reflection questions, a sample prayer, and a key truth to remember — equipping readers for salvation, discipleship, and growing maturity in Christ.",
+  cover_image_url: '/images/covers/salvation-and-new-life-volume-1.png',
 }
 
 export const chapters = [

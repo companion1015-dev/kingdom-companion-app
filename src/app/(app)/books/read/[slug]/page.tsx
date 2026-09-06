@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LibraryBig, ArrowLeft, ArrowRight } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
@@ -14,6 +15,7 @@ type ChapterSummary = { chapter_number: number; title: string; subtitle: string 
 type BookDetail = {
   slug: string; title: string; subtitle: string | null; author_name: string
   description: string | null; theme_verse: string | null; summary_sections: Section[] | null
+  cover_image_url: string | null
   chapters: ChapterSummary[]
 }
 
@@ -67,22 +69,33 @@ export default function ReadBookPage({ params }: { params: { slug: string } }) {
 
         {!loading && !error && book && (
           <>
-            <h1 className="text-3xl font-serif text-navy dark:text-cream mb-1">{book.title}</h1>
-            {book.subtitle && <p className="text-lg text-navy/70 dark:text-cream/70 font-body mb-2">{book.subtitle}</p>}
-            <p className="text-sm text-charcoal/45 dark:text-cream/45 font-body mb-6">by {book.author_name}</p>
-            {book.description && <p className="text-navy/70 dark:text-cream/70 leading-relaxed mb-6">{book.description}</p>}
-            {book.theme_verse && (
-              <blockquote className="border-l-2 border-gold/50 pl-4 italic text-navy/85 dark:text-cream/85 mb-8">
-                <SectionBody body={book.theme_verse} />
-              </blockquote>
-            )}
+            <div className="flex flex-col sm:flex-row gap-6 mb-8">
+              {book.cover_image_url && (
+                <div className="w-40 sm:w-48 shrink-0 mx-auto sm:mx-0">
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-lg shadow-navy/20">
+                    <Image src={book.cover_image_url} alt={`${book.title} cover`} fill className="object-cover" sizes="192px" priority />
+                  </div>
+                </div>
+              )}
+              <div className="min-w-0">
+                <h1 className="text-3xl font-serif text-navy dark:text-cream mb-1">{book.title}</h1>
+                {book.subtitle && <p className="text-lg text-navy/70 dark:text-cream/70 font-body mb-2">{book.subtitle}</p>}
+                <p className="text-sm text-charcoal/45 dark:text-cream/45 font-body mb-6">by {book.author_name}</p>
+                {book.description && <p className="text-navy/70 dark:text-cream/70 leading-relaxed mb-6">{book.description}</p>}
+                {book.theme_verse && (
+                  <blockquote className="border-l-2 border-gold/50 pl-4 italic text-navy/85 dark:text-cream/85 mb-6">
+                    <SectionBody body={book.theme_verse} />
+                  </blockquote>
+                )}
 
-            {book.chapters.length > 0 && (
-              <Link href={`/books/read/${book.slug}/1`}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all mb-8">
-                Start Reading <ArrowRight className="w-4 h-4" />
-              </Link>
-            )}
+                {book.chapters.length > 0 && (
+                  <Link href={`/books/read/${book.slug}/1`}
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold transition-all">
+                    Start Reading <ArrowRight className="w-4 h-4" />
+                  </Link>
+                )}
+              </div>
+            </div>
 
             <h2 className="text-sm font-medium uppercase tracking-wide text-navy/40 dark:text-cream/40 mb-3">
               Table of Contents

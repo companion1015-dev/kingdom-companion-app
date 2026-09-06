@@ -15,6 +15,7 @@ export const book = {
   volume_number: 3,
   description:
     'Christian character is not simply about knowing what the Bible says -- it is about allowing God’s Word to shape who we are, how we think, how we speak, how we treat people, and how we respond to everyday situations. This volume explores love, humility, forgiveness, integrity, speech, compassion, family relationships, friendship, service, and being salt and light -- the qualities that make spiritual maturity visible in our relationships.',
+  cover_image_url: '/images/covers/christian-character-and-relationships-volume-3.png',
   theme_verse:
     '"By this everyone will know that you are My disciples, if you love one another." - John 13:35',
   summary_sections: [
