@@ -1016,6 +1016,28 @@ model DailyGenerated {
   @@map("daily_generated")
 }
 
+// ─── WEB PUSH SUBSCRIPTIONS (DAILY DEVOTIONAL REMINDER) ──────────────────────
+// Backs the real (OS-level, fires even while the app is fully closed) daily
+// reminder notification -- see DailyDevotionalPopup's "Get a dated reminder
+// each day" opt-in and /api/v1/push/*. One row per browser subscription
+// (anonymous or signed-in); timezone_offset_minutes + preferred_hour let the
+// hourly cron (/api/v1/push/send-daily) fire at each subscriber's own local
+// time rather than one fixed UTC hour for everyone.
+model PushSubscription {
+  id                      String    @id @default(uuid()) @db.Uuid
+  endpoint                String    @unique
+  p256dh                  String
+  auth                    String
+  timezone_offset_minutes Int       @default(0) // JS Date.getTimezoneOffset() at subscribe time
+  preferred_hour          Int       @default(8) // local hour 0-23 to send at
+  last_sent_date          String?   @db.VarChar(10) // YYYY-MM-DD, in the subscriber's local time
+  user_id                 String?   @db.Uuid
+  created_at              DateTime  @default(now()) @db.Timestamptz
+
+  @@index([preferred_hour])
+  @@map("push_subscription")
+}
+
 // ─── LIVE PRAYER MODULE ───────────────────────────────────────────────────────
 // Live Video Intercessory Prayer — Implementation Blueprint, Section 1-3.
 // Distinct from `Prayer` (private journal) and `PrayerRequest` (public Prayer

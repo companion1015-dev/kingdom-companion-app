@@ -10,13 +10,17 @@ import { localDateKey } from '@/lib/date'
 // entry served by /api/v1/daily (Claude-written reflection + real Scripture
 // text from the Bible API) -- never a static/mocked message.
 //
-// Also offers an opt-in real (OS-level) Notification, dated to the calendar
-// day, for browsers that support the Notification API while a tab is open
-// (desktop Chrome/Firefox/Edge, Android Chrome). This is a best-effort
-// reminder, not true push -- there's no backend/VAPID push infrastructure
-// wiring this to fire while the app is fully closed, and iOS Safari doesn't
-// support the plain Notification API at all, so the button hides itself
-// wherever it can't work rather than promising something it can't deliver.
+// Also offers an opt-in real Web Push subscription, dated to the calendar
+// day -- backed by worker/index.js's `push` handler and the
+// /api/v1/push/send-daily cron sender, this fires an actual OS-level
+// notification even when the app/tab is fully closed (desktop Chrome/
+// Firefox/Edge, Android Chrome; iOS needs the app installed to Home
+// Screen on iOS 16.4+). Falls back to firing an immediate in-page
+// Notification too, purely for instant feedback the moment someone opts
+// in -- the real day-to-day delivery comes from the push subscription.
+// Hides itself entirely wherever the Notification/Push/ServiceWorker APIs
+// aren't supported (e.g. non-installed iOS Safari) rather than promising
+// something it can't deliver there.
 
 const SHOWN_KEY  = 'kc_daily_popup_shown_date'
 const NOTIFY_KEY = 'kc_daily_notify_enabled'
@@ -44,6 +48,47 @@ function fireDailyNotification(entry: DailyEntry, dateLabel: string) {
   } catch { /* Notification constructor unsupported/blocked on this platform -- no-op */ }
 }
 
+// Web Push wants the VAPID public key as a raw Uint8Array, not the
+// base64url string it's stored/transmitted as.
+function urlBase64ToUint8Array(base64: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64.length % 4)) % 4)
+  const base64Safe = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const raw = atob(base64Safe)
+  const arr = new Uint8Array(raw.length)
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i)
+  return arr
+}
+
+async function subscribeToPush(): Promise<boolean> {
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  if (!vapidPublicKey || !('serviceWorker' in navigator) || !('PushManager' in window)) return false
+  try {
+    const registration = await navigator.serviceWorker.ready
+    let sub = await registration.pushManager.getSubscription()
+    if (!sub) {
+      sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
+      })
+    }
+    const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } }
+    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false
+
+    await fetch('/api/v1/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: { endpoint: json.endpoint, keys: { p256dh: json.keys.p256dh, auth: json.keys.auth } },
+        timezoneOffsetMinutes: new Date().getTimezoneOffset(),
+      }),
+    })
+    return true
+  } catch (e) {
+    console.error('[DailyDevotionalPopup] push subscribe failed:', e)
+    return false
+  }
+}
+
 export default function DailyDevotionalPopup() {
   const [entry,          setEntry]          = useState<DailyEntry | null>(null)
   const [visible,         setVisible]        = useState(false)
@@ -53,8 +98,9 @@ export default function DailyDevotionalPopup() {
 
   useEffect(() => {
     try {
-      setNotifySupported('Notification' in window)
-      setNotifyEnabled(localStorage.getItem(NOTIFY_KEY) === '1' && 'Notification' in window && Notification.permission === 'granted')
+      const supported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window
+      setNotifySupported(supported)
+      setNotifyEnabled(supported && localStorage.getItem(NOTIFY_KEY) === '1' && Notification.permission === 'granted')
     } catch { /* storage/Notification blocked -- leave both false */ }
   }, [])
 
@@ -106,11 +152,14 @@ export default function DailyDevotionalPopup() {
   const enableReminders = useCallback(async () => {
     try {
       const perm = await Notification.requestPermission()
-      if (perm === 'granted') {
-        localStorage.setItem(NOTIFY_KEY, '1')
-        setNotifyEnabled(true)
-        if (entry) fireDailyNotification(entry, formattedToday())
-      }
+      if (perm !== 'granted') return
+
+      const subscribed = await subscribeToPush()
+      if (!subscribed) return // couldn't register real push -- don't claim reminders are on
+
+      localStorage.setItem(NOTIFY_KEY, '1')
+      setNotifyEnabled(true)
+      if (entry) fireDailyNotification(entry, formattedToday())
     } catch { /* permission prompt blocked/unsupported -- leave reminders off */ }
   }, [entry])
 

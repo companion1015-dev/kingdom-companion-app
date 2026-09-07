@@ -5,6 +5,11 @@ const withPWA = require('@ducanh2912/next-pwa').default({
   reloadOnOnline: false,
   swcMinify: true,
   disable: false,
+  // worker/index.js's `push` / `notificationclick` / `pushsubscriptionchange`
+  // handlers (Daily Devotional reminder) get bundled into the generated
+  // public/sw.js from here -- "worker" is next-pwa's default already, set
+  // explicitly so it's obvious why that directory exists.
+  customWorkerSrc: 'worker',
   workboxOptions: {
     disableDevLogs: true,
     runtimeCaching: [
