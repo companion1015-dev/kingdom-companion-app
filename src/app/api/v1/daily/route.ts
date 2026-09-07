@@ -3,6 +3,7 @@ import { successResponse, serverErrorResponse } from '@/lib/api-response'
 import { prisma } from '@/lib/db/client'
 import { getChapter } from '@/modules/bible/services/bible-api'
 import { BOOKS } from '@/modules/bible/services/mock-data'
+import { FALLBACK_CONTENT } from '@/modules/daily/data/fallback-content'
 
 // GET /api/v1/daily
 // Previously served one of only 5 hardcoded entries on a day-of-year
@@ -137,14 +138,21 @@ async function generateTodayEntry(date: string) {
   }
 
   if (!reflection) {
+    // Real fix: this used to hardcode one single reflection/prayer/challenge/
+    // question, byte-identical every day regardless of date -- genuinely
+    // static content masquerading as "daily". Now picks from a pool of 30
+    // distinct, independently-written entries (fallback-content.ts) via a
+    // date-seeded hash decorrelated from the verse pick above, so even
+    // without a working AI key the content actually varies day to day.
     const ref = pickFallbackRef(date, recentKeys)
     const [b, c, v] = ref.split('.')
     bookId = b; chapter = Number(c); verse = Number(v)
-    title = 'A Word for Today'
-    reflection = 'Whatever today holds, God\'s Word meets you exactly where you are. Take a moment to sit with this verse before you move into the rest of your day.'
-    prayer = 'Lord, thank You for meeting me here today. Help me carry this truth with me. Amen.'
-    challenge = 'Return to this verse once more before the day ends.'
-    reflectionQuestion = 'What does this verse reveal about God\'s character?'
+    const content = FALLBACK_CONTENT[seededIndex(`content:${date}`, FALLBACK_CONTENT.length)]
+    title = content.title
+    reflection = content.reflection
+    prayer = content.prayer
+    challenge = content.challenge
+    reflectionQuestion = content.reflectionQuestion
   }
 
   const chapterData = await getChapter('BSB', bookId, chapter)
