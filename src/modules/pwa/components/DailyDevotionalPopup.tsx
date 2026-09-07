@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { X, Sunrise, ArrowRight } from 'lucide-react'
+import { X, Sunrise, ArrowRight, BellRing, BellOff } from 'lucide-react'
 import { localDateKey } from '@/lib/date'
 
 // Daily pop-up reminder shown once per calendar day to every visitor (signed
@@ -9,19 +9,54 @@ import { localDateKey } from '@/lib/date'
 // remember to go look for. Content is the same real, per-date-generated
 // entry served by /api/v1/daily (Claude-written reflection + real Scripture
 // text from the Bible API) -- never a static/mocked message.
+//
+// Also offers an opt-in real (OS-level) Notification, dated to the calendar
+// day, for browsers that support the Notification API while a tab is open
+// (desktop Chrome/Firefox/Edge, Android Chrome). This is a best-effort
+// reminder, not true push -- there's no backend/VAPID push infrastructure
+// wiring this to fire while the app is fully closed, and iOS Safari doesn't
+// support the plain Notification API at all, so the button hides itself
+// wherever it can't work rather than promising something it can't deliver.
 
-const SHOWN_KEY = 'kc_daily_popup_shown_date'
+const SHOWN_KEY  = 'kc_daily_popup_shown_date'
+const NOTIFY_KEY = 'kc_daily_notify_enabled'
 
 type DailyEntry = {
+  date?: string
   verse_reference: string
   verse_text: string
   title: string
 }
 
+function formattedToday(): string {
+  return new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function fireDailyNotification(entry: DailyEntry, dateLabel: string) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
+    const n = new Notification(`Today's Encouragement — ${dateLabel}`, {
+      body: `${entry.title}\n"${entry.verse_text.slice(0, 110)}${entry.verse_text.length > 110 ? '…' : ''}" — ${entry.verse_reference}`,
+      icon: '/icons/icon-192.png',
+      tag: 'kc-daily-devotional',
+    })
+    n.onclick = () => { window.focus(); window.location.href = '/daily'; n.close() }
+  } catch { /* Notification constructor unsupported/blocked on this platform -- no-op */ }
+}
+
 export default function DailyDevotionalPopup() {
-  const [entry,        setEntry]        = useState<DailyEntry | null>(null)
-  const [visible,       setVisible]      = useState(false)
-  const [installOpen,   setInstallOpen]  = useState(false)
+  const [entry,          setEntry]          = useState<DailyEntry | null>(null)
+  const [visible,         setVisible]        = useState(false)
+  const [installOpen,     setInstallOpen]    = useState(false)
+  const [notifySupported, setNotifySupported] = useState(false)
+  const [notifyEnabled,   setNotifyEnabled]   = useState(false)
+
+  useEffect(() => {
+    try {
+      setNotifySupported('Notification' in window)
+      setNotifyEnabled(localStorage.getItem(NOTIFY_KEY) === '1' && 'Notification' in window && Notification.permission === 'granted')
+    } catch { /* storage/Notification blocked -- leave both false */ }
+  }, [])
 
   useEffect(() => {
     const onOverlayChange = (e: Event) => {
@@ -61,11 +96,23 @@ export default function DailyDevotionalPopup() {
     const t = setTimeout(() => {
       setVisible(true)
       try { localStorage.setItem(SHOWN_KEY, today) } catch { /* non-fatal */ }
+      if (notifyEnabled) fireDailyNotification(entry, formattedToday())
     }, 2500)
     return () => clearTimeout(t)
-  }, [entry, installOpen])
+  }, [entry, installOpen, notifyEnabled])
 
   const dismiss = useCallback(() => setVisible(false), [])
+
+  const enableReminders = useCallback(async () => {
+    try {
+      const perm = await Notification.requestPermission()
+      if (perm === 'granted') {
+        localStorage.setItem(NOTIFY_KEY, '1')
+        setNotifyEnabled(true)
+        if (entry) fireDailyNotification(entry, formattedToday())
+      }
+    } catch { /* permission prompt blocked/unsupported -- leave reminders off */ }
+  }, [entry])
 
   if (!visible || !entry) return null
 
@@ -85,6 +132,7 @@ export default function DailyDevotionalPopup() {
             <Sunrise className="w-4 h-4" />
             <span id="daily-popup-heading" className="text-xs font-body font-medium tracking-widest uppercase">Today&rsquo;s Encouragement</span>
           </div>
+          <p className="text-white/50 font-body text-[11px] mb-2">{formattedToday()}</p>
           <p className="font-display text-lg text-white leading-snug">{entry.title}</p>
         </div>
 
@@ -109,6 +157,23 @@ export default function DailyDevotionalPopup() {
               Maybe later
             </button>
           </div>
+
+          {notifySupported && (
+            <div className="mt-4 pt-4 border-t border-navy/8 text-center">
+              {notifyEnabled ? (
+                <p className="flex items-center justify-center gap-1.5 text-xs text-navy/40 dark:text-cream/40 font-body">
+                  <BellRing className="w-3.5 h-3.5 text-gold" /> Daily reminders are on
+                </p>
+              ) : (
+                <button
+                  onClick={enableReminders}
+                  className="flex items-center justify-center gap-1.5 mx-auto text-xs text-navy/50 dark:text-cream/50 hover:text-gold font-body font-medium transition-colors"
+                >
+                  <BellOff className="w-3.5 h-3.5" /> Get a dated reminder each day
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </>
