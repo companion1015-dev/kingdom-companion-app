@@ -39,12 +39,10 @@ export default function InstallPrompt() {
       setInstalled(true); return
     }
 
-    // Track visit count
+    // Track visit count (kept for analytics/future use, no longer gates display —
+    // every visitor should see the install prompt, not just returning ones)
     const visits = parseInt(localStorage.getItem(VISIT_KEY) ?? '0') + 1
     localStorage.setItem(VISIT_KEY, String(visits))
-
-    // Don't show on first visit — wait for second visit or meaningful engagement
-    if (visits < 2) return
 
     // Check dismissal cooldown
     const dismissedAt = localStorage.getItem(DISMISSED_KEY)
@@ -100,6 +98,12 @@ export default function InstallPrompt() {
     setShowPrompt(false)
     setDismissed(true)
   }
+
+  // Let other overlays (e.g. the daily devotional popup) know this one is
+  // occupying the screen, so they don't stack on top of each other.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('kc:overlay-change', { detail: { id: 'install-prompt', open: showPrompt || showIOSGuide } }))
+  }, [showPrompt, showIOSGuide])
 
   if (!showPrompt || installed || dismissed) return null
 

@@ -137,29 +137,18 @@ export const SAMPLE_SEARCH_RESULTS: SearchResult[] = [
   { verseId:'PHP.4.13', reference:'Philippians 4:13',text:'I can do all this through him who gives me strength.',                 bookId:'PHP', bookName:'Philippians', chapterNumber:4,   verseNumber:13, translation:'NIV', matchedWords:['strength'] },
 ]
 
-// Mock chapter fetcher — returns appropriate mock data for known chapters
+// Emergency offline fallback for when the live Bible API is unreachable —
+// intentionally covers only these two real, accurately-transcribed chapters.
+// Real fix: this used to also return a "generic fallback" for any other
+// chapter, filled with fabricated placeholder text like "[Connect Bible.com
+// API to display John 3:16 (BSB)]" dressed up with a real-looking reference
+// and verse count -- that fake text was then served to readers (and even
+// fed into the Daily Encouragement pipeline) as if it were actual
+// Scripture. Any chapter that isn't one of these two curated samples now
+// correctly returns null, so callers show an honest "unable to load"
+// state instead of inventing verse text.
 export function getMockChapter(bookId: string, chapter: number, translation: string): Chapter | null {
   if (bookId === 'JHN' && chapter === 3)  return { ...JOHN_3, translation }
   if (bookId === 'PSA' && chapter === 23) return { ...PSA_23, translation }
-  
-  // Generic fallback for other chapters
-  const book = BOOKS.find(b => b.bookId === bookId)
-  if (!book || chapter < 1 || chapter > book.chapterCount) return null
-  
-  return {
-    id:            `${bookId}.${chapter}`,
-    bookId,
-    bookName:      book.name,
-    chapterNumber: chapter,
-    totalVerses:   10,
-    translation,
-    previousChapter: chapter > 1 ? { bookId, chapterNumber: chapter - 1 } : null,
-    nextChapter:   chapter < book.chapterCount ? { bookId, chapterNumber: chapter + 1 } : null,
-    verses: Array.from({ length: 10 }, (_, i) => ({
-      id:          `${bookId}.${chapter}.${i + 1}`,
-      verseNumber: i + 1,
-      reference:   `${book.name} ${chapter}:${i + 1}`,
-      text:        `[Connect Bible.com API to display ${book.name} ${chapter}:${i + 1} (${translation})]`,
-    })),
-  }
+  return null
 }

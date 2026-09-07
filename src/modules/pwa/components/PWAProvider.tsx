@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 // Dynamically import PWA components (client-only)
 const SplashScreen     = dynamic(() => import('@/modules/pwa/components/SplashScreen'),     { ssr: false })
 const InstallPrompt    = dynamic(() => import('@/modules/pwa/components/InstallPrompt'),    { ssr: false })
+const DailyDevotionalPopup = dynamic(() => import('@/modules/pwa/components/DailyDevotionalPopup'), { ssr: false })
 const SyncStatusIndicator = dynamic(() => import('@/modules/pwa/components/SyncStatusIndicator'), { ssr: false })
 
 type Props = { children: React.ReactNode }
@@ -57,6 +58,9 @@ export default function PWAProvider({ children }: Props) {
 
       {/* PWA install prompt — non-intrusive, timing controlled */}
       {splashDone && <InstallPrompt />}
+
+      {/* Daily devotional reminder — once per calendar day, for every visitor */}
+      {splashDone && <DailyDevotionalPopup />}
 
       {/* Sync status indicator — offline/syncing/synced */}
       {splashDone && <SyncStatusIndicator />}

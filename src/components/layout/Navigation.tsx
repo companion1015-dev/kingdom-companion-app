@@ -99,17 +99,27 @@ export default function Navigation() {
             </div>
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-1 flex-wrap justify-end">
-            {allNavLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-3 py-1.5 text-sm text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-md transition-all duration-200 font-body"
-              >
-                {link.label}
-              </Link>
-            ))}
+          {/* Desktop nav — nowrap + horizontal scroll so links never silently
+              overflow past the fixed-height bar and become unreachable; a
+              flex-wrap here previously let a 14-link list wrap onto a second
+              row that spilled outside the h-16/h-18 bar, effectively hiding
+              items like Daily / Devotionals depending on viewport width. */}
+          <div className="hidden lg:flex items-center gap-0.5 flex-nowrap overflow-x-auto scrollbar-hide">
+            {allNavLinks.map(link => {
+              const isDaily = link.href === '/daily'
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative shrink-0 px-2.5 py-1.5 text-[13px] text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-md transition-all duration-200 font-body whitespace-nowrap ${isDaily ? 'text-gold/90 hover:text-gold font-medium' : ''}`}
+                >
+                  {link.label}
+                  {isDaily && (
+                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
+                  )}
+                </Link>
+              )
+            })}
           </div>
 
           {/* Desktop actions */}
@@ -191,7 +201,7 @@ export default function Navigation() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
+                className={`block px-4 py-3 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm ${link.href === '/daily' ? 'text-gold/90 font-medium' : 'text-white/80'}`}
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}
