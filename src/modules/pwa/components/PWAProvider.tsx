@@ -15,6 +15,26 @@ export default function PWAProvider({ children }: Props) {
   const [isOffline,  setIsOffline]  = useState(false)
   const [showSplash, setShowSplash] = useState(false)
 
+  // Real bug found investigating "install doesn't work on mobile": this app
+  // never actually registered its own service worker. @ducanh2912/next-pwa
+  // builds a real, valid public/sw.js and injects `register: true` by
+  // default, but that auto-injection targets the Pages Router's
+  // _document.js -- this project is App Router only (src/app), so nothing
+  // ever called navigator.serviceWorker.register() and no SW was ever
+  // active. Confirmed via Chrome DevTools Protocol: manifest and
+  // installability checks both passed with zero errors, but
+  // `navigator.serviceWorker.getRegistration()` returned nothing -- a
+  // controlling service worker is required before Chrome will ever fire
+  // beforeinstallprompt, which is why "Install App" always fell through to
+  // the manual-instructions guide. Registering it directly, here, fixes
+  // that at the source rather than working around the symptom.
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+        .catch(err => console.error('[PWA] Service worker registration failed:', err))
+    }
+  }, [])
+
   useEffect(() => {
     // Only show splash on first load / PWA launch
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
