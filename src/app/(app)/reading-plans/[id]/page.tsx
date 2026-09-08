@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
-  ArrowLeft, BookOpen, Clock, ChevronDown, Calendar, Sparkles,
+  ArrowLeft, ArrowRight, BookOpen, Clock, ChevronDown, Calendar, Sparkles,
   HeartHandshake, MessageSquare, Play, Pause, Check, RotateCcw,
 } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
@@ -89,6 +89,31 @@ function libraryReadingHref(libraryReading: string | undefined): string | null {
   const slug = VOLUME_SLUGS[volumeMatch[1]]
   if (!slug) return null
   return `/books/read/${slug}/${chapterMatch[1]}`
+}
+
+// Reflection Prompt & Prayer Focus are open-ended questions/prompts, not
+// titles — the natural "take me there" destination is the AI Companion,
+// pre-filled with the prompt (same handoff pattern the homepage emotion
+// selector already uses: /companion?message=...), left for the reader to
+// review and send rather than auto-submitted.
+function reflectionHref(prompt: string): string {
+  return `/companion?message=${encodeURIComponent(`Today's reading asks: "${prompt}" Can you help me think this through?`)}`
+}
+function prayerHref(prayerFocus: string): string {
+  return `/companion?message=${encodeURIComponent(`Help me pray about this: ${prayerFocus}`)}`
+}
+
+// Action Step is a commitment, not a question — the natural destination is
+// the Prayer Journal, pre-filled so acting on it becomes an actual saved
+// entry (see /journal's compose=1 deep-link support) rather than a dead end.
+function actionHref(day: Day, actionStep: string): string {
+  const params = new URLSearchParams({
+    compose: '1',
+    title: `Day ${day.day_number}${day.title ? `: ${day.title}` : ''} — Action Step`,
+    content: actionStep,
+    tags: 'action-step,reading-plan',
+  })
+  return `/journal?${params.toString()}`
 }
 
 export default function ReadingPlanDetailPage({ params }: { params: { id: string } }) {
@@ -386,19 +411,37 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                     {parsed['Reflection Prompt'] && (
                                       <div className="flex gap-2">
                                         <MessageSquare className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
-                                        <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Reflection —</span> {parsed['Reflection Prompt']}</p>
+                                        <div>
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Reflection —</span> {parsed['Reflection Prompt']}</p>
+                                          <Link href={reflectionHref(parsed['Reflection Prompt'])}
+                                            className="inline-flex items-center gap-1 mt-1 text-[11px] font-body font-medium text-gold hover:text-gold-dark transition-colors">
+                                            Reflect with AI Companion <ArrowRight className="w-3 h-3" />
+                                          </Link>
+                                        </div>
                                       </div>
                                     )}
                                     {parsed['Prayer Focus'] && (
                                       <div className="flex gap-2">
                                         <HeartHandshake className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
-                                        <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Prayer Focus —</span> {parsed['Prayer Focus']}</p>
+                                        <div>
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Prayer Focus —</span> {parsed['Prayer Focus']}</p>
+                                          <Link href={prayerHref(parsed['Prayer Focus'])}
+                                            className="inline-flex items-center gap-1 mt-1 text-[11px] font-body font-medium text-gold hover:text-gold-dark transition-colors">
+                                            Pray this with AI Companion <ArrowRight className="w-3 h-3" />
+                                          </Link>
+                                        </div>
                                       </div>
                                     )}
                                     {parsed['Action Step'] && (
                                       <div className="flex gap-2">
                                         <Sparkles className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
-                                        <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Action Step —</span> {parsed['Action Step']}</p>
+                                        <div>
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Action Step —</span> {parsed['Action Step']}</p>
+                                          <Link href={actionHref(day, parsed['Action Step'])}
+                                            className="inline-flex items-center gap-1 mt-1 text-[11px] font-body font-medium text-gold hover:text-gold-dark transition-colors">
+                                            Save as a commitment <ArrowRight className="w-3 h-3" />
+                                          </Link>
+                                        </div>
                                       </div>
                                     )}
                                     <div className="flex flex-wrap gap-1.5 pt-1">

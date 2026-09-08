@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { BookHeart, Plus, Search, Tag, CheckCircle2, Archive, Trash2, X } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
@@ -9,6 +10,12 @@ import Footer from '@/components/layout/Footer'
 // to the calling user only (see /api/v1/journal routes). There is no
 // visibility setting on this feature because there is no code path that
 // exposes it to anyone else — see Constitution §7 and DSD §2.12's binding note.
+//
+// Deep-link prefill: /journal?compose=1&title=&content=&category=&tags=&scripture=
+// opens the composer pre-filled — used by the Reading Plan day view's
+// "Action Step" link, so committing to an action becomes an actual saved
+// entry instead of a dead end. The composer still requires the user to
+// review and hit Save; nothing is written on their behalf automatically.
 
 type Prayer = {
   id: string
@@ -27,6 +34,8 @@ type StatusFilter = 'active' | 'answered' | 'archived' | 'all'
 
 const CATEGORIES = ['Thanksgiving', 'Intercession', 'Personal', 'Family', 'Church', 'Healing', 'Guidance', 'Other']
 
+type ComposerInitial = { title?: string; content?: string; category?: string; tags?: string; scriptureRef?: string }
+
 export default function JournalPage() {
   const [prayers,  setPrayers]  = useState<Prayer[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -34,7 +43,23 @@ export default function JournalPage() {
   const [status,   setStatus]   = useState<StatusFilter>('active')
   const [search,   setSearch]   = useState('')
   const [composerOpen, setComposerOpen] = useState(false)
+  const [composerInitial, setComposerInitial] = useState<ComposerInitial | undefined>(undefined)
   const [toast, setToast] = useState<string | null>(null)
+
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    if (searchParams.get('compose') !== '1') return
+    setComposerInitial({
+      title:        searchParams.get('title')      ?? undefined,
+      content:      searchParams.get('content')    ?? undefined,
+      category:     searchParams.get('category')   ?? undefined,
+      tags:         searchParams.get('tags')       ?? undefined,
+      scriptureRef: searchParams.get('scripture')  ?? undefined,
+    })
+    setComposerOpen(true)
+    window.history.replaceState({}, '', window.location.pathname)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500) }
 
@@ -222,8 +247,9 @@ export default function JournalPage() {
 
       {composerOpen && (
         <PrayerComposer
-          onClose={() => setComposerOpen(false)}
-          onSaved={() => { setComposerOpen(false); showToast('Prayer saved.'); load() }}
+          initial={composerInitial}
+          onClose={() => { setComposerOpen(false); setComposerInitial(undefined) }}
+          onSaved={() => { setComposerOpen(false); setComposerInitial(undefined); showToast('Prayer saved.'); load() }}
         />
       )}
 
@@ -238,12 +264,12 @@ export default function JournalPage() {
   )
 }
 
-function PrayerComposer({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
-  const [title,   setTitle]   = useState('')
-  const [content, setContent] = useState('')
-  const [category,setCategory]= useState('')
-  const [tags,    setTags]    = useState('')
-  const [scriptureRef, setScriptureRef] = useState('')
+function PrayerComposer({ initial, onClose, onSaved }: { initial?: ComposerInitial; onClose: () => void; onSaved: () => void }) {
+  const [title,   setTitle]   = useState(initial?.title ?? '')
+  const [content, setContent] = useState(initial?.content ?? '')
+  const [category,setCategory]= useState(initial?.category ?? '')
+  const [tags,    setTags]    = useState(initial?.tags ?? '')
+  const [scriptureRef, setScriptureRef] = useState(initial?.scriptureRef ?? '')
   const [saving,  setSaving]  = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
