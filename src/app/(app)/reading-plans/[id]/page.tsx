@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
   ArrowLeft, BookOpen, Clock, ChevronDown, Calendar, Sparkles,
   HeartHandshake, MessageSquare, Play, Pause, Check, RotateCcw,
@@ -190,6 +191,17 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
   useEffect(() => {
     if (todayRef.current) todayRef.current.scrollIntoView({ block: 'center' })
   }, [openPhase])
+
+  // Deep link support: /reading-plans/{id}?day=today auto-expands today's
+  // entry (used by the homepage "Read today's full devotional" CTA), so
+  // landing here shows the day's full write-up immediately rather than
+  // requiring an extra click to expand it.
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    if (searchParams.get('day') !== 'today' || parsedByDay.size === 0) return
+    const todays = (plan?.days ?? []).find(d => isoDateFrom(parsedByDay.get(d.id)?.Date) === todayKey)
+    if (todays) setOpenDays(prev => new Set(prev).add(todays.id))
+  }, [searchParams, plan, parsedByDay, todayKey])
 
   const toggleDay = (id: string) => {
     setOpenDays(prev => {

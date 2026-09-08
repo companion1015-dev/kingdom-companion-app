@@ -10,6 +10,14 @@ import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
 // which generates genuinely fresh content once per calendar day via Claude
 // (with real Scripture text fetched separately, never AI-fabricated) and
 // caches it -- true daily variation, not a static mock.
+//
+// The "Read today's full devotional" CTA below now redirects into today's
+// actual day inside the real Integrated 365-Day Reading Journey (Bible +
+// Discipleship Library + reflection + prayer + action step, all for this
+// exact calendar date) instead of just the shorter /daily page -- that
+// reading plan day is the genuinely "full" devotional now that it exists,
+// not a second, separate destination. Falls back to /daily if no published
+// reading plan is available, so the link is never dead.
 
 type DailyEntry = {
   date?: string
@@ -27,6 +35,7 @@ type DailyEntry = {
 export default function DailyEncouragementSection() {
   const [entry,   setEntry]   = useState<DailyEntry | null>(null)
   const [loading, setLoading] = useState(true)
+  const [fullHref, setFullHref] = useState('/daily')
 
   useEffect(() => {
     fetch(`/api/v1/daily?local_date=${localDateKey()}`)
@@ -34,6 +43,16 @@ export default function DailyEncouragementSection() {
       .then(res => { if (res.success) setEntry(res.data) })
       .catch(() => { /* card just won't render below -- not critical to page load */ })
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/v1/reading-plans')
+      .then(r => r.json())
+      .then(body => {
+        if (!body.success || !body.data?.length) return
+        setFullHref(`/reading-plans/${body.data[0].id}?day=today`)
+      })
+      .catch(() => { /* keep the /daily fallback */ })
   }, [])
 
   const todayLabel = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -121,7 +140,7 @@ export default function DailyEncouragementSection() {
 
               {/* CTA */}
               <Link
-                href="/daily"
+                href={fullHref}
                 className="inline-flex items-center gap-2 text-gold hover:text-gold-light font-body text-sm font-medium transition-colors group"
               >
                 Read today&rsquo;s full devotional
