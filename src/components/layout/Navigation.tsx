@@ -44,6 +44,18 @@ export default function Navigation() {
   const [accountOpen, setAccountOpen] = useState(false)
   const [openMenu,    setOpenMenu]    = useState<string | null>(null)
   const [canInstall,  setCanInstall]  = useState(false)
+  // Mobile-only accordion state for the "Grow" / "Community" groups -- these
+  // previously rendered as a plain, non-interactive label with the group's
+  // links always shown beneath it, which looked like a dropdown but had no
+  // tap behaviour at all. Now a real toggle, collapsed by default.
+  const [openMobileGroups, setOpenMobileGroups] = useState<Set<string>>(new Set())
+  const toggleMobileGroup = (label: string) => {
+    setOpenMobileGroups(prev => {
+      const next = new Set(prev)
+      next.has(label) ? next.delete(label) : next.add(label)
+      return next
+    })
+  }
   const accountRef = useRef<HTMLDivElement>(null)
   const menuRefs   = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -269,8 +281,15 @@ export default function Navigation() {
               </Link>
             ) : (
               <div key={entry.label} className="pt-2">
-                <p className="px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 tracking-widest uppercase">{entry.label}</p>
-                {entry.items.map(item => (
+                <button
+                  onClick={() => toggleMobileGroup(entry.label)}
+                  aria-expanded={openMobileGroups.has(entry.label)}
+                  className="w-full flex items-center justify-between px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 hover:text-white/60 tracking-widest uppercase transition-colors"
+                >
+                  {entry.label}
+                  <ChevronDown className={`w-3 h-3 transition-transform ${openMobileGroups.has(entry.label) ? 'rotate-180' : ''}`} />
+                </button>
+                {openMobileGroups.has(entry.label) && entry.items.map(item => (
                   <Link
                     key={item.href}
                     href={item.href}
