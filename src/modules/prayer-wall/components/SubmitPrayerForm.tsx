@@ -113,7 +113,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                 <input
                   value={title} onChange={e => setTitle(e.target.value)} maxLength={100}
                   placeholder="A short title for your prayer request…"
-                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 bg-white dark:bg-navy-dark text-navy dark:text-cream placeholder-charcoal/30 dark:placeholder-cream/30 font-body text-sm outline-none transition-all"
                 />
                 <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1 text-right">{title.length}/100</p>
               </div>
@@ -142,7 +142,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                 <textarea
                   value={content} onChange={e => setContent(e.target.value)} rows={5} maxLength={2000}
                   placeholder="Share what you'd like the community to pray with you about… Be as specific as you feel comfortable."
-                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm outline-none resize-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 bg-white dark:bg-navy-dark text-navy dark:text-cream placeholder-charcoal/30 dark:placeholder-cream/30 font-body text-sm outline-none resize-none transition-all"
                   style={{ caretColor: '#C9A84C' }}
                 />
                 <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1 text-right">{content.length}/2000</p>
@@ -237,7 +237,7 @@ export default function SubmitPrayerForm({ onClose, onSuccess }: Props) {
                   <input
                     value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={50}
                     placeholder="How should we show your name? (e.g. Sarah M.)"
-                    className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 text-navy dark:text-cream font-body text-sm outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-navy/12 focus:border-gold/40 bg-white dark:bg-navy-dark text-navy dark:text-cream placeholder-charcoal/30 dark:placeholder-cream/30 font-body text-sm outline-none transition-all"
                   />
                 </div>
               )}
