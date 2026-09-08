@@ -3,13 +3,24 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, Search, User, LogOut, ChevronDown, LayoutDashboard, Shield } from 'lucide-react'
-import { navLinks, authNavLinks } from '@/data/mock'
+import {
+  Menu, X, Search, User, LogOut, ChevronDown, LayoutDashboard, Shield,
+  NotebookPen, UserPlus, Download,
+} from 'lucide-react'
+import { navMenu, authNavLinks, type NavEntry } from '@/data/mock'
 
 // Real fix: this previously always showed a hardcoded "Sign in" button and
 // never included Prayer Journal / Invite Friends / My Profile conditionally
 // -- every signed-in user still saw "Sign in" regardless, and every signed-
 // out visitor saw links that just led straight to a "please sign in" wall.
+//
+// Redesign: the old bar rendered all 14 top-level pages as one flat,
+// horizontally-scrolling row (plus 4 more appended for signed-in users),
+// which silently overflowed the fixed-height bar on real-world viewports.
+// Replaced with a standard grouped nav -- a handful of primary links plus
+// two labelled dropdown menus ("Grow", "Community") -- and moved the
+// signed-in-only pages (Prayer Journal, Invite Friends) into the account
+// dropdown instead of duplicating them in the main row.
 
 export default function Navigation() {
   const router = useRouter()
@@ -31,7 +42,10 @@ export default function Navigation() {
   const [isAdmin,     setIsAdmin]     = useState(false)
   const [displayName, setDisplayName] = useState('')
   const [accountOpen, setAccountOpen] = useState(false)
+  const [openMenu,    setOpenMenu]    = useState<string | null>(null)
+  const [canInstall,  setCanInstall]  = useState(false)
   const accountRef = useRef<HTMLDivElement>(null)
+  const menuRefs   = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -53,20 +67,57 @@ export default function Navigation() {
       .catch(() => { /* stay signed-out on any network failure */ })
   }, [])
 
+  // Show a persistent "Install App" entry whenever the PWA is installable
+  // and not already installed -- a quick, always-available way to install
+  // rather than relying only on the once-in-a-while auto popup.
+  useEffect(() => {
+    try {
+      const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as { standalone?: boolean }).standalone === true
+      const installed = standalone || localStorage.getItem('bc_installed') === '1'
+      if (installed) { setCanInstall(false); return }
+
+      // iOS never fires beforeinstallprompt but always supports the manual
+      // "Add to Home Screen" guide, so the button can show immediately.
+      // Desktop/Android only show it once the browser actually confirms
+      // installability via beforeinstallprompt.
+      const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      setCanInstall(ios)
+
+      const onInstallable = () => setCanInstall(true)
+      const onInstalled   = () => setCanInstall(false)
+      window.addEventListener('beforeinstallprompt', onInstallable)
+      window.addEventListener('appinstalled', onInstalled)
+      return () => {
+        window.removeEventListener('beforeinstallprompt', onInstallable)
+        window.removeEventListener('appinstalled', onInstalled)
+      }
+    } catch { /* storage/matchMedia blocked -- leave hidden */ }
+  }, [])
+
+  const requestInstall = () => {
+    window.dispatchEvent(new CustomEvent('kc:request-install'))
+  }
+
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (accountRef.current && !accountRef.current.contains(e.target as Node)) setAccountOpen(false)
+      if (openMenu && !menuRefs.current[openMenu]?.contains(e.target as Node)) setOpenMenu(null)
     }
     document.addEventListener('mousedown', onClick)
     return () => document.removeEventListener('mousedown', onClick)
+  }, [openMenu])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { setOpenMenu(null); setAccountOpen(false) } }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
   }, [])
 
   const handleLogout = async () => {
     await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
     window.location.href = '/'
   }
-
-  const allNavLinks = authed ? [...navLinks, ...authNavLinks] : navLinks
 
   const navBg = scrolled
     ? 'bg-navy/95 backdrop-blur-md shadow-lg shadow-navy-dark/40'
@@ -99,27 +150,19 @@ export default function Navigation() {
             </div>
           </Link>
 
-          {/* Desktop nav — nowrap + horizontal scroll so links never silently
-              overflow past the fixed-height bar and become unreachable; a
-              flex-wrap here previously let a 14-link list wrap onto a second
-              row that spilled outside the h-16/h-18 bar, effectively hiding
-              items like Daily / Devotionals depending on viewport width. */}
-          <div className="hidden lg:flex items-center gap-0.5 flex-nowrap overflow-x-auto scrollbar-hide">
-            {allNavLinks.map(link => {
-              const isDaily = link.href === '/daily'
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative shrink-0 px-2.5 py-1.5 text-[13px] text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-md transition-all duration-200 font-body whitespace-nowrap ${isDaily ? 'text-gold/90 hover:text-gold font-medium' : ''}`}
-                >
-                  {link.label}
-                  {isDaily && (
-                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
-                  )}
-                </Link>
-              )
-            })}
+          {/* Desktop nav — a handful of primary links plus two grouped
+              dropdown menus, so the bar never overflows regardless of how
+              many pages the app has. */}
+          <div className="hidden lg:flex items-center gap-0.5">
+            {navMenu.map(entry => (
+              <NavMenuItem
+                key={entry.label}
+                entry={entry}
+                open={openMenu === entry.label}
+                setOpen={open => setOpenMenu(open ? entry.label : null)}
+                setRef={el => { menuRefs.current[entry.label] = el }}
+              />
+            ))}
           </div>
 
           {/* Desktop actions */}
@@ -127,6 +170,15 @@ export default function Navigation() {
             <button aria-label="Search" onClick={goToSearch} className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8 dark:bg-navy-dark">
               <Search className="w-4 h-4" />
             </button>
+
+            {canInstall && (
+              <button
+                onClick={requestInstall}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gold/90 hover:text-gold bg-gold/10 hover:bg-gold/15 border border-gold/25 rounded-full transition-all"
+              >
+                <Download className="w-3.5 h-3.5" /> Install App
+              </button>
+            )}
 
             {authed ? (
               <div className="relative" ref={accountRef}>
@@ -139,13 +191,21 @@ export default function Navigation() {
                   <ChevronDown className={`w-3 h-3 transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {accountOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-navy-dark rounded-xl shadow-xl shadow-navy/15 border border-navy/8 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-navy-dark rounded-xl shadow-xl shadow-navy/15 border border-navy/8 overflow-hidden">
                     <Link href="/dashboard" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
                       <LayoutDashboard className="w-3.5 h-3.5" /> My Dashboard
                     </Link>
-                    <Link href="/profile" onClick={() => setAccountOpen(false)}
+                    <Link href="/journal" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
+                      <NotebookPen className="w-3.5 h-3.5" /> Prayer Journal
+                    </Link>
+                    <Link href="/invite" onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
+                      <UserPlus className="w-3.5 h-3.5" /> Invite Friends
+                    </Link>
+                    <Link href="/profile" onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body border-t border-navy/8">
                       <User className="w-3.5 h-3.5" /> My Profile
                     </Link>
                     {isAdmin && (
@@ -155,7 +215,7 @@ export default function Navigation() {
                       </Link>
                     )}
                     <button onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-body text-left">
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-body text-left border-t border-navy/8">
                       <LogOut className="w-3.5 h-3.5" /> Sign Out
                     </button>
                   </div>
@@ -185,7 +245,7 @@ export default function Navigation() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="lg:hidden bg-navy-dark/98 backdrop-blur-md border-t border-white/10">
+        <div className="lg:hidden bg-navy-dark/98 backdrop-blur-md border-t border-white/10 max-h-[calc(100vh-4rem)] overflow-y-auto">
           {/* Mobile logo strip */}
           <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-white/8">
             <div className="relative w-9 h-9 rounded-lg overflow-hidden">
@@ -196,17 +256,42 @@ export default function Navigation() {
               <p className="text-gold/60 text-[9px] tracking-widest uppercase font-body">Rooted in Truth · Built for Life</p>
             </div>
           </div>
+
           <div className="px-4 py-3 space-y-1">
-            {allNavLinks.map(link => (
+            {navMenu.map(entry => 'href' in entry ? (
               <Link
-                key={link.href}
-                href={link.href}
-                className={`block px-4 py-3 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm ${link.href === '/daily' ? 'text-gold/90 font-medium' : 'text-white/80'}`}
+                key={entry.href}
+                href={entry.href}
+                className={`block px-4 py-3 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm ${entry.href === '/daily' ? 'text-gold/90 font-medium' : 'text-white/80'}`}
                 onClick={() => setMenuOpen(false)}
               >
-                {link.label}
+                {entry.label}
               </Link>
+            ) : (
+              <div key={entry.label} className="pt-2">
+                <p className="px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 tracking-widest uppercase">{entry.label}</p>
+                {entry.items.map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
             ))}
+
+            {canInstall && (
+              <button
+                onClick={() => { setMenuOpen(false); requestInstall() }}
+                className="flex items-center gap-2 w-full px-4 py-3 text-gold/90 hover:text-gold hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm font-medium"
+              >
+                <Download className="w-4 h-4" /> Install App
+              </button>
+            )}
+
             {isAdmin && (
               <Link
                 href="/admin"
@@ -216,6 +301,23 @@ export default function Navigation() {
                 <Shield className="w-4 h-4" /> Admin Dashboard
               </Link>
             )}
+
+            {authed && (
+              <div className="pt-2">
+                <p className="px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 tracking-widest uppercase">Account</p>
+                {authNavLinks.map(link => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <div className="pt-3 border-t border-white/10">
               {authed ? (
                 <button
@@ -238,5 +340,59 @@ export default function Navigation() {
         </div>
       )}
     </nav>
+  )
+}
+
+function NavMenuItem({
+  entry, open, setOpen, setRef,
+}: {
+  entry: NavEntry
+  open: boolean
+  setOpen: (open: boolean) => void
+  setRef: (el: HTMLDivElement | null) => void
+}) {
+  if ('href' in entry) {
+    const isDaily = entry.href === '/daily'
+    return (
+      <Link
+        href={entry.href}
+        className={`relative shrink-0 px-2.5 py-1.5 text-[13px] text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-md transition-all duration-200 font-body whitespace-nowrap ${isDaily ? 'text-gold/90 hover:text-gold font-medium' : ''}`}
+      >
+        {entry.label}
+        {isDaily && (
+          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
+        )}
+      </Link>
+    )
+  }
+
+  return (
+    <div className="relative shrink-0" ref={setRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className={`flex items-center gap-1 px-2.5 py-1.5 text-[13px] rounded-md transition-all duration-200 font-body whitespace-nowrap ${open ? 'text-white bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark'}`}
+      >
+        {entry.label}
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-navy-dark rounded-xl shadow-xl shadow-navy/20 border border-navy/8 overflow-hidden py-1.5">
+          {entry.items.map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className="block px-4 py-2.5 hover:bg-navy/4 transition-colors group/item"
+            >
+              <span className="block text-sm font-body font-medium text-navy dark:text-cream group-hover/item:text-gold-dark transition-colors">{item.label}</span>
+              {item.description && (
+                <span className="block text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5">{item.description}</span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

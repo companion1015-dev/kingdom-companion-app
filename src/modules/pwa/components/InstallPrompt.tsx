@@ -30,6 +30,7 @@ export default function InstallPrompt() {
   const [deferredEvt,  setDeferredEvt]  = useState<Event | null>(null)
   const [showPrompt,   setShowPrompt]   = useState(false)
   const [showIOSGuide, setShowIOSGuide] = useState(false)
+  const [showManualGuide, setShowManualGuide] = useState(false)
   const [installed,    setInstalled]    = useState(false)
   const [dismissed,    setDismissed]    = useState(false)
 
@@ -77,12 +78,32 @@ export default function InstallPrompt() {
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
+  // Lets the nav bar's always-available "Install App" button open this same
+  // flow on demand, bypassing the dismissal cooldown -- a deliberate click
+  // shouldn't be blocked by "you dismissed this 12 days ago".
+  useEffect(() => {
+    const onRequest = () => {
+      if (installed) return
+      setDismissed(false)
+      if (!platform) setPlatform(detectPlatform())
+      setShowPrompt(true)
+    }
+    window.addEventListener('kc:request-install', onRequest)
+    return () => window.removeEventListener('kc:request-install', onRequest)
+  }, [installed, platform])
+
   const handleInstall = useCallback(async () => {
     if (platform === 'ios') {
       setShowIOSGuide(true)
       return
     }
-    if (!deferredEvt) return
+    if (!deferredEvt) {
+      // No captured beforeinstallprompt yet (Firefox, or the browser hasn't
+      // fired it) -- give real instructions instead of silently doing
+      // nothing when someone explicitly asked to install.
+      setShowManualGuide(true)
+      return
+    }
     const promptEvent = deferredEvt as unknown as { prompt: () => void; userChoice: Promise<{ outcome: string }> }
     promptEvent.prompt()
     const { outcome } = await promptEvent.userChoice
@@ -102,8 +123,8 @@ export default function InstallPrompt() {
   // Let other overlays (e.g. the daily devotional popup) know this one is
   // occupying the screen, so they don't stack on top of each other.
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent('kc:overlay-change', { detail: { id: 'install-prompt', open: showPrompt || showIOSGuide } }))
-  }, [showPrompt, showIOSGuide])
+    window.dispatchEvent(new CustomEvent('kc:overlay-change', { detail: { id: 'install-prompt', open: showPrompt || showIOSGuide || showManualGuide } }))
+  }, [showPrompt, showIOSGuide, showManualGuide])
 
   if (!showPrompt || installed || dismissed) return null
 
@@ -142,6 +163,41 @@ export default function InstallPrompt() {
           ))}
           <button onClick={() => setShowIOSGuide(false)} className="w-full py-3.5 bg-navy text-white text-sm font-body font-medium rounded-2xl">
             Got it — I&rsquo;ll do it now
+          </button>
+        </div>
+      </>
+    )
+  }
+
+  // Manual guide — browsers that don't expose beforeinstallprompt (Firefox
+  // desktop) or haven't fired it yet. Points to the real, browser-native
+  // install affordance instead of pretending a one-click install exists.
+  if (showManualGuide) {
+    return (
+      <>
+        <div className="fixed inset-0 z-40 bg-navy/40 backdrop-blur-sm" onClick={() => setShowManualGuide(false)} />
+        <div className="fixed bottom-0 left-0 right-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-sm sm:w-full z-50 bg-white dark:bg-navy-dark rounded-t-3xl sm:rounded-3xl shadow-2xl shadow-navy/30 p-6 pb-10 sm:pb-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-display text-xl font-semibold text-navy dark:text-cream">Install Kingdom Companion</h2>
+            <button onClick={() => setShowManualGuide(false)} className="p-2 text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream rounded-lg"><X className="w-5 h-5" /></button>
+          </div>
+          <p className="text-sm text-charcoal/55 dark:text-cream/55 font-body mb-5 leading-relaxed">
+            Your browser hasn&rsquo;t offered a one-click install yet. You can still add Kingdom Companion to your device:
+          </p>
+          <div className="flex gap-4 mb-4">
+            <div className="w-9 h-9 rounded-full bg-navy/8 flex items-center justify-center shrink-0"><Download className="w-4 h-4 text-gold" /></div>
+            <p className="text-sm font-body text-charcoal/65 dark:text-cream/65 leading-relaxed">
+              Chrome / Edge: look for the <strong>install icon</strong> in the address bar, or open the browser menu (⋮) and choose <strong>&ldquo;Install Kingdom Companion&rdquo;</strong>.
+            </p>
+          </div>
+          <div className="flex gap-4 mb-6">
+            <div className="w-9 h-9 rounded-full bg-navy/8 flex items-center justify-center shrink-0"><Plus className="w-4 h-4 text-navy dark:text-cream" /></div>
+            <p className="text-sm font-body text-charcoal/65 dark:text-cream/65 leading-relaxed">
+              Firefox / other browsers: open the menu and choose <strong>&ldquo;Add to Home Screen&rdquo;</strong> or <strong>&ldquo;Install Site as App&rdquo;</strong>.
+            </p>
+          </div>
+          <button onClick={() => setShowManualGuide(false)} className="w-full py-3.5 bg-navy text-white text-sm font-body font-medium rounded-2xl">
+            Got it
           </button>
         </div>
       </>

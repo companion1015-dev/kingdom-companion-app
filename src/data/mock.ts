@@ -73,6 +73,10 @@ export const readingPlans = [
   { id: 'life-of-jesus',  title: 'Life of Jesus',        duration: '40 days',  category: 'Gospels',         progress: 0 },
 ]
 
+// Flat list kept for anything that still wants "every top-level page" (e.g.
+// a sitemap) -- the nav bar itself now renders navMenu below, which groups
+// the same destinations into a professional grouped/dropdown structure
+// instead of one 14-item row that silently overflowed the fixed-height bar.
 export const navLinks = [
   { label: 'Home',             href: '/' },
   { label: 'Bible',            href: '/bible' },
@@ -90,9 +94,43 @@ export const navLinks = [
   { label: 'About',            href: '/about' },
 ]
 
-// Shown only to signed-in users -- previously mixed into navLinks above and
-// shown to everyone regardless of auth state, even though every one of
-// these leads straight to a "please sign in" wall for anonymous visitors.
+export type NavLink  = { label: string; href: string; description?: string }
+export type NavEntry = NavLink | { label: string; items: NavLink[] }
+
+// Grouped nav structure — a handful of primary destinations shown directly,
+// with related pages folded into two dropdown menus ("Grow", "Community")
+// rather than one long flat row. This is what Navigation.tsx renders.
+export const navMenu: NavEntry[] = [
+  { label: 'Home',      href: '/' },
+  { label: 'Bible',     href: '/bible' },
+  { label: 'Daily',     href: '/daily' },
+  { label: 'Companion', href: '/companion' },
+  {
+    label: 'Grow',
+    items: [
+      { label: 'Devotionals',   href: '/devotionals',    description: 'Guided daily devotional series' },
+      { label: 'Reading Plans', href: '/reading-plans',  description: 'Structured Bible reading plans' },
+      { label: 'Library',      href: '/books',           description: 'Discipleship books & studies' },
+      { label: 'Study',        href: '/study',           description: 'In-depth study tools' },
+      { label: 'Topics',       href: '/topics',          description: 'Scripture organised by topic' },
+    ],
+  },
+  {
+    label: 'Community',
+    items: [
+      { label: 'Prayer Wall', href: '/prayer-wall', description: 'Share and pray for requests' },
+      { label: 'Live Prayer', href: '/prayer-live', description: 'Join a live prayer room' },
+      { label: 'Blog',        href: '/blog',         description: 'Articles and resources' },
+    ],
+  },
+  { label: 'Give',  href: '/support' },
+  { label: 'About', href: '/about' },
+]
+
+// Shown only to signed-in users, inside the account dropdown -- previously
+// mixed into navLinks above and shown to everyone regardless of auth state,
+// even though every one of these leads straight to a "please sign in" wall
+// for anonymous visitors.
 export const authNavLinks = [
   { label: 'My Dashboard',     href: '/dashboard' },
   { label: 'Prayer Journal',   href: '/journal' },

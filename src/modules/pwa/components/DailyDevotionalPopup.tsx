@@ -113,6 +113,13 @@ export default function DailyDevotionalPopup() {
     return () => window.removeEventListener('kc:overlay-change', onOverlayChange)
   }, [])
 
+  // The install prompt can also now be opened on demand (the nav bar's
+  // "Install App" button), possibly after this popup is already on screen
+  // -- close this one so the two never stack.
+  useEffect(() => {
+    if (installOpen) setVisible(false)
+  }, [installOpen])
+
   useEffect(() => {
     const today = localDateKey()
     let alreadyShownToday = false
