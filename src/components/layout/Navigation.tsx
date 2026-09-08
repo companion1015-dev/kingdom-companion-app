@@ -89,12 +89,18 @@ export default function Navigation() {
       const installed = standalone || localStorage.getItem('bc_installed') === '1'
       if (installed) { setCanInstall(false); return }
 
-      // iOS never fires beforeinstallprompt but always supports the manual
-      // "Add to Home Screen" guide, so the button can show immediately.
-      // Desktop/Android only show it once the browser actually confirms
-      // installability via beforeinstallprompt.
-      const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      setCanInstall(ios)
+      // Real fix: this previously only showed the button on iOS immediately,
+      // and on every other platform (including Android) waited for the
+      // browser to actually fire beforeinstallprompt first. Chrome only
+      // fires that event once its own engagement heuristic is satisfied --
+      // which can take a while, or not happen in a short session at all --
+      // so on Android the button (and the whole install feature) could
+      // appear to simply not exist on mobile. Any mobile browser now shows
+      // the button immediately; the tap handler already falls back to a
+      // real manual-install guide when no beforeinstallprompt has fired
+      // yet (see InstallPrompt.tsx), so it's never a dead end.
+      const mobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent)
+      setCanInstall(mobile)
 
       const onInstallable = () => setCanInstall(true)
       const onInstalled   = () => setCanInstall(false)

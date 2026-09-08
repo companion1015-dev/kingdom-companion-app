@@ -63,8 +63,17 @@ export default function InstallPrompt() {
     }
     window.addEventListener('beforeinstallprompt', handler)
 
-    // For iOS — show custom guide after delay
-    if (plt === 'ios') {
+    // Real fix: this previously only auto-showed unconditionally on iOS.
+    // On Android (and every other mobile browser), it depended entirely on
+    // beforeinstallprompt firing first -- which needs Chrome's own
+    // engagement heuristic to be satisfied first, and simply never fires
+    // on non-Chrome mobile browsers at all. In both cases the popup could
+    // silently never appear on mobile. Any mobile browser now gets the
+    // same unconditional timer as iOS; handleInstall already falls back to
+    // deferredEvt when available or the manual guide when it isn't, so
+    // this is never a dead end regardless of which path fired.
+    const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent)
+    if (isMobile) {
       setTimeout(() => setShowPrompt(true), 3000)
     }
 
