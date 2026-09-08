@@ -69,6 +69,28 @@ function isoDateFrom(dateLabel: string | undefined): string | null {
   return m ? m[1] : null
 }
 
+// Maps the plan's "Volume N" label to the real Discipleship Library book
+// slug (see prisma/seed-discipleship-library*.mjs) so "Library Reading —
+// Volume 1 — Chapter 1: The Gospel — Study day 1 of 6" can link straight
+// to that exact chapter at /books/read/{slug}/{chapterNumber}. Integration
+// days reference "Volumes 1–3" (no single chapter) and correctly produce
+// no link — nothing invented for a reading that isn't one specific chapter.
+const VOLUME_SLUGS: Record<string, string> = {
+  '1': 'salvation-and-new-life-volume-1',
+  '2': 'spiritual-growth-and-christian-living-volume-2',
+  '3': 'christian-character-and-relationships-volume-3',
+}
+
+function libraryReadingHref(libraryReading: string | undefined): string | null {
+  if (!libraryReading) return null
+  const volumeMatch  = libraryReading.match(/Volume (\d)\b/)
+  const chapterMatch = libraryReading.match(/Chapter (\d+)/)
+  if (!volumeMatch || !chapterMatch) return null
+  const slug = VOLUME_SLUGS[volumeMatch[1]]
+  if (!slug) return null
+  return `/books/read/${slug}/${chapterMatch[1]}`
+}
+
 export default function ReadingPlanDetailPage({ params }: { params: { id: string } }) {
   const [plan,     setPlan]     = useState<PlanDetail | null>(null)
   const [loading,  setLoading]  = useState(true)
@@ -345,12 +367,22 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
 
                                 {dayOpen && (
                                   <div className="px-5 pb-4 pl-[3.25rem] space-y-3">
-                                    {parsed['Library Reading'] && (
-                                      <div className="flex gap-2">
-                                        <BookOpen className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
-                                        <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Library Reading —</span> {parsed['Library Reading']}</p>
-                                      </div>
-                                    )}
+                                    {parsed['Library Reading'] && (() => {
+                                      const href = libraryReadingHref(parsed['Library Reading'])
+                                      return (
+                                        <div className="flex gap-2">
+                                          <BookOpen className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed">
+                                            <span className="font-medium text-navy/70 dark:text-cream/70">Library Reading —</span>{' '}
+                                            {href ? (
+                                              <Link href={href} className="text-navy dark:text-cream underline decoration-navy/25 hover:decoration-gold hover:text-gold-dark transition-colors">
+                                                {parsed['Library Reading']}
+                                              </Link>
+                                            ) : parsed['Library Reading']}
+                                          </p>
+                                        </div>
+                                      )
+                                    })()}
                                     {parsed['Reflection Prompt'] && (
                                       <div className="flex gap-2">
                                         <MessageSquare className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
