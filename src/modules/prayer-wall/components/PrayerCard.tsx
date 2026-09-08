@@ -62,16 +62,26 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
     if (prayed) return
     setLoading('pray')
     const ok = await prayForRequest(prayer.id)
-    if (ok) { setPrayed(true); setPrayCount(c => c + 1); showToast('🙏 Praying with you') }
+    if (ok) {
+      setPrayed(true)
+      setPrayCount(c => c + 1)
+      showToast('🙏 Praying with you')
+      onUpdate?.(prayer.id, { prayer_count: prayCount + 1, has_prayed: true })
+    } else {
+      showToast('Could not record your prayer. Please try again.')
+    }
     setLoading(null)
-    onUpdate?.(prayer.id, { prayer_count: prayCount + 1, has_prayed: true })
   }
 
   const handleSave = async () => {
     setLoading('save')
-    await savePrayer(prayer.id)
-    setSaved(s => !s)
-    showToast(saved ? 'Removed from saved' : '🔖 Saved for prayer')
+    const ok = await savePrayer(prayer.id)
+    if (ok) {
+      setSaved(s => !s)
+      showToast(saved ? 'Removed from saved' : '🔖 Saved for prayer')
+    } else {
+      showToast('Could not save this prayer. Please try again.')
+    }
     setLoading(null)
   }
 
@@ -80,6 +90,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
     setLoading('enc')
     const ok = await sendEncouragement(prayer.id, 'encouragement', encText)
     if (ok) { setEncText(''); setShowEnc(false); showToast('❤️ Encouragement sent') }
+    else showToast('Could not send your encouragement. Please try again.')
     setLoading(null)
   }
 
@@ -88,6 +99,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
     setLoading('verse')
     const ok = await sendEncouragement(prayer.id, 'verse', verseText)
     if (ok) { setVerseText(''); setShowVerse(false); showToast('📖 Verse shared') }
+    else showToast('Could not share this verse. Please try again.')
     setLoading(null)
   }
 
@@ -100,7 +112,7 @@ export default function PrayerCard({ prayer, onUpdate, onAnswer, isOwner, compac
       setReported(true)
       showToast('Thank you. Our team will review this.')
     } else {
-      showToast('You have already reported this prayer request.')
+      showToast('Could not submit your report — you may have already reported this, or something went wrong.')
     }
     setLoading(null)
   }

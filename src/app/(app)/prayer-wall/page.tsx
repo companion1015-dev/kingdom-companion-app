@@ -28,6 +28,7 @@ export default function PrayerWallPage() {
   const [testimonyTarget, setTestimonyTarget] = useState<{ id: string; title: string } | null>(null)
   const [praiseReports, setPraiseReports] = useState<PrayerAnswered[]>([])
   const [praiseLoading, setPraiseLoading] = useState(false)
+  const [praiseError,   setPraiseError]   = useState(false)
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(null), 2500) }
 
@@ -50,9 +51,12 @@ export default function PrayerWallPage() {
 
   const loadPraise = useCallback(async () => {
     setPraiseLoading(true)
+    setPraiseError(false)
     try {
       const reports = await fetchPraiseReports()
       setPraiseReports(reports)
+    } catch {
+      setPraiseError(true)
     } finally {
       setPraiseLoading(false)
     }
@@ -211,7 +215,13 @@ export default function PrayerWallPage() {
               </div>
             )}
 
-            {!praiseLoading && praiseReports.length === 0 && (
+            {!praiseLoading && praiseError && (
+              <div className="text-center py-16 text-navy/60 dark:text-cream/60">
+                <p>Something went wrong loading praise reports. Please try again.</p>
+              </div>
+            )}
+
+            {!praiseLoading && !praiseError && praiseReports.length === 0 && (
               <div className="text-center py-16 text-navy/50 dark:text-cream/50">
                 <Flame className="w-10 h-10 mx-auto mb-3 opacity-40" />
                 <p>No public testimonies yet. When a prayer is answered, be the first to share how God moved.</p>
