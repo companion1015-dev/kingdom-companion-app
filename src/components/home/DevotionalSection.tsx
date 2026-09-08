@@ -60,7 +60,7 @@ export default function DevotionalSection() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
 
           {/* Devotional Library — real data */}
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-6">
               <BookMarked className="w-4 h-4 text-navy/50 dark:text-cream/50" />
               <span className="text-xs font-body font-medium tracking-widest uppercase text-navy/50 dark:text-cream/50">
@@ -129,7 +129,7 @@ export default function DevotionalSection() {
           </div>
 
           {/* Reading Plans — real data, /api/v1/reading-plans */}
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-navy/50 dark:text-cream/50" />
@@ -168,7 +168,7 @@ export default function DevotionalSection() {
                   <Link
                     key={plan.id}
                     href={`/reading-plans/${plan.id}`}
-                    className="flex items-center gap-4 p-5 rounded-xl bg-white dark:bg-navy-dark hover:bg-cream dark:bg-navy-dark border border-navy/8 hover:border-gold/20 transition-all duration-200 group"
+                    className="flex items-center gap-4 p-5 rounded-xl bg-white dark:bg-navy-dark hover:bg-cream dark:bg-navy-dark border border-navy/8 hover:border-gold/20 transition-all duration-200 group min-w-0"
                   >
                     <div className="w-9 h-9 rounded-full bg-navy/6 flex items-center justify-center shrink-0 group-hover:bg-navy/10 transition-colors">
                       <span className="font-display text-sm font-semibold text-navy/50 dark:text-cream/50">{i + 1}</span>

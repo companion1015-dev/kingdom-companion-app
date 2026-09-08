@@ -13,6 +13,18 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Real bug found on mobile: a single unshrinkable/overflowing element
+     anywhere on a page (e.g. a long reading-plan title whose `truncate`
+     wasn't actually constraining it) silently widens the whole mobile
+     layout viewport to fit it -- shifting the fixed nav bar's own content,
+     including its hamburger/close button, off the visible screen and out
+     of reach. This is the standard, broad safety net: no single element
+     can ever expand the page horizontally, no matter what overflows. */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
   body {
     @apply bg-cream text-charcoal font-body;
     margin: 0;
