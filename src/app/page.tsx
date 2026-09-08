@@ -4,7 +4,6 @@ import HeroSection from '@/components/home/HeroSection'
 import DailyEncouragementSection from '@/components/home/DailyEncouragementSection'
 import SearchSection from '@/components/home/SearchSection'
 import DevotionalSection from '@/components/home/DevotionalSection'
-import TopicsSection from '@/components/home/TopicsSection'
 import MissionStrip from '@/components/home/MissionStrip'
 import type { Metadata } from 'next'
 
@@ -31,10 +30,7 @@ export default function HomePage() {
         {/* 4. Featured devotional + reading plans */}
         <DevotionalSection />
 
-        {/* 5. Scripture by topic grid */}
-        <TopicsSection />
-
-        {/* 6. Mission statement + CTAs */}
+        {/* 5. Mission statement + CTAs */}
         <MissionStrip />
       </main>
 
