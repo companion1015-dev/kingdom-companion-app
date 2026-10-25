@@ -42,3 +42,33 @@ export async function uploadPublicFile(buffer: Buffer, key: string, contentType:
   const { data } = getClient().storage.from(BUCKET).getPublicUrl(key)
   return data.publicUrl
 }
+// ─── PRIVATE ATTACHMENTS ──────────────────────────────────────────────────────
+// Attachments on Prayer Wall requests that are NOT shown in the public feed
+// (privacy "private" or "anonymous") go to a separate, NON-public bucket.
+// The database stores a reference "private:<object key>" instead of a URL.
+// If the bucket is missing, uploads FAIL -- they never fall back to public.
+
+const PRIVATE_BUCKET = process.env.SUPABASE_PRIVATE_BUCKET ?? 'kingdom-companion-private'
+export const PRIVATE_REF_PREFIX = 'private:'
+
+export async function uploadPrivateFile(buffer: Buffer, key: string, contentType: string): Promise<string> {
+  if (!STORAGE_CONFIGURED) {
+    throw new Error('File storage is not configured yet.')
+  }
+  const { error } = await getClient().storage.from(PRIVATE_BUCKET).upload(key, buffer, { contentType, upsert: false })
+  if (error) throw new Error(`Private upload failed: ${error.message}`)
+  return `${PRIVATE_REF_PREFIX}${key}`
+}
+
+/**
+ * "private:<key>" -> short-lived signed URL; anything else is returned unchanged.
+ * Callers MUST check the viewer is allowed to see the request first.
+ */
+export async function resolveAttachmentUrl(stored: string | null | undefined, expiresInSeconds = 600): Promise<string | null> {
+  if (!stored) return null
+  if (!stored.startsWith(PRIVATE_REF_PREFIX)) return stored
+  if (!STORAGE_CONFIGURED) return null
+  const key = stored.slice(PRIVATE_REF_PREFIX.length)
+  const { data, error } = await getClient().storage.from(PRIVATE_BUCKET).createSignedUrl(key, expiresInSeconds)
+  return error ? null : data.signedUrl
+}

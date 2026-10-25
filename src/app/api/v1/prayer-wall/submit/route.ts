@@ -5,7 +5,7 @@ import { checkRateLimit, getRateLimitKey } from '@/lib/auth/rate-limit'
 import { prisma } from '@/lib/db/client'
 import { sendAdminAlertEmail } from '@/lib/email/service'
 import { containsBlockedContent, BLOCKED_MESSAGE } from '@/modules/prayer-wall/utils/content-safety'
-import { uploadPublicFile, STORAGE_CONFIGURED } from '@/lib/storage/attachments'
+import { uploadPublicFile, uploadPrivateFile, STORAGE_CONFIGURED } from '@/lib/storage/attachments'
 import { randomUUID } from 'crypto'
 
 // POST /api/v1/prayer-wall/submit
@@ -53,7 +53,19 @@ export const POST = withOptionalAuth(async (req: NextRequest, user) => {
 
         const buffer = Buffer.from(await file.arrayBuffer())
         const key    = `prayer-wall/${randomUUID()}.${ext}`
-        attachment_url  = await uploadPublicFile(buffer, key, file.type)
+        // Only requests shown in the public feed (community | public) may have a
+        // public file. "private" and "anonymous" ones go to the private bucket and
+        // are stored as a "private:<key>" reference, never as a URL. A failed
+        // private upload is an error -- it must never fall back to public storage.
+        const showsInFeed = privacy === 'community' || privacy === 'public'
+        try {
+          attachment_url = showsInFeed
+            ? await uploadPublicFile(buffer, key, file.type)
+            : await uploadPrivateFile(buffer, key, file.type)
+        } catch (uploadError) {
+          console.error('[PrayerWall] Attachment upload failed:', uploadError)
+          return errorResponse('STORAGE_UNAVAILABLE', 'File attachments are temporarily unavailable. Please submit without one.', 503)
+        }
         attachment_type = file.type === 'application/pdf' ? 'pdf' : 'image'
       }
     } else {
