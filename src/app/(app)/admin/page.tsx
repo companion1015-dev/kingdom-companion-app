@@ -11,8 +11,9 @@ import Footer from '@/components/layout/Footer'
 
 type Stats = {
   total_users: number; pending_reports: number; open_feedback: number
-  total_prayer_requests: number; total_donated_cents: number
+  total_prayer_requests: number; total_donated_cents: number; pending_prayer_requests: number
 }
+type PendingRequest = { id: string; title: string; category: string; privacy: string; created_at: string }
 type PrayerReport = {
   id: string; reason: string; details: string | null; created_at: string
   request: { id: string; title: string; content: string; category: string }
@@ -26,6 +27,7 @@ export default function AdminDashboardPage() {
   const [tab,      setTab]      = useState<Tab>('overview')
   const [stats,    setStats]    = useState<Stats | null>(null)
   const [reports,  setReports]  = useState<PrayerReport[]>([])
+  const [pending,  setPending]  = useState<PendingRequest[]>([])
   const [feedback, setFeedback] = useState<FeedbackItem[]>([])
   const [donations,setDonations]= useState<Donation[]>([])
   const [loading,  setLoading]  = useState(true)
@@ -44,6 +46,7 @@ export default function AdminDashboardPage() {
         if (data.success) {
           setStats(data.data.stats)
           setReports(data.data.prayer_reports)
+          setPending(data.data.pending_requests ?? [])
           setFeedback(data.data.feedback)
           setDonations(data.data.recent_donations)
         } else setError(data.error?.message ?? 'Unable to load dashboard.')
@@ -86,9 +89,17 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex items-center justify-between mb-8">
           <p className="text-navy/60 dark:text-cream/60">Moderation, feedback, and ministry activity in one place.</p>
-          <Link href="/admin/content" className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-navy/15 text-navy dark:text-cream text-xs font-body font-semibold hover:bg-navy/5 transition-all shrink-0 ml-4">
-            <FolderCog className="w-3.5 h-3.5" /> Manage Content
-          </Link>
+          <div className="flex items-center gap-2 shrink-0 ml-4">
+            <Link href="/admin/prayer-wall" className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-navy text-white text-xs font-body font-semibold hover:bg-navy-light transition-all">
+              <Heart className="w-3.5 h-3.5" /> Review Prayer Requests
+              {stats && stats.pending_prayer_requests > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gold text-navy text-[10px] leading-none">{stats.pending_prayer_requests}</span>
+              )}
+            </Link>
+            <Link href="/admin/content" className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-navy/15 text-navy dark:text-cream text-xs font-body font-semibold hover:bg-navy/5 transition-all">
+              <FolderCog className="w-3.5 h-3.5" /> Manage Content
+            </Link>
+          </div>
         </div>
 
         {loading && (
@@ -130,6 +141,7 @@ export default function AdminDashboardPage() {
             {tab === 'overview' && (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <StatCard icon={Users2}       label="Total Users"        value={stats.total_users} />
+                <StatCard icon={Heart}        label="Awaiting Review"    value={stats.pending_prayer_requests} accent={stats.pending_prayer_requests > 0} />
                 <StatCard icon={Flag}         label="Pending Reports"    value={stats.pending_reports} accent={stats.pending_reports > 0} />
                 <StatCard icon={MessageSquare}label="Open Feedback"      value={stats.open_feedback} accent={stats.open_feedback > 0} />
                 <StatCard icon={Heart}        label="Prayer Requests"    value={stats.total_prayer_requests} />
@@ -139,7 +151,21 @@ export default function AdminDashboardPage() {
 
             {tab === 'moderation' && (
               <div className="space-y-3">
-                {reports.length === 0 && <EmptyState text="No pending reports — the Prayer Wall is clean." />}
+                <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-display text-sm font-semibold text-navy dark:text-cream">Prayer requests awaiting review ({stats.pending_prayer_requests})</h2>
+                    <Link href="/admin/prayer-wall" className="text-xs font-body font-semibold text-navy dark:text-cream underline">Open review queue</Link>
+                  </div>
+                  {pending.length === 0 && <p className="text-xs text-charcoal/55 dark:text-cream/55 font-body">Nothing is waiting for review.</p>}
+                  {pending.map(r => (
+                    <Link key={r.id} href="/admin/prayer-wall" className="flex items-center justify-between gap-3 py-2 border-t border-navy/6 first:border-t-0 hover:opacity-80">
+                      <span className="text-sm font-body text-navy dark:text-cream truncate">{r.title}</span>
+                      <span className="text-xs text-charcoal/40 dark:text-cream/40 font-body whitespace-nowrap capitalize">{r.category} · {r.privacy} · {new Date(r.created_at).toLocaleDateString()}</span>
+                    </Link>
+                  ))}
+                </div>
+                <h2 className="font-display text-sm font-semibold text-navy dark:text-cream pt-2">Reported by members</h2>
+                {reports.length === 0 && <EmptyState text="No member reports. (New prayer requests are listed above.)" />}
                 {reports.map(r => (
                   <div key={r.id} className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-5">
                     <div className="flex items-center justify-between mb-2">

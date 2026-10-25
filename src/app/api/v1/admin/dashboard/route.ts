@@ -16,6 +16,7 @@ export const GET = withAdmin(async (_req: NextRequest) => {
     const [
       userCount, pendingReports, openFeedback, recentDonations,
       totalDonatedCents, prayerRequestCount, reports, feedback,
+      pendingRequestCount, pendingRequests,
     ] = await Promise.all([
       db.user.count(),
       db.prayerReport.count({ where: { status: 'pending' } }),
@@ -34,6 +35,14 @@ export const GET = withAdmin(async (_req: NextRequest) => {
         where: { status: 'open' }, orderBy: { created_at: 'desc' }, take: 20,
         select: { id: true, feedback_type: true, subject: true, message: true, created_at: true },
       }),
+      // Prayer requests waiting for moderation. Previously the dashboard showed only
+      // member REPORTS, so new requests were invisible here. Content is deliberately
+      // not selected -- the review queue page shows it.
+      db.prayerRequest.count({ where: { moderation_status: 'pending', deleted_at: null } }),
+      db.prayerRequest.findMany({
+        where: { moderation_status: 'pending', deleted_at: null }, orderBy: { created_at: 'desc' }, take: 5,
+        select: { id: true, title: true, category: true, privacy: true, created_at: true },
+      }),
     ])
 
     return successResponse({
@@ -42,9 +51,11 @@ export const GET = withAdmin(async (_req: NextRequest) => {
         pending_reports: pendingReports,
         open_feedback: openFeedback,
         total_prayer_requests: prayerRequestCount,
+        pending_prayer_requests: pendingRequestCount,
         total_donated_cents: totalDonatedCents._sum.amount_cents ?? 0,
       },
       recent_donations: recentDonations,
+      pending_requests: pendingRequests,
       prayer_reports: reports.map((r: Record<string, unknown> & { request: unknown }) => ({ ...r, request: r.request })),
       feedback,
     }, 'Admin dashboard data retrieved.')
