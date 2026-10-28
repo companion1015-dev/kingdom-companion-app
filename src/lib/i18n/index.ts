@@ -18,6 +18,7 @@ export const dirOf = (c: LocaleCode) => LANGUAGES.find(l => l.code === c)?.dir ?
 
 const en = {
   'lang.interface': 'App language',
+  'nav.language': 'Language',
   'lang.help': 'Choose the language for menus and buttons. Your choice is saved to your account.',
   'lang.beta': 'Beta: wording not yet reviewed by a native speaker',
   'lang.saved': 'Saved',
@@ -29,6 +30,7 @@ type Messages = Record<MessageKey, string>
 
 const fr: Messages = {
   'lang.interface': "Langue de l'application",
+  'nav.language': 'Langue',
   'lang.help': 'Choisissez la langue des menus et des boutons. Votre choix est enregistré dans votre compte.',
   'lang.beta': 'Bêta : formulation pas encore relue par un locuteur natif',
   'lang.saved': 'Enregistré',
@@ -37,6 +39,7 @@ const fr: Messages = {
 }
 const es: Messages = {
   'lang.interface': 'Idioma de la aplicación',
+  'nav.language': 'Idioma',
   'lang.help': 'Elige el idioma de los menús y botones. Tu elección se guarda en tu cuenta.',
   'lang.beta': 'Beta: redacción aún no revisada por un hablante nativo',
   'lang.saved': 'Guardado',
@@ -45,6 +48,7 @@ const es: Messages = {
 }
 const ar: Messages = {
   'lang.interface': 'لغة التطبيق',
+  'nav.language': 'اللغة',
   'lang.help': 'اختر لغة القوائم والأزرار. يتم حفظ اختيارك في حسابك.',
   'lang.beta': 'تجريبي: لم تتم مراجعة الصياغة بعد من قِبل ناطق أصلي',
   'lang.saved': 'تم الحفظ',
@@ -53,6 +57,7 @@ const ar: Messages = {
 }
 const ur: Messages = {
   'lang.interface': 'ایپ کی زبان',
+  'nav.language': 'زبان',
   'lang.help': 'مینو اور بٹنوں کی زبان منتخب کریں۔ آپ کا انتخاب آپ کے اکاؤنٹ میں محفوظ ہو جاتا ہے۔',
   'lang.beta': 'بیٹا: الفاظ پر ابھی کسی اہلِ زبان نے نظرثانی نہیں کی',
   'lang.saved': 'محفوظ ہو گیا',

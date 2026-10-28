@@ -8,6 +8,8 @@ import {
   NotebookPen, UserPlus, Download, Globe,
 } from 'lucide-react'
 import { navMenu, authNavLinks, type NavEntry } from '@/data/mock'
+import { useI18n } from '@/components/i18n/I18nProvider'
+import { LANGUAGES } from '@/lib/i18n'
 
 // Real fix: this previously always showed a hardcoded "Sign in" button and
 // never included Prayer Journal / Invite Friends / My Profile conditionally
@@ -24,6 +26,8 @@ import { navMenu, authNavLinks, type NavEntry } from '@/data/mock'
 
 export default function Navigation() {
   const router = useRouter()
+  const { locale, t } = useI18n()
+  const currentLang = LANGUAGES.find(l => l.code === locale)?.native ?? 'English'
   const goToSearch = () => {
     const focusSearch = () => {
       document.getElementById('search-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -189,8 +193,8 @@ export default function Navigation() {
               <Search className="w-4 h-4" />
             </button>
 
-            <Link href="/settings/language" aria-label="Language" className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8 dark:bg-navy-dark">
-              <Globe className="w-4 h-4" />
+            <Link href="/settings/language" aria-label={t('nav.language')} title={t('nav.language')} className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/80 hover:text-white transition-colors rounded-full border border-white/20 hover:bg-white/8">
+              <Globe className="w-4 h-4" /> <span>{currentLang}</span>
             </Link>
 
             {canInstall && (
@@ -352,7 +356,7 @@ export default function Navigation() {
               className="flex items-center gap-2 px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
               onClick={() => setMenuOpen(false)}
             >
-              <Globe className="w-4 h-4" /> Language
+              <Globe className="w-4 h-4" /> {t('nav.language')} · {currentLang}
             </Link>
 
             <div className="pt-3 border-t border-white/10">
