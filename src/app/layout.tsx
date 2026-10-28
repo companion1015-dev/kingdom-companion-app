@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
 import ThemeProvider from '@/components/providers/ThemeProvider'
 import '@/styles/globals.css'
-
+   import I18nProvider from '@/components/i18n/I18nProvider'
 const PWAProvider = dynamic(() => import('@/modules/pwa/components/PWAProvider'), { ssr: false })
 
 export const metadata: Metadata = {
@@ -54,9 +54,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen bg-cream dark:bg-navy-dark dark:bg-navy-dark text-charcoal dark:text-cream dark:text-cream font-body antialiased transition-colors duration-200">
         <ThemeProvider>
-          <PWAProvider>
-            {children}
-          </PWAProvider>
+                       <I18nProvider>
+               <PWAProvider>
+                 {children}
+               </PWAProvider>
+             </I18nProvider>
         </ThemeProvider>
       </body>
     </html>
