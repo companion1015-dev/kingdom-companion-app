@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   Menu, X, Search, User, LogOut, ChevronDown, LayoutDashboard, Shield,
-  NotebookPen, UserPlus, Download,
+  NotebookPen, UserPlus, Download, Globe,
 } from 'lucide-react'
 import { navMenu, authNavLinks, type NavEntry } from '@/data/mock'
 
@@ -189,6 +189,10 @@ export default function Navigation() {
               <Search className="w-4 h-4" />
             </button>
 
+            <Link href="/settings/language" aria-label="Language" className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8 dark:bg-navy-dark">
+              <Globe className="w-4 h-4" />
+            </Link>
+
             {canInstall && (
               <button
                 onClick={requestInstall}
@@ -342,6 +346,14 @@ export default function Navigation() {
                 ))}
               </div>
             )}
+
+            <Link
+              href="/settings/language"
+              className="flex items-center gap-2 px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
+              onClick={() => setMenuOpen(false)}
+            >
+              <Globe className="w-4 h-4" /> Language
+            </Link>
 
             <div className="pt-3 border-t border-white/10">
               {authed ? (
