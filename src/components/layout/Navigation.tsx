@@ -10,6 +10,7 @@ import {
 import { navMenu, authNavLinks, type NavEntry } from '@/data/mock'
 import { useI18n } from '@/components/i18n/I18nProvider'
 import { LANGUAGES } from '@/lib/i18n'
+import T, { useTr } from '@/components/i18n/T'
 
 // Real fix: this previously always showed a hardcoded "Sign in" button and
 // never included Prayer Journal / Invite Friends / My Profile conditionally
@@ -25,8 +26,9 @@ import { LANGUAGES } from '@/lib/i18n'
 // dropdown instead of duplicating them in the main row.
 
 export default function Navigation() {
+  const tr = useTr()
   const router = useRouter()
-  const { locale, t } = useI18n()
+  const { locale } = useI18n()
   const currentLang = LANGUAGES.find(l => l.code === locale)?.native ?? 'English'
   const goToSearch = () => {
     const focusSearch = () => {
@@ -151,7 +153,7 @@ export default function Navigation() {
         <div className="flex items-center justify-between h-16 lg:h-18">
 
           {/* Logo — official Kingdom Companion logo */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0" aria-label="Kingdom Companion — Home">
+          <Link href="/" className="flex items-center gap-3 group shrink-0" aria-label={tr('Kingdom Companion — Home')}>
             <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-navy-dark/30 group-hover:shadow-gold/30 transition-shadow duration-300">
               <Image
                 src="/images/logo.png"
@@ -167,7 +169,7 @@ export default function Navigation() {
                 Kingdom Companion
               </span>
               <span className="block text-[9px] text-gold/75 tracking-[0.2em] uppercase font-body font-medium">
-                Scripture · Peace · Purpose
+                <T>Scripture · Peace · Purpose</T>
               </span>
             </div>
           </Link>
@@ -189,11 +191,11 @@ export default function Navigation() {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <button aria-label="Search" onClick={goToSearch} className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8 dark:bg-navy-dark">
+            <button aria-label={tr('Search')} onClick={goToSearch} className="p-2 text-white/60 hover:text-white transition-colors rounded-md hover:bg-white/8 dark:bg-navy-dark">
               <Search className="w-4 h-4" />
             </button>
 
-            <Link href="/settings/language" aria-label={t('nav.language')} title={t('nav.language')} className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/80 hover:text-white transition-colors rounded-full border border-white/20 hover:bg-white/8">
+            <Link href="/settings/language" aria-label={tr('Language')} title={tr('Language')} className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white/80 hover:text-white transition-colors rounded-full border border-white/20 hover:bg-white/8">
               <Globe className="w-4 h-4" /> <span>{currentLang}</span>
             </Link>
 
@@ -202,7 +204,7 @@ export default function Navigation() {
                 onClick={requestInstall}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gold/90 hover:text-gold bg-gold/10 hover:bg-gold/15 border border-gold/25 rounded-full transition-all"
               >
-                <Download className="w-3.5 h-3.5" /> Install App
+                <Download className="w-3.5 h-3.5" /> <T>Install App</T>
               </button>
             )}
 
@@ -220,29 +222,29 @@ export default function Navigation() {
                   <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-navy-dark rounded-xl shadow-xl shadow-navy/15 border border-navy/8 overflow-hidden">
                     <Link href="/dashboard" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
-                      <LayoutDashboard className="w-3.5 h-3.5" /> My Dashboard
+                      <LayoutDashboard className="w-3.5 h-3.5" /> <T>My Dashboard</T>
                     </Link>
                     <Link href="/journal" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
-                      <NotebookPen className="w-3.5 h-3.5" /> Prayer Journal
+                      <NotebookPen className="w-3.5 h-3.5" /> <T>Prayer Journal</T>
                     </Link>
                     <Link href="/invite" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body">
-                      <UserPlus className="w-3.5 h-3.5" /> Invite Friends
+                      <UserPlus className="w-3.5 h-3.5" /> <T>Invite Friends</T>
                     </Link>
                     <Link href="/profile" onClick={() => setAccountOpen(false)}
                       className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body border-t border-navy/8">
-                      <User className="w-3.5 h-3.5" /> My Profile
+                      <User className="w-3.5 h-3.5" /> <T>My Profile</T>
                     </Link>
                     {isAdmin && (
                       <Link href="/admin" onClick={() => setAccountOpen(false)}
                         className="flex items-center gap-2 px-4 py-2.5 text-sm text-charcoal/70 dark:text-cream/70 hover:bg-navy/4 hover:text-navy dark:text-cream transition-colors font-body border-t border-navy/8">
-                        <Shield className="w-3.5 h-3.5" /> Admin Dashboard
+                        <Shield className="w-3.5 h-3.5" /> <T>Admin Dashboard</T>
                       </Link>
                     )}
                     <button onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors font-body text-left border-t border-navy/8">
-                      <LogOut className="w-3.5 h-3.5" /> Sign Out
+                      <LogOut className="w-3.5 h-3.5" /> <T>Sign Out</T>
                     </button>
                   </div>
                 )}
@@ -252,7 +254,7 @@ export default function Navigation() {
                 href="/login"
                 className="px-4 py-1.5 text-sm font-medium text-navy dark:text-cream bg-gold hover:bg-gold-light rounded-full transition-all duration-200"
               >
-                Sign in
+                <T>Sign in</T>
               </Link>
             )}
           </div>
@@ -279,7 +281,7 @@ export default function Navigation() {
             </div>
             <div>
               <p className="text-white text-sm font-display font-semibold">Kingdom Companion</p>
-              <p className="text-gold/60 text-[9px] tracking-widest uppercase font-body">Rooted in Truth · Built for Life</p>
+              <p className="text-gold/60 text-[9px] tracking-widest uppercase font-body"><T>Rooted in Truth · Built for Life</T></p>
             </div>
           </div>
 
@@ -291,7 +293,7 @@ export default function Navigation() {
                 className={`block px-4 py-3 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm ${entry.href === '/daily' ? 'text-gold/90 font-medium' : 'text-white/80'}`}
                 onClick={() => setMenuOpen(false)}
               >
-                {entry.label}
+                <T>{entry.label}</T>
               </Link>
             ) : (
               <div key={entry.label} className="pt-2">
@@ -300,7 +302,7 @@ export default function Navigation() {
                   aria-expanded={openMobileGroups.has(entry.label)}
                   className="w-full flex items-center justify-between px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 hover:text-white/60 tracking-widest uppercase transition-colors"
                 >
-                  {entry.label}
+                  <T>{entry.label}</T>
                   <ChevronDown className={`w-3 h-3 transition-transform ${openMobileGroups.has(entry.label) ? 'rotate-180' : ''}`} />
                 </button>
                 {openMobileGroups.has(entry.label) && entry.items.map(item => (
@@ -310,7 +312,7 @@ export default function Navigation() {
                     className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {item.label}
+                    <T>{item.label}</T>
                   </Link>
                 ))}
               </div>
@@ -321,7 +323,7 @@ export default function Navigation() {
                 onClick={() => { setMenuOpen(false); requestInstall() }}
                 className="flex items-center gap-2 w-full px-4 py-3 text-gold/90 hover:text-gold hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm font-medium"
               >
-                <Download className="w-4 h-4" /> Install App
+                <Download className="w-4 h-4" /> <T>Install App</T>
               </button>
             )}
 
@@ -331,13 +333,13 @@ export default function Navigation() {
                 className="flex items-center gap-2 px-4 py-3 text-gold/90 hover:text-gold hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm font-semibold"
                 onClick={() => setMenuOpen(false)}
               >
-                <Shield className="w-4 h-4" /> Admin Dashboard
+                <Shield className="w-4 h-4" /> <T>Admin Dashboard</T>
               </Link>
             )}
 
             {authed && (
               <div className="pt-2">
-                <p className="px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 tracking-widest uppercase">Account</p>
+                <p className="px-4 pt-2 pb-1 text-[11px] font-body font-semibold text-white/35 tracking-widest uppercase"><T>Account</T></p>
                 {authNavLinks.map(link => (
                   <Link
                     key={link.href}
@@ -345,7 +347,7 @@ export default function Navigation() {
                     className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {link.label}
+                    <T>{link.label}</T>
                   </Link>
                 ))}
               </div>
@@ -356,7 +358,7 @@ export default function Navigation() {
               className="flex items-center gap-2 px-4 py-3 text-white/80 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-lg transition-all font-body text-sm"
               onClick={() => setMenuOpen(false)}
             >
-              <Globe className="w-4 h-4" /> {t('nav.language')} · {currentLang}
+              <Globe className="w-4 h-4" /> {tr('Language')} · {currentLang}
             </Link>
 
             <div className="pt-3 border-t border-white/10">
@@ -365,7 +367,7 @@ export default function Navigation() {
                   onClick={() => { setMenuOpen(false); handleLogout() }}
                   className="block w-full text-center px-4 py-3 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
                 >
-                  Sign Out
+                  <T>Sign Out</T>
                 </button>
               ) : (
                 <Link
@@ -373,7 +375,7 @@ export default function Navigation() {
                   className="block w-full text-center px-4 py-3 text-sm font-medium text-navy dark:text-cream bg-gold hover:bg-gold-light rounded-full transition-colors"
                   onClick={() => setMenuOpen(false)}
                 >
-                  Create free account
+                  <T>Create free account</T>
                 </Link>
               )}
             </div>
@@ -399,7 +401,7 @@ function NavMenuItem({
         href={entry.href}
         className={`relative shrink-0 px-2.5 py-1.5 text-[13px] text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark rounded-md transition-all duration-200 font-body whitespace-nowrap ${isDaily ? 'text-gold/90 hover:text-gold font-medium' : ''}`}
       >
-        {entry.label}
+        <T>{entry.label}</T>
         {isDaily && (
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-gold" aria-hidden="true" />
         )}
@@ -414,7 +416,7 @@ function NavMenuItem({
         aria-expanded={open}
         className={`flex items-center gap-1 px-2.5 py-1.5 text-[13px] rounded-md transition-all duration-200 font-body whitespace-nowrap ${open ? 'text-white bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/8 dark:bg-navy-dark'}`}
       >
-        {entry.label}
+        <T>{entry.label}</T>
         <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
@@ -426,9 +428,9 @@ function NavMenuItem({
               onClick={() => setOpen(false)}
               className="block px-4 py-2.5 hover:bg-navy/4 transition-colors group/item"
             >
-              <span className="block text-sm font-body font-medium text-navy dark:text-cream group-hover/item:text-gold-dark transition-colors">{item.label}</span>
+              <span className="block text-sm font-body font-medium text-navy dark:text-cream group-hover/item:text-gold-dark transition-colors"><T>{item.label}</T></span>
               {item.description && (
-                <span className="block text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5">{item.description}</span>
+                <span className="block text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5"><T>{item.description}</T></span>
               )}
             </Link>
           ))}

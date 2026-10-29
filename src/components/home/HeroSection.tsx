@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, BookOpen, ChevronDown } from 'lucide-react'
 import { emotions } from '@/data/mock'
 import { localDateKey } from '@/lib/date'
 import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
+import T, { useTr } from '@/components/i18n/T'
 
 // Genuine fixes here: the emotion selector previously did
 // alert('AI Companion coming in Phase 3...') -- a leftover from before the
@@ -22,6 +23,7 @@ const QUICK_COUNT = 6
 type DailyVerse = { reference: string; text: string; book_id: string; chapter: number; verse: number | null }
 
 export default function HeroSection() {
+  const tr = useTr()
   const router = useRouter()
   const [input, setInput]       = useState('')
   const [selected, setSelected] = useState<string | null>(null)
@@ -98,13 +100,13 @@ export default function HeroSection() {
         {/* Primary heading */}
         <div className="text-center mb-4 animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0, animationFillMode: 'forwards' }}>
           <h1 id="hero-heading" className="font-display text-5xl sm:text-6xl lg:text-7xl font-light text-white leading-tight tracking-wide">
-            How are you feeling
-            <span className="block italic font-light gold-text">today?</span>
+            <T>How are you feeling</T>
+            <span className="block italic font-light gold-text"><T>today?</T></span>
           </h1>
         </div>
 
         <p className="text-center text-white/55 font-body text-base sm:text-lg mb-10 animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0, animationFillMode: 'forwards' }}>
-          Share what&rsquo;s on your heart — receive Scripture, reflection, and prayer.
+          <T>Share what&rsquo;s on your heart — receive Scripture, reflection, and prayer.</T>
         </p>
 
         {/* Emotion input card — signature element */}
@@ -137,7 +139,7 @@ export default function HeroSection() {
                 aria-pressed={selected === emotion.id}
               >
                 <span>{emotion.icon}</span>
-                <span>{emotion.label}</span>
+                <span><T>{emotion.label}</T></span>
               </button>
             ))}
             <button
@@ -145,7 +147,7 @@ export default function HeroSection() {
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-body text-white/50 hover:text-white border border-white/15 hover:border-white/30 transition-all"
               aria-expanded={showMore}
             >
-              More topics <ChevronDown className={`w-3 h-3 transition-transform ${showMore ? 'rotate-180' : ''}`} />
+              <T>More topics</T> <ChevronDown className={`w-3 h-3 transition-transform ${showMore ? 'rotate-180' : ''}`} />
             </button>
           </div>
 
@@ -166,7 +168,7 @@ export default function HeroSection() {
                   aria-pressed={selected === emotion.id}
                 >
                   <span>{emotion.icon}</span>
-                  <span>{emotion.label}</span>
+                  <span><T>{emotion.label}</T></span>
                 </button>
               ))}
             </div>
@@ -178,14 +180,14 @@ export default function HeroSection() {
               ref={inputRef}
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Or describe what you're going through in your own words… I feel anxious about tomorrow. I don't know what to pray. My heart is heavy."
+              placeholder={tr('Or describe what you\'re going through in your own words… I feel anxious about tomorrow. I don\'t know what to pray. My heart is heavy.')}
               rows={3}
               className="w-full bg-transparent text-white placeholder-white/30 font-body text-sm resize-none border-0 outline-none leading-relaxed"
               style={{ caretColor: '#C9A84C' }}
               onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit() }}
             />
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-              <span className="text-xs text-white/25 font-body">⌘ + Enter to send</span>
+              <span className="text-xs text-white/25 font-body"><T>⌘ + Enter to send</T></span>
               <button
                 onClick={handleSubmit}
                 disabled={!input.trim()}
@@ -198,7 +200,7 @@ export default function HeroSection() {
                 `}
               >
                 <Sparkles className="w-4 h-4" />
-                Receive encouragement
+                <T>Receive encouragement</T>
               </button>
             </div>
           </div>

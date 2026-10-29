@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookMarked, Clock } from 'lucide-react'
+import T from '@/components/i18n/T'
 
 // Devotional half: migrated from hardcoded mock data to the real Devotionals
 // API (/api/v1/devotionals), PRD §4.44.
@@ -64,7 +65,7 @@ export default function DevotionalSection() {
             <div className="flex items-center gap-2 mb-6">
               <BookMarked className="w-4 h-4 text-navy/50 dark:text-cream/50" />
               <span className="text-xs font-body font-medium tracking-widest uppercase text-navy/50 dark:text-cream/50">
-                From the Devotional Library
+                <T>From the Devotional Library</T>
               </span>
             </div>
 
@@ -78,14 +79,14 @@ export default function DevotionalSection() {
             {/* Error */}
             {error && (
               <p className="text-charcoal/40 dark:text-cream/40 font-body text-sm py-10">
-                The Devotional Library couldn&rsquo;t be loaded right now.
+                <T>The Devotional Library couldn&rsquo;t be loaded right now.</T>
               </p>
             )}
 
             {/* Empty — honest, no invented examples */}
             {series !== null && !error && !highlighted && (
               <p className="text-charcoal/40 dark:text-cream/40 font-body text-sm py-10">
-                Devotional series are coming soon.
+                <T>Devotional series are coming soon.</T>
               </p>
             )}
 
@@ -101,7 +102,7 @@ export default function DevotionalSection() {
                 >
                   <div className="absolute top-4 right-4 opacity-10 font-display text-8xl leading-none select-none">✝</div>
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-body font-medium bg-gold/20 text-gold border border-gold/30 mb-4">
-                    {highlighted.duration_days} days
+                    {highlighted.duration_days} <T>days</T>
                   </span>
                   <h2 id="devotional-heading" className="font-display text-3xl font-semibold text-white mb-2">
                     {highlighted.title}
@@ -112,7 +113,7 @@ export default function DevotionalSection() {
                 <div className="p-8 bg-white dark:bg-navy-dark">
                   {highlighted.description && (
                     <p className="text-charcoal/65 dark:text-cream/65 font-body text-sm leading-relaxed mb-6">
-                      {highlighted.description}
+                      <T>{highlighted.description}</T>
                     </p>
                   )}
 
@@ -120,7 +121,7 @@ export default function DevotionalSection() {
                     href={`/devotionals/${highlighted.slug}`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-navy hover:bg-navy-light text-white rounded-full text-sm font-body font-medium transition-all duration-200 group"
                   >
-                    Begin this devotional
+                    <T>Begin this devotional</T>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
@@ -133,10 +134,10 @@ export default function DevotionalSection() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-navy/50 dark:text-cream/50" />
-                <span className="text-xs font-body font-medium tracking-widest uppercase text-navy/50 dark:text-cream/50">Reading Plans</span>
+                <span className="text-xs font-body font-medium tracking-widest uppercase text-navy/50 dark:text-cream/50"><T>Reading Plans</T></span>
               </div>
               <Link href="/reading-plans" className="text-xs text-gold hover:text-gold-dark font-body font-medium transition-colors">
-                View all plans →
+                <T>View all plans →</T>
               </Link>
             </div>
 
@@ -150,14 +151,14 @@ export default function DevotionalSection() {
             {/* Error */}
             {plansError && (
               <p className="text-charcoal/40 dark:text-cream/40 font-body text-sm py-6">
-                Reading plans couldn&rsquo;t be loaded right now.
+                <T>Reading plans couldn&rsquo;t be loaded right now.</T>
               </p>
             )}
 
             {/* Empty — honest, no invented examples */}
             {plans !== null && !plansError && plans.length === 0 && (
               <p className="text-charcoal/40 dark:text-cream/40 font-body text-sm py-6">
-                Reading plans are coming soon.
+                <T>Reading plans are coming soon.</T>
               </p>
             )}
 
@@ -177,7 +178,7 @@ export default function DevotionalSection() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-body text-sm font-medium text-navy dark:text-cream truncate mb-0.5">{plan.title}</h3>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-charcoal/40 dark:text-cream/40">{plan.duration_days} days</span>
+                        <span className="text-xs text-charcoal/40 dark:text-cream/40">{plan.duration_days} <T>days</T></span>
                         <span className="w-1 h-1 rounded-full bg-charcoal/20" />
                         <span className="text-xs text-charcoal/40 dark:text-cream/40 capitalize">{plan.difficulty}</span>
                       </div>
@@ -198,7 +199,7 @@ export default function DevotionalSection() {
                 href="/bible?book=PSA&chapter=119&verse=105"
                 className="inline-flex items-center gap-2 text-sm font-body font-medium text-sage-dark hover:text-navy dark:text-cream transition-colors group"
               >
-                Open the Bible <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                <T>Open the Bible</T> <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           </div>

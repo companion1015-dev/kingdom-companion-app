@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Heart } from 'lucide-react'
+import T from '@/components/i18n/T'
 
 const footerLinks = [
   { group: 'Scripture',  links: [{ label:'Bible',              href:'/bible'         }, { label:'Topics',            href:'/topics'        }, { label:'Daily Encouragement', href:'/daily'          }] },
@@ -22,10 +23,10 @@ export default function Footer() {
           <div>
             <span className="block font-display text-lg font-semibold text-white">Kingdom Companion</span>
             <span className="block text-xs text-gold/65 tracking-widest uppercase font-body mt-0.5">
-              Scripture · Encouragement · Peace · Purpose
+              <T>Scripture · Encouragement · Peace · Purpose</T>
             </span>
             <span className="block text-xs text-white/30 font-body mt-1 italic font-display">
-              &ldquo;Rooted in Truth. Built for Life.&rdquo;
+              <T>&ldquo;Rooted in Truth. Built for Life.&rdquo;</T>
             </span>
           </div>
         </div>
@@ -40,7 +41,7 @@ export default function Footer() {
             { icon: '🌱', label: 'Grow Every Day'          },
           ].map(p => (
             <span key={p.label} className="flex items-center gap-2 text-xs text-white/30 font-body">
-              <span>{p.icon}</span> {p.label}
+              <span>{p.icon}</span> <T>{p.label}</T>
             </span>
           ))}
         </div>
@@ -49,12 +50,12 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pb-12 border-b border-white/8">
           {footerLinks.map(group => (
             <div key={group.group}>
-              <h4 className="text-xs font-semibold text-white/35 tracking-widest uppercase mb-4">{group.group}</h4>
+              <h4 className="text-xs font-semibold text-white/35 tracking-widest uppercase mb-4"><T>{group.group}</T></h4>
               <ul className="space-y-2.5">
                 {group.links.map(link => (
                   <li key={link.href}>
                     <Link href={link.href} className="text-sm text-white/55 hover:text-gold transition-colors font-body">
-                      {link.label}
+                      <T>{link.label}</T>
                     </Link>
                   </li>
                 ))}
@@ -72,7 +73,7 @@ export default function Footer() {
             <p>Scripture quotations from the Holy Bible, New International Version® (NIV). All rights reserved.</p>
           </div>
           <p className="flex items-center gap-1.5 shrink-0">
-            Built with <Heart className="w-3 h-3 text-clay fill-current" /> for the Kingdom
+            <T>Built with</T> <Heart className="w-3 h-3 text-clay fill-current" /> <T>for the Kingdom</T>
           </p>
         </div>
       </div>
