@@ -2,20 +2,27 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+export const dynamic = 'force-dynamic'
 
 export default function PrayerPage(){
   const [rooms, setRooms] = useState<any[]>([])
+
   useEffect(()=>{
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if(!url || !key) return
+    const supabase = createClient(url, key)
     supabase.from('prayer_rooms').select('*').order('created_at',{ascending:false}).then(({data})=> data && setRooms(data))
   },[])
+
   const create = async () => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    const supabase = createClient(url, key)
     const { data } = await supabase.from('prayer_rooms').insert({ title: `Live Altar ${new Date().toLocaleDateString()}` }).select().single()
     if(data) setRooms([data, ...rooms])
   }
+
   return (
     <div style={{ padding:40, color:'white', background:'#0a0a0f', minHeight:'100vh' }}>
       <a href="/" style={{ color:'#888', textDecoration:'none' }}>← Back to Home</a>
