@@ -10,12 +10,13 @@ const ts = require(path.join(process.cwd(), 'node_modules', 'typescript'))
 const MESSAGES_DIR = 'src/lib/i18n/messages'
 const ENT = { '&ldquo;': '“', '&rdquo;': '”', '&lsquo;': '‘', '&rsquo;': '’', '&apos;': "'", '&quot;': '"', '&amp;': '&', '&mdash;': '—', '&ndash;': '–', '&hellip;': '…', '&nbsp;': ' ' }
 const decode = s => s.replace(/&[a-z]+;/g, m => ENT[m] ?? m).replace(/\s+/g, ' ').trim()
-const hasLetters = s => /[A-Za-z]{2}/.test(s) && !/^[\w.+-]+@[\w-]+(\.[\w-]+)+$/.test(s.trim()) && !/^(https?:\/\/|www\.)\S+$/i.test(s.trim()) // emails and links are never translated
+const hasLetters = s => /[A-Za-z]{2}/.test(s) && !/^[A-Z]{2,6}$/.test(s.trim()) && !/^[\w.+-]+@[\w-]+(\.[\w-]+)+$/.test(s.trim()) && !/^(https?:\/\/|www\.)\S+$/i.test(s.trim()) // emails and links are never translated
 const q = s => "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'"
 const parse = (file, text) => ts.createSourceFile(file, text ?? fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, file.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS)
 const walkFiles = (dir, out = []) => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const p = path.join(dir, e.name); if (e.isDirectory()) { if (e.name !== 'node_modules' && e.name !== '.next') walkFiles(p, out) } else if (/\.(ts|tsx)$/.test(e.name)) out.push(p) } return out }
 
 // Never translated: brand, Scripture, copyright notices, and sentences split around links/values.
+const isCopyrightNotice = k => /^Scripture quotations\b/i.test(k) || /all rights reserved/i.test(k) || /taken from the Holy Bible/i.test(k) // legal attribution: kept exactly as published
 const SKIP = new Set([
   'Kingdom Companion', '“Your word is a lamp for my feet, a light on my path.”', '— Psalm 119:105',
   'Scripture quotations from the Holy Bible, New International Version® (NIV). All rights reserved.',
@@ -45,8 +46,11 @@ function usedTexts() {
     if (file.includes(path.join('lib', 'i18n'))) continue
     const sf = parse(file)
     ;(function w(n) {
-      if (ts.isJsxElement(n) && n.openingElement.tagName.getText() === 'T' && n.children.length === 1 && ts.isJsxText(n.children[0])) { const k = decode(n.children[0].getText()); if (hasLetters(k)) used.add(k) }
-      if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && (n.expression.text === 'tr' || n.expression.text === 't') && n.arguments.length === 1 && ts.isStringLiteralLike(n.arguments[0])) { const k = decode(n.arguments[0].text); if (hasLetters(k)) used.add(k) }
+      if (ts.isJsxElement(n) && n.openingElement.tagName.getText() === 'T' && n.children.length === 1) {
+        const c = n.children[0], raw = ts.isJsxText(c) ? c.getText() : ts.isJsxExpression(c) && c.expression && ts.isStringLiteralLike(c.expression) ? c.expression.text : null
+        if (raw !== null) { const k = decode(raw); if (hasLetters(k)) used.add(k) }
+      }
+      if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && (n.expression.text === 'tr' || n.expression.text === 't') && n.arguments.length >= 1 && n.arguments.length <= 2 && ts.isStringLiteralLike(n.arguments[0])) { const k = decode(n.arguments[0].text); if (hasLetters(k)) used.add(k) }
       ts.forEachChild(n, w)
     })(sf)
   }
@@ -60,7 +64,9 @@ function check() {
   console.log('Languages: en (source), ' + codes.join(', ') + '   |   ' + union.size + ' texts in use\n')
   for (const c of codes) {
     const d = langs[c], missing = [...union].filter(k => !(k in d)), empty = Object.keys(d).filter(k => !String(d[k]).trim())
-    const bad = missing.length + empty.length; if (bad) failed = true
+    const ph = k => (k.match(/\{\w+\}/g) || []).sort().join(' ')
+    const broken = Object.keys(d).filter(k => String(d[k]).trim() && ph(k) !== ph(d[k]))
+    const bad = missing.length + empty.length + broken.length; if (bad) failed = true
     console.log(c.padEnd(4) + String(Object.keys(d).length - empty.length).padStart(4) + ' translated   ' + missing.length + ' missing   ' + empty.length + ' empty' + (bad ? '   ✗' : '   ✓'))
     missing.slice(0, 8).forEach(k => console.log('       missing: ' + k.slice(0, 90)))
     if (missing.length > 8) console.log('       … and ' + (missing.length - 8) + ' more')
@@ -102,30 +108,62 @@ function wrapFiles(files, { dry = false } = {}) {
   for (const file of files) {
     if (!fs.existsSync(file)) { console.log('MISSING', file); continue }
     const src = fs.readFileSync(file, 'utf8'), sf = parse(file, src), edits = []; let needT = false, needTr = false
+    const isClient = /^\s*(\/\/[^\n]*\n\s*|\/\*[\s\S]*?\*\/\s*)*['"]use client['"]/.test(src) // hooks (useTr) only work in client components
     const noTranslate = n => { for (let p = n.parent; p; p = p.parent) { const open = ts.isJsxElement(p) ? p.openingElement : ts.isJsxSelfClosingElement(p) ? p : null
         if (open && open.attributes.properties.some(a => ts.isJsxAttribute(a) && a.name.getText() === 'translate' && a.initializer && ts.isStringLiteral(a.initializer) && a.initializer.text === 'no')) return true } return false }
     const comp = n => { let c = null; for (let p = n; p; p = p.parent) {
         if (ts.isFunctionDeclaration(p) && p.name && /^[A-Z]/.test(p.name.text)) c = p
         if (ts.isVariableDeclaration(p) && /^[A-Z]/.test(p.name.getText()) && p.initializer && (ts.isArrowFunction(p.initializer) || ts.isFunctionExpression(p.initializer))) c = p.initializer }
       return c }
+    const handled = new Set()
+    const nameOf = (e, i) => ts.isIdentifier(e) ? e.text : ts.isPropertyAccessExpression(e) ? e.name.text : ts.isCallExpression(e) && ts.isIdentifier(e.expression) ? e.expression.text : 'n' + (i + 1)
+    const exprOk = e => { const t = e.getText(); return !/[<]|=>|\s\?\s/.test(t) && t.length < 160 }
+    // A sentence made of words AND values ("Day {n} of {total}") — even beside an icon — is translated as ONE text with named placeholders.
+    const mixedRuns = n => {
+      const runs = []; let cur = []
+      for (const c of n.children) { if (ts.isJsxText(c) || (ts.isJsxExpression(c) && c.expression)) cur.push(c); else { if (cur.length) runs.push(cur); cur = [] } }
+      if (cur.length) runs.push(cur)
+      for (const run of runs) {
+        if (run.length < 2 || !run.some(c => ts.isJsxText(c) && hasLetters(decode(c.getText())))) continue
+        const exprs = run.filter(c => ts.isJsxExpression(c) && !ts.isStringLiteralLike(c.expression))
+        if (!exprs.length || !exprs.every(c => exprOk(c.expression))) continue
+        let key = '', i = 0; const vals = [], seen = new Set()
+        for (const c of run) {
+          if (ts.isJsxText(c)) key += src.slice(c.pos, c.end) // full text: TypeScript treats a fragment's leading spaces as trivia
+          else if (ts.isStringLiteralLike(c.expression)) key += c.expression.text
+          else { let nm = nameOf(c.expression, i++); while (seen.has(nm)) nm += '2'; seen.add(nm); key += '{' + nm + '}'; vals.push(nm + ': ' + c.expression.getText()) }
+        }
+        key = decode(key); run.forEach(c => handled.add(c))
+        if (SKIP.has(key) || isCopyrightNotice(key)) continue
+        const first = run[0], last = run[run.length - 1]
+        const trail = ts.isJsxText(last) ? last.getText().match(/\s*$/)[0] : ''
+        keys.add(key); needT = true
+        edits.push([first.getStart(), last.getEnd(), '<T v={{ ' + vals.join(', ') + ' }}>{' + q(key) + '}</T>' + trail])
+      }
+    }
     ;(function walk(n) {
-      if (ts.isJsxText(n)) {
+      if (((ts.isJsxElement(n) && n.openingElement.tagName.getText() !== 'T') || ts.isJsxFragment(n)) && !noTranslate(n.children[0] || n)) mixedRuns(n)
+      if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && ['confirm', 'alert'].includes(n.expression.text) && n.arguments.length >= 1 && ts.isStringLiteralLike(n.arguments[0]) && hasLetters(n.arguments[0].text) && !noTranslate(n)) {
+        const c = comp(n); const a = n.arguments[0]
+        if (c && c.body && ts.isBlock(c.body) && isClient) { keys.add(decode(a.text)); needTr = true; edits.push([a.getStart(), a.getEnd(), 'tr(' + q(a.text) + ')']) }
+      }
+      if (ts.isJsxText(n) && !handled.has(n)) {
         const raw = n.getText(), core = raw.trim(), key = decode(core)
         const insideT = n.parent && ts.isJsxElement(n.parent) && n.parent.openingElement.tagName.getText() === 'T'
-        if (!insideT && hasLetters(key) && !SKIP.has(key) && !noTranslate(n)) {
+        if (!insideT && hasLetters(key) && !SKIP.has(key) && !isCopyrightNotice(key) && !noTranslate(n)) {
           keys.add(key); needT = true
           const lead = raw.slice(0, raw.indexOf(core)), trail = raw.slice(raw.indexOf(core) + core.length)
           edits.push([n.getStart(), n.getEnd(), lead + '<T>' + core.replace(/\s+/g, ' ') + '</T>' + trail])
         }
       }
-      if (ts.isJsxExpression(n) && n.expression && n.parent && ts.isJsxElement(n.parent) && n.parent.openingElement.tagName.getText() !== 'T'
+      if (ts.isJsxExpression(n) && !handled.has(n) && n.expression && n.parent && ts.isJsxElement(n.parent) && n.parent.openingElement.tagName.getText() !== 'T'
           && /^[a-z]\w*\.(label|description|group)$/.test(n.expression.getText()) && !noTranslate(n)) { needT = true; edits.push([n.getStart(), n.getEnd(), '<T>' + n.getText() + '</T>']) }
       if (ts.isJsxAttribute(n) && n.initializer && ts.isStringLiteral(n.initializer) && ['aria-label', 'placeholder', 'title', 'alt'].includes(n.name.getText())) {
         const v = decode(n.initializer.text)
         if (hasLetters(v) && !SKIP.has(v) && !noTranslate(n)) {
           const c = comp(n)
-          if (c && c.body && ts.isBlock(c.body)) { keys.add(v); needTr = true; edits.push([n.initializer.getStart(), n.initializer.getEnd(), '{tr(' + q(n.initializer.text) + ')}']) }
-          else console.log('  (left as-is, not inside a component: ' + file + ' → ' + v.slice(0, 50) + ')')
+          if (c && c.body && ts.isBlock(c.body) && isClient) { keys.add(v); needTr = true; edits.push([n.initializer.getStart(), n.initializer.getEnd(), '{tr(' + q(n.initializer.text) + ')}']) }
+          else console.log('  (left as-is — ' + (isClient ? 'not inside a component' : 'server component, convert to client or use <T>') + ': ' + file + ' → ' + v.slice(0, 50) + ')')
         }
       }
       ts.forEachChild(n, walk)

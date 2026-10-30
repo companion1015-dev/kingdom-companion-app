@@ -1,6 +1,6 @@
 'use client'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { AUTO, DEFAULT_LOCALE, LOCALE_COOKIE, dirOf, isPreference, resolveLocale, translate, type LocaleCode, type LocalePreference } from '@/lib/i18n'
+import { AUTO, DEFAULT_LOCALE, LOCALE_COOKIE, dirOf, isPreference, resolveLocale, translate, type LocaleCode, type LocalePreference, type Values } from '@/lib/i18n'
 
 export type SaveResult = 'saved' | 'guest' | 'failed'
 
@@ -10,10 +10,10 @@ type Ctx = {
   /** What the user picked: a language, or 'auto' = device language. */
   preference: LocalePreference
   dir: 'ltr' | 'rtl'
-  /** Translate an English text into the current language (falls back to the English text). */
-  tr: (text: string) => string
+  /** Translate an English text into the current language (falls back to the English text). Values fill {placeholders}. */
+  tr: (text: string, values?: Values) => string
   /** Alias of tr. */
-  t: (text: string) => string
+  t: (text: string, values?: Values) => string
   /** Switch on this device only (cookie). */
   setPreference: (p: LocalePreference) => void
   /** Switch, and also save to the signed-in user's account (guests: device only). */
@@ -24,7 +24,7 @@ type Ctx = {
 
 const noop = async (): Promise<SaveResult> => 'guest'
 const I18nContext = createContext<Ctx>({
-  locale: DEFAULT_LOCALE, preference: DEFAULT_LOCALE, dir: 'ltr', tr: s => s, t: s => s,
+  locale: DEFAULT_LOCALE, preference: DEFAULT_LOCALE, dir: 'ltr', tr: (s, v) => translate(DEFAULT_LOCALE, s, v), t: (s, v) => translate(DEFAULT_LOCALE, s, v),
   setPreference: () => {}, choosePreference: noop, chooseLocale: noop,
 })
 
@@ -83,7 +83,7 @@ export default function I18nProvider({ children, initialLocale = DEFAULT_LOCALE 
   }, [apply])
 
   const value = useMemo<Ctx>(() => {
-    const tr = (text: string) => translate(locale, text)
+    const tr = (text: string, values?: Values) => translate(locale, text, values)
     return { locale, preference, dir: dirOf(locale), tr, t: tr, setPreference, choosePreference, chooseLocale: choosePreference }
   }, [locale, preference, setPreference, choosePreference])
 

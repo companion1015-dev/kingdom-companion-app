@@ -18,8 +18,15 @@ export const dictionaries: Record<Exclude<LocaleCode, 'en'>, Dictionary> = {
   // i18n:dictionaries
 }
 
-export function translate(locale: LocaleCode, text: string): string {
-  if (locale === 'en') return text
+export type Values = Record<string, string | number>
+
+// Sentences with values use named placeholders: translate(locale, 'Day {n} of {total}', { n: 3, total: 40 }).
+// Translators may move {n} and {total} anywhere in the sentence (needed for Arabic and Urdu word order).
+const fill = (text: string, values?: Values) =>
+  values ? text.replace(/\{(\w+)\}/g, (m, k: string) => (k in values ? String(values[k]) : m)) : text
+
+export function translate(locale: LocaleCode, text: string, values?: Values): string {
+  if (locale === 'en') return fill(text, values)
   const found = dictionaries[locale]?.[text]
-  return found ? found : text
+  return fill(found ? found : text, values)
 }

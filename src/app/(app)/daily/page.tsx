@@ -9,8 +9,10 @@ import type { DailyEntry } from '@/modules/daily/data/entries'
 import { BOOKS } from '@/modules/bible/services/mock-data'
 import { localDateKey } from '@/lib/date'
 import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
+import T, { useTr } from '@/components/i18n/T'
 
 export default function DailyPage() {
+  const tr = useTr()
   const [entry,     setEntry]     = useState<DailyEntry | null>(null)
   const [offset,    setOffset]    = useState(0)
   const [loading,   setLoading]   = useState(true)
@@ -62,7 +64,7 @@ export default function DailyPage() {
           <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-12 text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
               <div className="w-px h-4 bg-white/20 dark:bg-navy-dark" />
-              <span className="text-xs font-body font-medium text-white/45 tracking-widest uppercase">Daily Encouragement</span>
+              <span className="text-xs font-body font-medium text-white/45 tracking-widest uppercase"><T>Daily Encouragement</T></span>
               <div className="w-px h-4 bg-white/20 dark:bg-navy-dark" />
             </div>
             <p className="text-gold/70 font-body text-xs tracking-widest uppercase mb-2">{today}</p>
@@ -89,7 +91,7 @@ export default function DailyPage() {
                     </div>
                     <div className="flex items-center gap-1.5 text-white/30 font-body text-xs">
                       <Clock className="w-3 h-3" />
-                      {Math.max(1, Math.round((entry?.reflection?.split(/\s+/).length || 200) / 200))} min read
+                      <T v={{ n1: Math.max(1, Math.round((entry?.reflection?.split(/\s+/).length || 200) / 200)) }}>{'{n1} min read'}</T>
                     </div>
                   </div>
                 </div>
@@ -103,11 +105,11 @@ export default function DailyPage() {
                   </button>
                   <button onClick={handleShare}
                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white/70 hover:border-white/40 hover:text-white text-sm font-body font-medium transition-all">
-                    <Share2 className="w-3.5 h-3.5" /> Share
+                    <Share2 className="w-3.5 h-3.5" /> <T>Share</T>
                   </button>
                   <Link href={bibleHref(entry.book_id, entry.chapter, firstVerseNumber(entry.verse_reference))}
                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 text-white/70 hover:border-white/40 hover:text-white text-sm font-body font-medium transition-all">
-                    <BookOpen className="w-3.5 h-3.5" /> Read in Bible
+                    <BookOpen className="w-3.5 h-3.5" /> <T>Read in Bible</T>
                   </Link>
                 </div>
               </>
@@ -138,7 +140,7 @@ export default function DailyPage() {
               <div className="space-y-5">
                 {/* Reflection */}
                 <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 sm:p-8">
-                  <h2 className="font-display text-xl font-semibold text-navy dark:text-cream mb-4">Reflection</h2>
+                  <h2 className="font-display text-xl font-semibold text-navy dark:text-cream mb-4"><T>Reflection</T></h2>
                   {entry.reflection.split('\n\n').map((para, i) => (
                     <p key={i} className="text-charcoal/70 dark:text-cream/70 font-body text-sm leading-relaxed mb-4 last:mb-0">{para}</p>
                   ))}
@@ -148,10 +150,10 @@ export default function DailyPage() {
                 <div className="bg-navy rounded-2xl p-6 relative overflow-hidden">
                   <div className="absolute top-4 right-4 opacity-10 font-display text-6xl select-none">✝</div>
                   <div className="relative">
-                    <span className="text-xs font-body font-semibold text-gold/70 tracking-widest uppercase block mb-2">Today&rsquo;s Challenge</span>
+                    <span className="text-xs font-body font-semibold text-gold/70 tracking-widest uppercase block mb-2"><T>Today&rsquo;s Challenge</T></span>
                     <p className="text-white font-body text-sm leading-relaxed mb-4">{entry.challenge}</p>
                     <div className="h-px bg-white/10 dark:bg-navy-dark mb-4" />
-                    <span className="text-xs font-body font-semibold text-white/40 tracking-widest uppercase block mb-2">Reflection Question</span>
+                    <span className="text-xs font-body font-semibold text-white/40 tracking-widest uppercase block mb-2"><T>Reflection Question</T></span>
                     <p className="text-white/70 font-display italic text-base leading-relaxed">{entry.reflection_question}</p>
                   </div>
                 </div>
@@ -162,11 +164,11 @@ export default function DailyPage() {
                     <BookOpen className="w-5 h-5 text-navy/50 dark:text-cream/50" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-0.5">Suggested Reading</p>
+                    <p className="text-xs font-body font-semibold text-navy/40 dark:text-cream/40 tracking-widest uppercase mb-0.5"><T>Suggested Reading</T></p>
                     <p className="font-body font-medium text-navy dark:text-cream text-sm">{BOOKS.find(b => b.bookId === entry?.book_id)?.name} {entry?.chapter}</p>
                   </div>
                   <Link href={bibleHref(entry.book_id, entry.chapter)} className="flex items-center gap-1.5 text-gold hover:text-gold-dark text-xs font-body font-semibold transition-colors">
-                    Open <ArrowRight className="w-3.5 h-3.5" />
+                    <T>Open</T> <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               </div>
@@ -180,8 +182,8 @@ export default function DailyPage() {
                     <Image src="/images/logo.png" alt="" fill className="object-cover" sizes="32px" />
                   </div>
                   <div>
-                    <h2 className="font-display text-xl font-semibold text-navy dark:text-cream">Guided Prayer</h2>
-                    <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">Pray this aloud or silently</p>
+                    <h2 className="font-display text-xl font-semibold text-navy dark:text-cream"><T>Guided Prayer</T></h2>
+                    <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body"><T>Pray this aloud or silently</T></p>
                   </div>
                 </div>
                 <div className="border-l-4 border-gold/40 pl-5">
@@ -190,9 +192,9 @@ export default function DailyPage() {
                   ))}
                 </div>
                 <div className="mt-6 pt-5 border-t border-navy/8 text-center">
-                  <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body mb-3">Want to continue in prayer?</p>
+                  <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body mb-3"><T>Want to continue in prayer?</T></p>
                   <Link href="/companion" className="inline-flex items-center gap-2 px-5 py-2.5 bg-navy hover:bg-navy-light text-white text-sm font-body font-medium rounded-full transition-colors">
-                    Open AI Companion
+                    <T>Open AI Companion</T>
                   </Link>
                 </div>
               </div>
@@ -201,18 +203,18 @@ export default function DailyPage() {
             {/* Journal tab */}
             {tab === 'journal' && (
               <div className="bg-white dark:bg-navy-dark rounded-2xl border border-navy/8 p-6 sm:p-8">
-                <h2 className="font-display text-xl font-semibold text-navy dark:text-cream mb-2">Journal Prompt</h2>
-                <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm mb-6 leading-relaxed">What is God saying to you through today's verse? Write freely below.</p>
+                <h2 className="font-display text-xl font-semibold text-navy dark:text-cream mb-2"><T>Journal Prompt</T></h2>
+                <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm mb-6 leading-relaxed"><T>What is God saying to you through today's verse? Write freely below.</T></p>
                 <textarea
-                  placeholder="Write your thoughts, prayers, or reflections here…"
+                  placeholder={tr('Write your thoughts, prayers, or reflections here…')}
                   rows={8}
                   className="w-full p-4 rounded-xl border border-navy/10 focus:border-gold/40 focus:ring-2 focus:ring-gold/10 text-navy dark:text-cream font-body text-sm leading-relaxed outline-none resize-none transition-all bg-cream/50 dark:bg-navy-dark"
                   style={{ caretColor: '#C9A84C' }}
                 />
                 <div className="flex items-center justify-between mt-4">
-                  <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body">Your journal is private and saved locally</p>
+                  <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body"><T>Your journal is private and saved locally</T></p>
                   <Link href="/journal" className="text-xs text-gold hover:text-gold-dark font-body font-medium transition-colors">
-                    Open full journal →
+                    <T>Open full journal →</T>
                   </Link>
                 </div>
               </div>
@@ -222,7 +224,7 @@ export default function DailyPage() {
             <div className="flex items-center justify-between mt-8 pt-6 border-t border-navy/8">
               <button onClick={() => setOffset(o => o - 1)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream hover:border-navy/25 text-sm font-body font-medium transition-all">
-                <ChevronLeft className="w-4 h-4" /> Previous Day
+                <ChevronLeft className="w-4 h-4" /> <T>Previous Day</T>
               </button>
               <div className="text-center">
                 <p className="text-xs text-charcoal/35 dark:text-cream/35 font-body">
@@ -231,7 +233,7 @@ export default function DailyPage() {
               </div>
               <button onClick={() => setOffset(o => o + 1)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream hover:border-navy/25 text-sm font-body font-medium transition-all">
-                Next Day <ChevronRight className="w-4 h-4" />
+                <T>Next Day</T> <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>

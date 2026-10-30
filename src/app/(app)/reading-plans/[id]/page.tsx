@@ -11,6 +11,7 @@ import Footer from '@/components/layout/Footer'
 import { bibleBooks } from '@/data/mock'
 import { bibleHref } from '@/lib/bible-links'
 import { localDateKey } from '@/lib/date'
+import T, { useTr } from '@/components/i18n/T'
 
 // Reading Plan detail — rebuilt. The previous version dumped all 365 days
 // as one flat list of bare "Day N" + chapter chips and never rendered
@@ -117,6 +118,7 @@ function actionHref(day: Day, actionStep: string): string {
 }
 
 export default function ReadingPlanDetailPage({ params }: { params: { id: string } }) {
+  const tr = useTr()
   const [plan,     setPlan]     = useState<PlanDetail | null>(null)
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState<string | null>(null)
@@ -194,7 +196,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
   }
 
   const resetPlan = () => {
-    if (!confirm('Reset this reading plan? Your progress will be lost.')) return
+    if (!confirm(tr('Reset this reading plan? Your progress will be lost.'))) return
     const all = loadProgress(); delete all[params.id]; saveProgress(all)
     setProgress(null)
     pushProgress({ planId: params.id, currentDay: 1, completed: false, paused: false, startedAt: new Date().toISOString(), reset: true })
@@ -265,7 +267,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
       <Navigation />
       <main className="max-w-3xl mx-auto px-4 py-10">
         <Link href="/reading-plans" className="inline-flex items-center gap-1.5 text-sm text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream mb-6">
-          <ArrowLeft className="w-4 h-4" /> Reading Plans
+          <ArrowLeft className="w-4 h-4" /> <T>Reading Plans</T>
         </Link>
 
         {loading && (
@@ -277,7 +279,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
         {!loading && error === 'not_found' && (
           <div className="text-center py-16 text-navy/50 dark:text-cream/50">
             <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p>This reading plan doesn&rsquo;t exist or isn&rsquo;t published yet.</p>
+            <p><T>This reading plan doesn&rsquo;t exist or isn&rsquo;t published yet.</T></p>
           </div>
         )}
 
@@ -288,9 +290,9 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
         {!loading && !error && plan && (
           <>
             <h1 className="font-display text-3xl font-light text-navy dark:text-cream mb-2">{plan.title}</h1>
-            {plan.description && <p className="text-navy/60 dark:text-cream/60 mb-4 leading-relaxed font-body text-sm">{plan.description}</p>}
+            {plan.description && <p className="text-navy/60 dark:text-cream/60 mb-4 leading-relaxed font-body text-sm"><T>{plan.description}</T></p>}
             <div className="flex items-center gap-3 mb-6 text-sm text-navy/50 dark:text-cream/50 font-body">
-              <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {plan.duration_days} days</span>
+              <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> <T v={{ duration_days: plan.duration_days }}>{'{duration_days} days'}</T></span>
               <span className="capitalize px-2 py-0.5 rounded-full bg-navy/6 text-xs font-medium">{plan.difficulty}</span>
             </div>
 
@@ -299,7 +301,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
               {!progress ? (
                 <button onClick={startPlan}
                   className="flex items-center gap-2 px-5 py-2.5 bg-navy hover:bg-navy-light text-white text-sm font-body font-semibold rounded-full transition-colors">
-                  <Play className="w-4 h-4" /> Start This Plan
+                  <Play className="w-4 h-4" /> <T>Start This Plan</T>
                 </button>
               ) : (
                 <>
@@ -314,18 +316,18 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                     {!progress.completed && (
                       <button onClick={markDay}
                         className="flex items-center gap-1.5 px-4 py-2 bg-navy hover:bg-navy-light text-white text-xs font-body font-medium rounded-full transition-colors">
-                        <Check className="w-3.5 h-3.5" /> Mark Day {progress.currentDay} Complete
+                        <Check className="w-3.5 h-3.5" /> <T v={{ currentDay: progress.currentDay }}>{'Mark Day {currentDay} Complete'}</T>
                       </button>
                     )}
                     {!progress.completed && (
                       <button onClick={togglePause}
                         className="flex items-center gap-1.5 px-4 py-2 border border-navy/15 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-xs font-body rounded-full transition-colors">
-                        {progress.paused ? <><Play className="w-3.5 h-3.5" /> Resume</> : <><Pause className="w-3.5 h-3.5" /> Pause</>}
+                        {progress.paused ? <><Play className="w-3.5 h-3.5" /> <T>Resume</T></> : <><Pause className="w-3.5 h-3.5" /> <T>Pause</T></>}
                       </button>
                     )}
                     <button onClick={resetPlan}
                       className="flex items-center gap-1.5 px-4 py-2 text-charcoal/35 dark:text-cream/35 hover:text-red-500 text-xs font-body rounded-full transition-colors">
-                      <RotateCcw className="w-3.5 h-3.5" /> Reset
+                      <RotateCcw className="w-3.5 h-3.5" /> <T>Reset</T>
                     </button>
                   </div>
                 </>
@@ -333,7 +335,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
             </div>
 
             {plan.days.length === 0 ? (
-              <p className="text-navy/50 dark:text-cream/50 text-sm font-body">This plan&rsquo;s daily readings haven&rsquo;t been published yet.</p>
+              <p className="text-navy/50 dark:text-cream/50 text-sm font-body"><T>This plan&rsquo;s daily readings haven&rsquo;t been published yet.</T></p>
             ) : (
               <div className="space-y-3">
                 {phases.map(phase => {
@@ -347,7 +349,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                       >
                         <div>
                           <h2 className="font-display text-lg text-navy dark:text-cream">{phase.name}</h2>
-                          <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5">Days {phase.days[0]?.day_number}–{phase.days[phase.days.length - 1]?.day_number} · {phase.days.length} days</p>
+                          <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body mt-0.5"><T v={{ day_number: phase.days[0]?.day_number, day_number2: phase.days[phase.days.length - 1]?.day_number, length: phase.days.length }}>{'Days {day_number}–{day_number2} · {length} days'}</T></p>
                         </div>
                         <ChevronDown className={`w-4 h-4 text-navy/40 dark:text-cream/40 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                       </button>
@@ -371,8 +373,8 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                                       {day.title && <h3 className="font-body text-sm font-medium text-navy dark:text-cream">{day.title}</h3>}
-                                      {isToday && <span className="text-[10px] font-body font-semibold text-gold-dark bg-gold/15 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Today</span>}
-                                      {isCurrent && !isToday && <span className="text-[10px] font-body font-semibold text-navy dark:text-cream bg-navy/10 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Your day</span>}
+                                      {isToday && <span className="text-[10px] font-body font-semibold text-gold-dark bg-gold/15 px-1.5 py-0.5 rounded-full uppercase tracking-wide"><T>Today</T></span>}
+                                      {isCurrent && !isToday && <span className="text-[10px] font-body font-semibold text-navy dark:text-cream bg-navy/10 px-1.5 py-0.5 rounded-full uppercase tracking-wide"><T>Your day</T></span>}
                                     </div>
                                     {parsed.Date && (
                                       <p className="text-[11px] text-charcoal/35 dark:text-cream/35 font-body flex items-center gap-1 mb-1.5">
@@ -398,7 +400,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                         <div className="flex gap-2">
                                           <BookOpen className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
                                           <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed">
-                                            <span className="font-medium text-navy/70 dark:text-cream/70">Library Reading —</span>{' '}
+                                            <span className="font-medium text-navy/70 dark:text-cream/70"><T>Library Reading —</T></span>{' '}
                                             {href ? (
                                               <Link href={href} className="text-navy dark:text-cream underline decoration-navy/25 hover:decoration-gold hover:text-gold-dark transition-colors">
                                                 {parsed['Library Reading']}
@@ -412,10 +414,10 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                       <div className="flex gap-2">
                                         <MessageSquare className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
                                         <div>
-                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Reflection —</span> {parsed['Reflection Prompt']}</p>
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70"><T>Reflection —</T></span> {parsed['Reflection Prompt']}</p>
                                           <Link href={reflectionHref(parsed['Reflection Prompt'])}
                                             className="inline-flex items-center gap-1 mt-1 text-[11px] font-body font-medium text-gold hover:text-gold-dark transition-colors">
-                                            Reflect with AI Companion <ArrowRight className="w-3 h-3" />
+                                            <T>Reflect with AI Companion</T> <ArrowRight className="w-3 h-3" />
                                           </Link>
                                         </div>
                                       </div>
@@ -424,10 +426,10 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                       <div className="flex gap-2">
                                         <HeartHandshake className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
                                         <div>
-                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Prayer Focus —</span> {parsed['Prayer Focus']}</p>
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70"><T>Prayer Focus —</T></span> {parsed['Prayer Focus']}</p>
                                           <Link href={prayerHref(parsed['Prayer Focus'])}
                                             className="inline-flex items-center gap-1 mt-1 text-[11px] font-body font-medium text-gold hover:text-gold-dark transition-colors">
-                                            Pray this with AI Companion <ArrowRight className="w-3 h-3" />
+                                            <T>Pray this with AI Companion</T> <ArrowRight className="w-3 h-3" />
                                           </Link>
                                         </div>
                                       </div>
@@ -436,10 +438,10 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                       <div className="flex gap-2">
                                         <Sparkles className="w-3.5 h-3.5 text-navy/40 dark:text-cream/40 shrink-0 mt-0.5" />
                                         <div>
-                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70">Action Step —</span> {parsed['Action Step']}</p>
+                                          <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed"><span className="font-medium text-navy/70 dark:text-cream/70"><T>Action Step —</T></span> {parsed['Action Step']}</p>
                                           <Link href={actionHref(day, parsed['Action Step'])}
                                             className="inline-flex items-center gap-1 mt-1 text-[11px] font-body font-medium text-gold hover:text-gold-dark transition-colors">
-                                            Save as a commitment <ArrowRight className="w-3 h-3" />
+                                            <T>Save as a commitment</T> <ArrowRight className="w-3 h-3" />
                                           </Link>
                                         </div>
                                       </div>
@@ -448,8 +450,7 @@ export default function ReadingPlanDetailPage({ params }: { params: { id: string
                                       {day.readings.map(item => (
                                         <Link key={item.id} href={bibleHref(item.book_id, item.chapter)}
                                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-navy text-white hover:bg-navy-light text-[11px] font-body font-medium transition-colors">
-                                          Read {bookName(item.book_id)} {item.chapter}
-                                        </Link>
+                                          <T v={{ bookName: bookName(item.book_id), chapter: item.chapter }}>{'Read {bookName} {chapter}'}</T></Link>
                                       ))}
                                     </div>
                                   </div>

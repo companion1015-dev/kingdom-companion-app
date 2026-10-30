@@ -18,6 +18,7 @@ import { InlineCommentary, NoteIndicator, CommentaryPopup } from '@/modules/comm
 import { HelloAOCommentaryProvider } from '@/modules/commentary/providers/helloao'
 import { loadStudySettings } from '@/modules/commentary/types'
 import type { CommentaryNote } from '@/modules/commentary/types'
+import T, { useTr } from '@/components/i18n/T'
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type Panel = 'book' | 'chapter' | 'search' | null
@@ -36,6 +37,7 @@ function loadPosition() {
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function BibleReader() {
+  const tr = useTr()
   const searchParams = useSearchParams()
   const appliedInitialPosition = useRef(false)
   const [translation, setTranslation] = useState('BSB') // NIV is access-denied with this API key/tier — see bible-api.ts header
@@ -305,27 +307,27 @@ export default function BibleReader() {
               <h1 className="font-display text-3xl sm:text-4xl font-light text-navy dark:text-cream">
                 {currentBook?.name} {chapter}
               </h1>
-              {chapterData && <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1">{chapterData.totalVerses} verses</p>}
+              {chapterData && <p className="text-xs text-charcoal/30 dark:text-cream/30 font-body mt-1"><T v={{ totalVerses: chapterData.totalVerses }}>{'{totalVerses} verses'}</T></p>}
             </div>
 
             {/* Note format toggle — OLD vs NEW */}
             {!loading && !error && chapterData && Object.keys(studyState.notes).length > 0 && (
               <div className="flex items-center justify-end gap-2 mb-4">
-                <span className="text-xs text-charcoal/35 dark:text-cream/35 font-body">Notes:</span>
+                <span className="text-xs text-charcoal/35 dark:text-cream/35 font-body"><T>Notes:</T></span>
                 <div className="flex bg-navy/5 rounded-lg p-0.5">
                   <button
                     onClick={() => setNoteFormat('popup')}
-                    title="Old format: note link in verse actions"
+                    title={tr('Old format: note link in verse actions')}
                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-body transition-all ${noteFormat === 'popup' ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream'}`}
                   >
-                    <FileText className="w-3 h-3" /> Links
+                    <FileText className="w-3 h-3" /> <T>Links</T>
                   </button>
                   <button
                     onClick={() => setNoteFormat('inline')}
-                    title="New format: explanatory text under verse"
+                    title={tr('New format: explanatory text under verse')}
                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-body transition-all ${noteFormat === 'inline' ? 'bg-white dark:bg-navy-dark text-navy dark:text-cream shadow-sm' : 'text-charcoal/40 dark:text-cream/40 hover:text-navy dark:text-cream'}`}
                   >
-                    <AlignLeft className="w-3 h-3" /> Inline
+                    <AlignLeft className="w-3 h-3" /> <T>Inline</T>
                   </button>
                 </div>
               </div>
@@ -355,7 +357,7 @@ export default function BibleReader() {
                 <WifiOff className="w-12 h-12 text-navy/20 dark:text-cream/20 mb-4" />
                 <p className="font-body text-sm text-charcoal/50 dark:text-cream/50 mb-2">{error}</p>
                 <button onClick={() => loadChapter(translation, bookId, chapter)} className="px-5 py-2 bg-navy text-white text-sm font-body font-medium rounded-full hover:bg-navy-light transition-colors">
-                  Try again
+                  <T>Try again</T>
                 </button>
               </div>
             )}
@@ -396,7 +398,7 @@ export default function BibleReader() {
                               className="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded-md bg-gold/15 text-gold text-xs font-body font-medium hover:bg-gold/25 transition-colors align-middle"
                               aria-label={`View note for ${verse.reference}`}
                             >
-                              <FileText className="w-2.5 h-2.5" /> Note
+                              <FileText className="w-2.5 h-2.5" /> <T>Note</T>
                             </button>
                           )}
                           {commentaryMode === 'popup' && commentaryIndex[verse.verseNumber] && (
@@ -406,7 +408,7 @@ export default function BibleReader() {
 
                         {/* Bookmark indicator */}
                         {isBookmarked && (
-                          <div className="absolute top-0 right-2 w-2.5 h-4 bg-gold rounded-b-sm" aria-label="Bookmarked" />
+                          <div className="absolute top-0 right-2 w-2.5 h-4 bg-gold rounded-b-sm" aria-label={tr('Bookmarked')} />
                         )}
                       </div>
 
@@ -420,7 +422,7 @@ export default function BibleReader() {
                         >
                           <div className="flex items-center gap-1.5 mb-1">
                             <FileText className="w-2.5 h-2.5 text-gold/70 shrink-0" />
-                            <span className="text-xs text-gold/70 font-body font-semibold">Your note</span>
+                            <span className="text-xs text-gold/70 font-body font-semibold"><T>Your note</T></span>
                           </div>
                           <p className="text-xs text-charcoal/60 dark:text-cream/60 font-body leading-relaxed line-clamp-3">
                             {note.content}
@@ -470,11 +472,11 @@ export default function BibleReader() {
             <div className="sticky bottom-0 bg-white/95 dark:bg-navy-dark backdrop-blur-md border-t border-navy/8">
               <div className="max-w-2xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
                 <button onClick={goToPrevChapter} disabled={!chapterData.previousChapter} className="flex items-center gap-2 px-4 py-2 rounded-full border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream hover:border-navy/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-body font-medium">
-                  <ChevronLeft className="w-4 h-4" /> Previous
+                  <ChevronLeft className="w-4 h-4" /> <T>Previous</T>
                 </button>
                 <span className="text-xs text-charcoal/30 dark:text-cream/30 font-body">{currentBook?.name} {chapter} · {translation}</span>
                 <button onClick={goToNextChapter} disabled={!chapterData.nextChapter} className="flex items-center gap-2 px-4 py-2 rounded-full border border-navy/12 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream hover:border-navy/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-sm font-body font-medium">
-                  Next <ChevronRight className="w-4 h-4" />
+                  <T>Next</T> <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>

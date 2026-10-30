@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Clock, Play, RotateCcw, Pause, Check, BookOpen } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
+import T, { useTr } from '@/components/i18n/T'
 
 // Reading Plans index — real API-backed plan data (previous session), with
 // Reading Plans Progress sync now implemented per the finalised Option C
@@ -90,6 +91,7 @@ const diffColor: Record<string, string> = {
 }
 
 export default function ReadingPlansPage() {
+  const tr = useTr()
   const [plans,    setPlans]    = useState<Plan[] | null>(null)
   const [error,    setError]    = useState(false)
   const [progress, setProgress] = useState<Record<string, Progress>>({})
@@ -196,7 +198,7 @@ export default function ReadingPlansPage() {
   }
 
   const resetPlan = (planId: string) => {
-    if (!confirm('Reset this reading plan? Your progress will be lost.')) return
+    if (!confirm(tr('Reset this reading plan? Your progress will be lost.'))) return
     const updated = { ...progress }; delete updated[planId]
     setProgress(updated); saveProgress(updated)
 
@@ -249,8 +251,8 @@ export default function ReadingPlansPage() {
               <Image src="/images/logo.png" alt="" fill className="object-cover" sizes="48px" />
             </div>
             <div>
-              <h1 className="font-display text-3xl font-light text-navy dark:text-cream">Reading Plans</h1>
-              <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm">Build a consistent habit of reading God&rsquo;s Word</p>
+              <h1 className="font-display text-3xl font-light text-navy dark:text-cream"><T>Reading Plans</T></h1>
+              <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm"><T>Build a consistent habit of reading God&rsquo;s Word</T></p>
             </div>
           </div>
 
@@ -262,13 +264,13 @@ export default function ReadingPlansPage() {
 
           {error && (
             <p className="text-center text-charcoal/50 dark:text-cream/50 font-body text-sm py-16">
-              Reading plans couldn&rsquo;t be loaded right now. Please try again.
+              <T>Reading plans couldn&rsquo;t be loaded right now. Please try again.</T>
             </p>
           )}
 
           {plans !== null && !error && plans.length === 0 && (
             <p className="text-center text-charcoal/50 dark:text-cream/50 font-body text-sm py-16">
-              No reading plans are published yet — check back soon.
+              <T>No reading plans are published yet — check back soon.</T>
             </p>
           )}
 
@@ -276,7 +278,7 @@ export default function ReadingPlansPage() {
             <>
               {activePlans.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-3">Your Active Plans</h2>
+                  <h2 className="font-display text-lg font-semibold text-navy dark:text-cream mb-3"><T>Your Active Plans</T></h2>
                   <div className="space-y-3">
                     {activePlans.map(plan => {
                       const p   = progress[plan.id]
@@ -288,7 +290,7 @@ export default function ReadingPlansPage() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2 mb-1">
                                 <h3 className="font-body font-semibold text-navy dark:text-cream text-sm">{plan.title}</h3>
-                                <span className="text-xs text-charcoal/40 dark:text-cream/40 font-body shrink-0">Day {p.currentDay}/{plan.duration_days}</span>
+                                <span className="text-xs text-charcoal/40 dark:text-cream/40 font-body shrink-0"><T v={{ currentDay: p.currentDay, duration_days: plan.duration_days }}>{'Day {currentDay}/{duration_days}'}</T></span>
                               </div>
                               <div className="w-full bg-navy/8 rounded-full h-1.5 mb-3">
                                 <div className="bg-gold h-1.5 rounded-full transition-all" style={{ width: `${pct}%` }} />
@@ -296,15 +298,15 @@ export default function ReadingPlansPage() {
                               <div className="flex items-center gap-2 flex-wrap">
                                 <button onClick={() => markDay(plan.id)}
                                   className="flex items-center gap-1.5 px-3 py-1.5 bg-navy hover:bg-navy-light text-white text-xs font-body font-medium rounded-full transition-colors">
-                                  <Check className="w-3 h-3" /> Mark Day {p.currentDay} Complete
+                                  <Check className="w-3 h-3" /> <T v={{ currentDay: p.currentDay }}>{'Mark Day {currentDay} Complete'}</T>
                                 </button>
                                 <button onClick={() => togglePause(plan.id)}
                                   className="flex items-center gap-1.5 px-3 py-1.5 border border-navy/15 text-navy/60 dark:text-cream/60 hover:text-navy dark:text-cream text-xs font-body rounded-full transition-colors">
-                                  {p.paused ? <><Play className="w-3 h-3" /> Resume</> : <><Pause className="w-3 h-3" /> Pause</>}
+                                  {p.paused ? <><Play className="w-3 h-3" /> <T>Resume</T></> : <><Pause className="w-3 h-3" /> <T>Pause</T></>}
                                 </button>
                                 <button onClick={() => resetPlan(plan.id)}
                                   className="flex items-center gap-1.5 px-3 py-1.5 text-charcoal/35 dark:text-cream/35 hover:text-red-500 text-xs font-body rounded-full transition-colors">
-                                  <RotateCcw className="w-3 h-3" /> Reset
+                                  <RotateCcw className="w-3 h-3" /> <T>Reset</T>
                                 </button>
                               </div>
                             </div>
@@ -340,17 +342,17 @@ export default function ReadingPlansPage() {
                         <div className={`p-5 ${completed ? 'bg-green-50' : 'bg-cream/50 dark:bg-navy-dark'}`}>
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <BookOpen className="w-6 h-6 text-navy/40 dark:text-cream/40" />
-                            {completed && <span className="flex items-center gap-1 text-xs font-body font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full"><Check className="w-3 h-3" /> Completed</span>}
+                            {completed && <span className="flex items-center gap-1 text-xs font-body font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full"><Check className="w-3 h-3" /> <T>Completed</T></span>}
                           </div>
                           <h3 className="font-body font-semibold text-navy dark:text-cream mb-1">{plan.title}</h3>
-                          {plan.description && <p className="text-xs text-charcoal/50 dark:text-cream/50 font-body leading-relaxed">{plan.description}</p>}
+                          {plan.description && <p className="text-xs text-charcoal/50 dark:text-cream/50 font-body leading-relaxed"><T>{plan.description}</T></p>}
                         </div>
                       </Link>
 
                       {started && !completed && (
                         <div className="px-5 pt-3">
                           <div className="flex justify-between text-xs font-body text-charcoal/40 dark:text-cream/40 mb-1">
-                            <span>Day {p.currentDay}</span><span>{pct}% complete</span>
+                            <span><T v={{ currentDay: p.currentDay }}>{'Day {currentDay}'}</T></span><span><T v={{ pct: pct }}>{'{pct}% complete'}</T></span>
                           </div>
                           <div className="w-full bg-navy/8 rounded-full h-1.5">
                             <div className="bg-gold h-1.5 rounded-full" style={{ width: `${pct}%` }} />
@@ -361,7 +363,7 @@ export default function ReadingPlansPage() {
                       <div className="p-5 pt-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1 text-xs text-charcoal/40 dark:text-cream/40 font-body">
-                            <Clock className="w-3 h-3" /> {plan.duration_days} days
+                            <Clock className="w-3 h-3" /> <T v={{ duration_days: plan.duration_days }}>{'{duration_days} days'}</T>
                           </div>
                           <span className={`text-xs font-body font-medium px-2 py-0.5 rounded-full ${diffColor[plan.difficulty] ?? 'bg-navy/8 text-navy/60 dark:text-cream/60'}`}>
                             {diffLabel(plan.difficulty)}
@@ -371,18 +373,17 @@ export default function ReadingPlansPage() {
                         {!started ? (
                           <button onClick={() => startPlan(plan)}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-navy hover:bg-navy-light text-white text-xs font-body font-medium rounded-full transition-colors">
-                            <Play className="w-3 h-3" /> Start
+                            <Play className="w-3 h-3" /> <T>Start</T>
                           </button>
                         ) : completed ? (
                           <button onClick={() => resetPlan(plan.id)}
                             className="flex items-center gap-1.5 px-3 py-1.5 border border-navy/15 text-navy/50 dark:text-cream/50 text-xs font-body rounded-full hover:text-navy dark:text-cream transition-colors">
-                            <RotateCcw className="w-3 h-3" /> Restart
+                            <RotateCcw className="w-3 h-3" /> <T>Restart</T>
                           </button>
                         ) : (
                           <button onClick={() => markDay(plan.id)}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-gold hover:bg-gold-light text-navy dark:text-cream text-xs font-body font-semibold rounded-full transition-colors">
-                            <Check className="w-3 h-3" /> Day {p?.currentDay}
-                          </button>
+                            <Check className="w-3 h-3" /> <T v={{ currentDay: p?.currentDay }}>{'Day {currentDay}'}</T></button>
                         )}
                       </div>
                     </div>
