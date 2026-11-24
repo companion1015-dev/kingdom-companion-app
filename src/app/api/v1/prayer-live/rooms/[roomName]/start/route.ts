@@ -12,7 +12,7 @@ export const PRAYER_LIVE_ROLES = {
 
 const HOST_ROLES = ['host','admin','super_admin','worship_leader','intercessor']
 
-export function isHostRole(role: string) {
+function isHostRole(role: string) {
   return HOST_ROLES.includes(role)
 }
 
