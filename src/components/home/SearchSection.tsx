@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, ArrowRight, Loader2 } from 'lucide-react'
 import { bibleHref, parseVerseId } from '@/lib/bible-links'
+import T, { useTr } from '@/components/i18n/T'
 
 // Real fix: this previously did alert(`Searching for: ${query}`) -- a
 // leftover placeholder. Now performs genuine live search against
@@ -47,6 +48,7 @@ function parseReference(raw: string): { bookId: string; chapter: number; verse: 
 }
 
 export default function SearchSection() {
+  const tr = useTr()
   const router = useRouter()
   const [query, setQuery]     = useState('')
   const [focused, setFocused] = useState(false)
@@ -96,10 +98,10 @@ export default function SearchSection() {
     <section className="py-16 px-4 sm:px-6 lg:px-8 bg-cream dark:bg-navy-dark-dark" aria-labelledby="search-heading">
       <div className="max-w-2xl mx-auto text-center">
         <h2 id="search-heading" className="font-display text-3xl font-light text-navy dark:text-cream mb-2">
-          Search Scripture
+          <T>Search Scripture</T>
         </h2>
         <p className="text-charcoal/50 dark:text-cream/50 font-body text-sm mb-8">
-          Search by reference, keyword, topic, person, place, or event.
+          <T>Search by reference, keyword, topic, person, place, or event.</T>
         </p>
 
         {/* Search input */}
@@ -120,13 +122,13 @@ export default function SearchSection() {
               onBlur={() => setTimeout(() => setFocused(false), 150)}
               onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
               id="bible-search-input"
-              placeholder="Try: 'Psalm 23', 'anxiety', 'Moses', 'hope'…"
+              placeholder={tr('Try: \'Psalm 23\', \'anxiety\', \'Moses\', \'hope\'…')}
               className="w-full pl-14 pr-14 py-4 bg-transparent text-navy dark:text-cream font-body text-base placeholder-charcoal/30 outline-none rounded-2xl"
-              aria-label="Search the Bible"
+              aria-label={tr('Search the Bible')}
             />
             <button
               className="absolute right-3 p-2.5 bg-navy hover:bg-navy-light text-white rounded-xl transition-colors"
-              aria-label="Search"
+              aria-label={tr('Search')}
               onClick={handleSearch}
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}

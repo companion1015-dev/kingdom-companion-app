@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
 import ThemeProvider from '@/components/providers/ThemeProvider'
 import '@/styles/globals.css'
-   import I18nProvider from '@/components/i18n/I18nProvider'
+import I18nProvider from '@/components/i18n/I18nProvider'
+import LanguageSuggestion from '@/components/i18n/LanguageSuggestion'
+import { languageBootScript } from '@/lib/i18n'
 const PWAProvider = dynamic(() => import('@/modules/pwa/components/PWAProvider'), { ssr: false })
 
 export const metadata: Metadata = {
@@ -51,10 +53,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: languageBootScript() }} />
+      </head>
       <body className="min-h-screen bg-cream dark:bg-navy-dark dark:bg-navy-dark text-charcoal dark:text-cream dark:text-cream font-body antialiased transition-colors duration-200">
         <ThemeProvider>
                        <I18nProvider>
+               <LanguageSuggestion />
                <PWAProvider>
                  {children}
                </PWAProvider>

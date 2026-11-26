@@ -5,30 +5,25 @@ import { issuePrayerLiveToken, PRAYER_LIVE_ROLES } from '@/lib/prayer-live/livek
 import { errorResponse, notFoundResponse, successResponse, serverErrorResponse } from '@/lib/api-response'
 import { randomUUID } from 'crypto'
 
-/**
- * POST /api/v1/prayer-live/rooms/:roomName/token
- *
- * The permission-issuing core of the feature (blueprint Section 2 & 3):
- *  - No session (user === null)        -> Visitor: subscribe-only, hidden, no chat
- *  - Logged in, default role "user"    -> can chat, cannot publish
- *  - intercessor / worship_leader /    -> can publish camera+mic (stage-eligible)
- *    host / admin / super_admin
- *
- * Role is resolved server-side from the verified session (withOptionalAuth) —
- * never trusted from the request body.
- */
+export const dynamic = 'force-dynamic'
+
+const HOST_ROLES = ['host','admin','super_admin','worship_leader','intercessor']
+
 export const POST = withOptionalAuth(async (req: NextRequest, user, context) => {
   const roomName = context?.params.roomName
-  if (!roomName) {
-    return notFoundResponse('Prayer room')
-  }
+  if (!roomName) return notFoundResponse('Prayer room')
 
   try {
     const room = await prisma.prayerLiveRoom.findFirst({
       where: { room_name: roomName, deleted_at: null },
     })
+    if (!room) return notFoundResponse('Prayer room')
 
-    if (!room || !room.is_live) {
+    // FIX: Allow hosts to get token even when offline to START the session
+    const role = user?.role ?? PRAYER_LIVE_ROLES.VISITOR
+    const isHost = HOST_ROLES.includes(role)
+    
+    if (!room.is_live && !isHost) {
       return errorResponse('SESSION_NOT_LIVE', 'This session is not currently live.', 404)
     }
 
@@ -36,12 +31,9 @@ export const POST = withOptionalAuth(async (req: NextRequest, user, context) => 
     try {
       const body = await req.json()
       displayName = typeof body?.displayName === 'string' ? body.displayName : undefined
-    } catch {
-      // no body provided — fine, displayName is optional
-    }
+    } catch {}
 
     const identity = user?.id ?? `visitor-${randomUUID()}`
-    const role = user?.role ?? PRAYER_LIVE_ROLES.VISITOR
     const name = displayName || user?.email?.split('@')[0] || 'Guest'
 
     const result = await issuePrayerLiveToken({ roomName, identity, displayName: name, role })

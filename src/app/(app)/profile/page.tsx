@@ -6,6 +6,7 @@ import { User, Save, Check, Lock } from 'lucide-react'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 import { useTheme } from '@/components/providers/ThemeProvider'
+import AppLanguageRow from '@/components/i18n/AppLanguageRow'
 
 // Genuinely new page -- no Profile/Settings page existed anywhere before
 // this. Users could fully use the app but had no way to update their name,
@@ -163,6 +164,8 @@ export default function ProfilePage() {
                 ))}
               </div>
             </div>
+
+            <AppLanguageRow />
 
             <div>
               <label className="block text-xs font-body font-semibold text-navy/50 dark:text-cream/50 tracking-wider uppercase mb-1.5">Theme</label>

@@ -79,3 +79,7 @@
     border: 1px solid rgba(201,168,76,0.15);
   }
 }
+
+/* App language — right-to-left scripts. Letter-spacing and forced capitals break Arabic/Urdu letter joining, so switch them off. */
+html[dir='rtl'] *, html[dir='rtl'] *::before, html[dir='rtl'] *::after { letter-spacing: normal !important; text-transform: none !important; }
+html[lang='ur'] body { line-height: 1.9; }

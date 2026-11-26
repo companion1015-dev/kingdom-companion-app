@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff, ArrowRight, Check } from 'lucide-react'
+import T, { useTr } from '@/components/i18n/T'
 
 type FieldErrors = Record<string, string[]>
 
@@ -17,7 +18,7 @@ function PasswordStrength({ password }: { password: string }) {
       {checks.map(c => (
         <div key={c.label} className={`flex items-center gap-2 text-xs ${c.pass ? 'text-green-600' : 'text-charcoal/40 dark:text-cream/40'}`}>
           <Check className={`w-3 h-3 ${c.pass ? 'text-green-500' : 'text-charcoal/25 dark:text-cream/25'}`} />
-          {c.label}
+          <T>{c.label}</T>
         </div>
       ))}
     </div>
@@ -25,6 +26,7 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export default function RegisterPage() {
+  const tr = useTr()
   const [form,    setForm]    = useState({ display_name: '', email: '', password: '', confirm_password: '' })
   const [errors,  setErrors]  = useState<FieldErrors>({})
   const [apiError,setApiError]= useState('')
@@ -73,14 +75,14 @@ export default function RegisterPage() {
         <div className="w-16 h-16 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center mx-auto mb-6">
           <Check className="w-7 h-7 text-green-500" />
         </div>
-        <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3">Check your email</h1>
+        <h1 className="font-display text-2xl font-semibold text-navy dark:text-cream mb-3"><T>Check your email</T></h1>
         <p className="text-charcoal/60 dark:text-cream/60 font-body text-sm leading-relaxed mb-8">
           We've sent a verification link to <strong className="text-navy dark:text-cream">{form.email}</strong>.
           Please click the link to activate your account.
         </p>
         <p className="text-xs text-charcoal/40 dark:text-cream/40 font-body">
-          Didn't receive it?{' '}
-          <button className="text-gold underline" onClick={() => setSuccess(false)}>Try again</button>
+          <T>Didn't receive it?</T>{' '}
+          <button className="text-gold underline" onClick={() => setSuccess(false)}><T>Try again</T></button>
         </p>
       </div>
     )
@@ -94,9 +96,9 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-1">Create account</h1>
+      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-1"><T>Create account</T></h1>
       <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-8">
-        Free forever. No credit card required.
+        <T>Free forever. No credit card required.</T>
       </p>
 
       {apiError && (
@@ -110,11 +112,11 @@ export default function RegisterPage() {
         {/* Display name */}
         <div>
           <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
-            Your name
+            <T>Your name</T>
           </label>
           <input
             type="text" value={form.display_name} onChange={set('display_name')}
-            placeholder="How should we address you?" autoComplete="name" autoFocus
+            placeholder={tr('How should we address you?')} autoComplete="name" autoFocus
             className={err('display_name') ? inputError : inputNormal}
           />
           {err('display_name') && <p className="mt-1 text-xs text-red-600">{err('display_name')}</p>}
@@ -123,7 +125,7 @@ export default function RegisterPage() {
         {/* Email */}
         <div>
           <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
-            Email address
+            <T>Email address</T>
           </label>
           <input
             type="email" value={form.email} onChange={set('email')}
@@ -136,12 +138,12 @@ export default function RegisterPage() {
         {/* Password */}
         <div>
           <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
-            Password
+            <T>Password</T>
           </label>
           <div className="relative">
             <input
               type={showPw ? 'text' : 'password'} value={form.password} onChange={set('password')}
-              placeholder="Create a strong password" autoComplete="new-password"
+              placeholder={tr('Create a strong password')} autoComplete="new-password"
               className={`${err('password') ? inputError : inputNormal} pr-12`}
             />
             <button type="button" onClick={() => setShowPw(v => !v)}
@@ -158,12 +160,12 @@ export default function RegisterPage() {
         {/* Confirm password */}
         <div>
           <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
-            Confirm password
+            <T>Confirm password</T>
           </label>
           <div className="relative">
             <input
               type={showCpw ? 'text' : 'password'} value={form.confirm_password} onChange={set('confirm_password')}
-              placeholder="Repeat your password" autoComplete="new-password"
+              placeholder={tr('Repeat your password')} autoComplete="new-password"
               className={`${err('confirm_password') ? inputError : inputNormal} pr-12`}
             />
             <button type="button" onClick={() => setShowCpw(v => !v)}
@@ -179,8 +181,8 @@ export default function RegisterPage() {
         {/* Terms */}
         <p className="text-xs text-charcoal/45 dark:text-cream/45 font-body leading-relaxed">
           By creating an account you agree to our{' '}
-          <Link href="/terms" className="text-gold underline">Terms of Use</Link> and{' '}
-          <Link href="/privacy" className="text-gold underline">Privacy Policy</Link>.
+          <Link href="/terms" className="text-gold underline"><T>Terms of Use</T></Link> and{' '}
+          <Link href="/privacy" className="text-gold underline"><T>Privacy Policy</T></Link>.
         </p>
 
         {/* Submit */}
@@ -191,15 +193,15 @@ export default function RegisterPage() {
           {loading ? (
             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-            <>Create my account <ArrowRight className="w-4 h-4" /></>
+            <><T>Create my account</T> <ArrowRight className="w-4 h-4" /></>
           )}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm font-body text-charcoal/50 dark:text-cream/50">
-        Already have an account?{' '}
+        <T>Already have an account?</T>{' '}
         <Link href="/login" className="text-gold font-medium hover:text-gold-dark transition-colors">
-          Sign in
+          <T>Sign in</T>
         </Link>
       </p>
     </>

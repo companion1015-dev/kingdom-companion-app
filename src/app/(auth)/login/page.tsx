@@ -2,8 +2,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff, ArrowRight } from 'lucide-react'
+import T, { useTr } from '@/components/i18n/T'
 
 export default function LoginPage() {
+  const tr = useTr()
   const [form,     setForm]     = useState({ email: '', password: '' })
   const [apiError, setApiError] = useState('')
   const [loading,  setLoading]  = useState(false)
@@ -52,9 +54,9 @@ export default function LoginPage() {
 
   return (
     <>
-      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-1">Welcome back</h1>
+      <h1 className="font-display text-3xl font-semibold text-navy dark:text-cream mb-1"><T>Welcome back</T></h1>
       <p className="text-charcoal/55 dark:text-cream/55 font-body text-sm mb-8">
-        Sign in to continue your spiritual journey.
+        <T>Sign in to continue your spiritual journey.</T>
       </p>
 
       {apiError && (
@@ -67,7 +69,7 @@ export default function LoginPage() {
 
         <div>
           <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 mb-1.5 tracking-wide uppercase">
-            Email address
+            <T>Email address</T>
           </label>
           <input
             type="email" value={form.email} onChange={set('email')}
@@ -79,16 +81,16 @@ export default function LoginPage() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-xs font-body font-medium text-navy/60 dark:text-cream/60 tracking-wide uppercase">
-              Password
+              <T>Password</T>
             </label>
             <Link href="/forgot-password" className="text-xs text-gold hover:text-gold-dark transition-colors font-body">
-              Forgot password?
+              <T>Forgot password?</T>
             </Link>
           </div>
           <div className="relative">
             <input
               type={showPw ? 'text' : 'password'} value={form.password} onChange={set('password')}
-              placeholder="Your password" autoComplete="current-password"
+              placeholder={tr('Your password')} autoComplete="current-password"
               className={`${inputNormal} pr-12`}
             />
             <button
@@ -107,7 +109,7 @@ export default function LoginPage() {
         >
           {loading
             ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            : <><span>Sign in</span><ArrowRight className="w-4 h-4" /></>
+            : <><span><T>Sign in</T></span><ArrowRight className="w-4 h-4" /></>
           }
         </button>
       </form>
@@ -118,7 +120,7 @@ export default function LoginPage() {
           <div className="w-full border-t border-navy/8" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-cream dark:bg-navy-dark px-4 text-xs text-charcoal/35 dark:text-cream/35 font-body">or continue without an account</span>
+          <span className="bg-cream dark:bg-navy-dark px-4 text-xs text-charcoal/35 dark:text-cream/35 font-body"><T>or continue without an account</T></span>
         </div>
       </div>
 
@@ -126,13 +128,13 @@ export default function LoginPage() {
         href="/bible"
         className="w-full flex items-center justify-center gap-2 py-3.5 border border-navy/15 hover:border-navy/30 text-navy/70 dark:text-cream/70 hover:text-navy dark:text-cream font-body font-medium text-sm rounded-xl transition-all duration-200"
       >
-        📖 Read the Bible — no account needed
+        <T>📖 Read the Bible — no account needed</T>
       </Link>
 
       <p className="mt-6 text-center text-sm font-body text-charcoal/50 dark:text-cream/50">
-        Don&apos;t have an account?{' '}
+        <T>Don&apos;t have an account?</T>{' '}
         <Link href="/register" className="text-gold font-medium hover:text-gold-dark transition-colors">
-          Create one free
+          <T>Create one free</T>
         </Link>
       </p>
     </>

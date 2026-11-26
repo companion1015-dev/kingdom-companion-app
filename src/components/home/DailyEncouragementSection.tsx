@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowRight, Sunrise, BookOpen } from 'lucide-react'
 import { localDateKey } from '@/lib/date'
 import { bibleHref, firstVerseNumber } from '@/lib/bible-links'
+import T from '@/components/i18n/T'
 
 // Real fix: this previously always showed one single hardcoded entry from
 // mock.ts, regardless of the actual date. Now fetches from /api/v1/daily,
@@ -68,7 +69,7 @@ export default function DailyEncouragementSection() {
         <div className="flex items-center gap-3 mb-8">
           <div className="flex items-center gap-2 text-gold/80">
             <Sunrise className="w-4 h-4" />
-            <span className="text-xs font-body font-medium tracking-widest uppercase">Daily Encouragement</span>
+            <span className="text-xs font-body font-medium tracking-widest uppercase"><T>Daily Encouragement</T></span>
           </div>
           <div className="flex-1 h-px bg-white/10 dark:bg-navy-dark" />
           <span className="text-xs text-white/30 font-body">{todayLabel}</span>
@@ -133,7 +134,7 @@ export default function DailyEncouragementSection() {
               <div className="flex items-start gap-3 p-4 rounded-xl bg-white/5 dark:bg-navy-dark border border-white/8 mb-8">
                 <span className="text-base mt-0.5">📖</span>
                 <div>
-                  <span className="text-xs text-gold/70 font-body font-medium tracking-wider uppercase block mb-1">Today&rsquo;s Challenge</span>
+                  <span className="text-xs text-gold/70 font-body font-medium tracking-wider uppercase block mb-1"><T>Today&rsquo;s Challenge</T></span>
                   <p className="text-white/70 text-sm font-body">{entry.challenge}</p>
                 </div>
               </div>
@@ -143,14 +144,14 @@ export default function DailyEncouragementSection() {
                 href={fullHref}
                 className="inline-flex items-center gap-2 text-gold hover:text-gold-light font-body text-sm font-medium transition-colors group"
               >
-                Read today&rsquo;s full devotional
+                <T>Read today&rsquo;s full devotional</T>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </>
           )}
 
           {!loading && !entry && (
-            <p className="text-white/50 font-body text-sm">Today&rsquo;s encouragement couldn&rsquo;t be loaded right now.</p>
+            <p className="text-white/50 font-body text-sm"><T>Today&rsquo;s encouragement couldn&rsquo;t be loaded right now.</T></p>
           )}
         </div>
       </div>
