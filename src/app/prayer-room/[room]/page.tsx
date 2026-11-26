@@ -39,7 +39,7 @@ export default function PrayerRoom() {
   return (
     <LiveKitRoom serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL} token={token} connect video={!listen} audio={!listen}
       data-lk-theme="default" style={{ height: "100dvh" }} onDisconnected={() => router.push("/prayer-room")}
-      onError={() => setErr("Connection lost. Check your internet, then rejoin using the same link.")}>
+      onError={(e) => setErr("Connection problem: " + e.message + " | LiveKit URL in browser: " + (process.env.NEXT_PUBLIC_LIVEKIT_URL ? "set" : "MISSING"))}>
       <VideoConference />
       <RoomAudioRenderer />
       <div style={{ position: "fixed", top: 8, right: 8, display: "flex", gap: 8, zIndex: 20 }}>
